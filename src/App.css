@@ -16,24 +16,33 @@
   .gradient-primary {
     background: linear-gradient(158deg, #3A49A4 24.72%, #E830B0 112.15%);
   }
-  
+
   .gradient-text {
     background: linear-gradient(135deg, #E830B0 0%, #3A49A4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .input-error {
     @apply border-error ring-4 ring-error/10;
   }
-  
+
   .input-success {
     @apply border-success ring-4 ring-success/10;
   }
-  
+
   .button-loading {
     @apply pointer-events-none opacity-70;
+  }
+
+  /* Enhanced input visibility */
+  .input-field {
+    @apply bg-gray-50 dark:bg-dark-card border-2 border-neutral-gray/30 dark:border-dark-border;
+    @apply transition-all duration-200;
+    @apply hover:border-primary-blue/50 hover:bg-white dark:hover:bg-dark-surface;
+    @apply focus-within:border-primary-blue focus-within:bg-white dark:focus-within:bg-dark-surface;
+    @apply focus-within:ring-4 focus-within:ring-primary-blue/10;
   }
 }
 
