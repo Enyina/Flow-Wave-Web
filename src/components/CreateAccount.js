@@ -6,6 +6,7 @@ const CreateAccount = ({ onNext, onSignin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   // Demo data cycling
   const demoEmails = [
@@ -14,6 +15,12 @@ const CreateAccount = ({ onNext, onSignin }) => {
     'sarah.wilson@demo.com',
     'mike.johnson@test.org'
   ];
+
+  useEffect(() => {
+    // Trigger animation only once
+    const timer = setTimeout(() => setHasAnimated(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     // Cycle through demo emails every 10 seconds
@@ -26,7 +33,7 @@ const CreateAccount = ({ onNext, onSignin }) => {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [email, touched.email]);
+  }, [email, touched.email, demoEmails]);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -80,68 +87,81 @@ const CreateAccount = ({ onNext, onSignin }) => {
   };
 
   return (
-    <div className="onboarding-container">
-      <div className="left-section">
-        <div className="hero-content">
-          <div className="hero-visual">
-            <div className="hero-card">
-              <div className="hero-text-container">
-                <h1 className="hero-title">Cross Border Payment Made Easy</h1>
+    <div className="flex w-full min-h-screen">
+      {/* Left Section */}
+      <div className="hidden lg:flex lg:w-1/2 gradient-primary relative overflow-hidden">
+        {/* Floating background effect */}
+        <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-radial from-white/10 to-transparent animate-float" />
+        
+        <div className={`flex flex-col items-center px-16 xl:px-20 py-20 z-10 w-full ${hasAnimated ? 'animate-slide-in-left animate-once' : 'opacity-0'}`}>
+          <div className="flex flex-col gap-10 w-full max-w-2xl">
+            {/* Hero Visual */}
+            <div className={`flex items-center relative ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+              <div className="relative w-full max-w-lg h-96 xl:h-[536px] rounded-2xl border border-primary-light backdrop-blur-sm bg-white/10 hover:transform hover:-translate-y-2 hover:shadow-large transition-all duration-300">
+                <div className="absolute left-8 top-20 xl:left-9 xl:top-28 w-4/5 h-80">
+                  <h1 className="text-white text-3xl xl:text-5xl font-bold leading-tight text-center">
+                    <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                      Cross Border Payment Made Easy
+                    </span>
+                  </h1>
+                </div>
+                <div className="absolute right-4 bottom-20 w-44 h-38 bg-secondary-light rounded-3xl animate-pulse-slow" />
               </div>
-              <div className="hero-decorative-pink"></div>
+              <div className="w-36 h-38 bg-primary-pink rounded-3xl animate-bounce-slow" />
             </div>
-            <div className="hero-decorative-dark"></div>
-          </div>
-          <div className="download-section">
-            <span className="download-text">Get the app on:</span>
-            <div className="download-buttons">
-              <img 
-                src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" 
-                alt="Download on App Store" 
-                style={{ height: '40px' }}
-                onClick={() => alert('Redirecting to App Store...')}
-              />
-              <img 
-                src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
-                alt="Get it on Google Play" 
-                style={{ height: '40px' }}
-                onClick={() => alert('Redirecting to Google Play...')}
-              />
+            
+            {/* Download Section */}
+            <div className={`flex items-center gap-2 w-full ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
+              <span className="text-white text-lg xl:text-2xl font-bold">Get the app on:</span>
+              <div className="flex items-center gap-2 flex-1">
+                <img 
+                  src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" 
+                  alt="Download on App Store" 
+                  className="h-10 hover:transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 cursor-pointer rounded-lg"
+                  onClick={() => alert('Redirecting to App Store...')}
+                />
+                <img 
+                  src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
+                  alt="Get it on Google Play" 
+                  className="h-10 hover:transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 cursor-pointer rounded-lg"
+                  onClick={() => alert('Redirecting to Google Play...')}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="right-section">
-        <div className="logo-container">
-          <div className="logo-icon">
+      {/* Right Section */}
+      <div className="flex flex-col items-center justify-center w-full lg:w-1/2 p-8 xl:p-10 bg-white relative">
+        {/* Logo */}
+        <div className={`absolute top-12 left-20 flex items-center ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+          <div className="w-13 h-9 mr-3">
             <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-              <rect width="52" height="37" fill="url(#pattern0)" />
-              <defs>
-                <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
-                  <rect width="52" height="37" fill="#6C63FF" />
-                </pattern>
-              </defs>
+              <rect width="52" height="37" fill="#6C63FF" />
             </svg>
           </div>
-          <div className="logo-text">FLOWWAVE</div>
+          <div className="text-black/80 font-times text-2xl font-bold">FLOWWAVE</div>
         </div>
         
-        <div className="form-card">
-          <div className="form-content">
-            <div className="form-header">
-              <div className="form-title-section">
-                <h2 className="form-title">Create Account</h2>
-                <p className="form-subtitle">Join thousands sending money globally</p>
+        {/* Form Card */}
+        <div className={`flex flex-col justify-center items-center w-full max-w-lg p-8 xl:p-12 rounded-2xl bg-white shadow-soft hover:shadow-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-scale-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+          <div className="flex flex-col items-center gap-6 w-full max-w-md">
+            {/* Header */}
+            <div className={`flex flex-col items-center gap-10 w-full ${hasAnimated ? 'animate-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
+              <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+                <h2 className="gradient-text text-center text-2xl font-bold">Create Account</h2>
+                <p className="text-neutral-gray text-center opacity-80">Join thousands sending money globally</p>
               </div>
               
-              <form onSubmit={handleSubmit} className="form-fields">
-                <div className="input-field">
-                  <label className="input-label">Email</label>
-                  <div className={`input-container ${errors.email ? 'input-error' : email && validateEmail(email) ? 'input-success' : ''}`}>
+              {/* Form */}
+              <form onSubmit={handleSubmit} className={`flex flex-col gap-4 w-full ${hasAnimated ? 'animate-stagger-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
+                <div className="flex flex-col gap-2 w-full">
+                  <label className="text-neutral-dark text-base font-normal">Email</label>
+                  <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 ${errors.email ? 'input-error' : email && validateEmail(email) ? 'input-success' : 'border-neutral-lightgray'} ${!errors.email && !email ? 'hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px' : ''}`}>
                     <input
                       type="email"
-                      className="input"
+                      className="flex-1 border-none outline-none bg-transparent text-neutral-dark placeholder:text-neutral-placeholder placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2"
                       placeholder="your@email.com"
                       value={email}
                       onChange={handleEmailChange}
@@ -150,41 +170,42 @@ const CreateAccount = ({ onNext, onSignin }) => {
                       disabled={isLoading}
                     />
                     {email && validateEmail(email) && (
-                      <svg className="success-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M9.54961 17.9996L3.84961 12.2996L5.27461 10.8746L9.54961 15.1496L18.7246 5.97461L20.1496 7.39961L9.54961 17.9996Z" fill="#1FC16B"/>
+                      <svg className="w-4 h-4 text-success animate-checkmark animate-once" viewBox="0 0 24 24" fill="none">
+                        <path d="M9.54961 17.9996L3.84961 12.2996L5.27461 10.8746L9.54961 15.1496L18.7246 5.97461L20.1496 7.39961L9.54961 17.9996Z" fill="currentColor"/>
                       </svg>
                     )}
                   </div>
                   {errors.email && (
-                    <div className="validation-message validation-error">{errors.email}</div>
+                    <div className="text-error text-xs mt-1 animate-slide-in-down animate-once">{errors.email}</div>
                   )}
                   {email && validateEmail(email) && !errors.email && (
-                    <div className="validation-message validation-success">Email looks good!</div>
+                    <div className="text-success text-xs mt-1 animate-slide-in-down animate-once">Email looks good!</div>
                   )}
                 </div>
                 
-                <div className="checkbox-container" onClick={() => setAgreedToTerms(!agreedToTerms)}>
-                  <div className="checkbox">
+                <div className="flex items-center gap-4 w-full cursor-pointer hover:translate-x-1 transition-transform duration-150" onClick={() => setAgreedToTerms(!agreedToTerms)}>
+                  <div className="w-4.5 h-4.5 rounded-sm bg-primary-pink flex items-center justify-center flex-shrink-0 relative overflow-hidden hover:ring-4 hover:ring-primary-pink/20 transition-all duration-150">
                     {agreedToTerms && (
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="animate-checkmark animate-once">
                         <path d="M10 16.4L6 12.4L7.4 11L10 13.6L16.6 7L18 8.4L10 16.4Z" fill="white"/>
                       </svg>
                     )}
                   </div>
-                  <span className="checkbox-text">
+                  <span className="text-neutral-gray text-xs">
                     I agree with the Terms of services and Privacy Policy
                   </span>
                 </div>
                 {errors.terms && (
-                  <div className="validation-message validation-error">{errors.terms}</div>
+                  <div className="text-error text-xs animate-slide-in-down animate-once">{errors.terms}</div>
                 )}
               </form>
             </div>
             
-            <div className="form-actions">
+            {/* Actions */}
+            <div className={`flex flex-col gap-4 w-full ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '1s' }}>
               <button 
                 type="submit" 
-                className={`primary-button ${isLoading ? 'button-loading' : ''}`}
+                className={`flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold relative overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-blue/30 transition-all duration-300 ${isLoading ? 'button-loading' : ''}`}
                 onClick={handleSubmit}
                 disabled={isLoading}
               >
@@ -197,18 +218,22 @@ const CreateAccount = ({ onNext, onSignin }) => {
                   'Create Account'
                 )}
               </button>
-              <span className="link-text" onClick={onSignin}>
+              <span className="text-neutral-dark text-xs text-center underline cursor-pointer hover:text-primary-blue hover:-translate-y-px transition-all duration-150" onClick={onSignin}>
                 Already have an account? <strong>Signin</strong>
               </span>
             </div>
             
-            <div className="divider">
-              <span className="divider-text">or</span>
+            {/* Divider */}
+            <div className="flex justify-center items-center gap-0.5 w-full relative my-2">
+              <div className="flex-1 h-px bg-neutral-lightgray transition-colors duration-150 hover:bg-primary-blue"></div>
+              <span className="text-neutral-dark text-base px-4 bg-white">or</span>
+              <div className="flex-1 h-px bg-neutral-lightgray transition-colors duration-150 hover:bg-primary-blue"></div>
             </div>
             
-            <div className="form-actions">
+            {/* Social Login */}
+            <div className="flex flex-col gap-4 w-full">
               <button 
-                className="secondary-button" 
+                className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg border border-neutral-lightgray bg-white cursor-pointer w-full text-neutral-dark text-lg font-bold hover:bg-gray-50 hover:border-primary-blue hover:-translate-y-px hover:shadow-lg transition-all duration-300"
                 type="button"
                 onClick={() => handleSocialLogin('Google')}
                 disabled={isLoading}
@@ -230,7 +255,7 @@ const CreateAccount = ({ onNext, onSignin }) => {
               </button>
               
               <button 
-                className="secondary-button" 
+                className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg border border-neutral-lightgray bg-white cursor-pointer w-full text-neutral-dark text-lg font-bold hover:bg-gray-50 hover:border-primary-blue hover:-translate-y-px hover:shadow-lg transition-all duration-300"
                 type="button"
                 onClick={() => handleSocialLogin('Apple')}
                 disabled={isLoading}

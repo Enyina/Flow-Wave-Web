@@ -40,7 +40,7 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className="min-h-screen flex">
       {renderScreen()}
     </div>
   );
