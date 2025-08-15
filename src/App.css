@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+  
+  body {
+    @apply font-sans leading-relaxed overflow-x-hidden;
+  }
+}
+
+@layer components {
+  .gradient-primary {
+    background: linear-gradient(158deg, #3A49A4 24.72%, #E830B0 112.15%);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #E830B0 0%, #3A49A4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .input-error {
+    @apply border-error ring-4 ring-error/10;
+  }
+
+  .input-success {
+    @apply border-success ring-4 ring-success/10;
+  }
+
+  .button-loading {
+    @apply pointer-events-none opacity-70;
+  }
+
+  /* Enhanced input visibility */
+  .input-field {
+    @apply bg-gray-50 dark:bg-dark-card border-2 border-neutral-gray/30 dark:border-dark-border;
+    @apply transition-all duration-200 shadow-sm;
+    @apply hover:border-primary-blue/50 hover:bg-white dark:hover:bg-dark-surface hover:shadow-md;
+    @apply focus-within:border-primary-blue focus-within:bg-white dark:focus-within:bg-dark-surface;
+    @apply focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:shadow-md;
+  }
+
+  /* Make PIN/OTP inputs more visible */
+  .pin-input {
+    @apply bg-white dark:bg-dark-card border-2 border-neutral-gray/30 dark:border-dark-border;
+    @apply shadow-sm hover:shadow-md transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  .animate-once {
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+  }
+  
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
