@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DarkModeToggle from './DarkModeToggle';
 
 const CreatePassword = ({ onNext }) => {
   const [password, setPassword] = useState('');
@@ -10,7 +11,6 @@ const CreatePassword = ({ onNext }) => {
   const [hasAnimated, setHasAnimated] = useState(false);
 
   React.useEffect(() => {
-    // Trigger animation only once
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
@@ -48,37 +48,39 @@ const CreatePassword = ({ onNext }) => {
   const isConfirmPasswordValid = password === confirmPassword && confirmPassword !== '';
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200">
-      {/* Logo */}
-      <div className={`flex items-center mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
-        <div className="w-13 h-9 mr-3">
-          <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-            <rect width="52" height="37" fill="#6C63FF" />
-          </svg>
+    <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-dark-bg dark:to-dark-surface transition-colors duration-300">
+      <div className={`flex items-center justify-between w-full max-w-md mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+        <div className="flex items-center">
+          <div className="w-13 h-9 mr-3">
+            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+              <rect width="52" height="37" fill="#6C63FF" />
+            </svg>
+          </div>
+          <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
         </div>
-        <div className="text-black/80 font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
+        <DarkModeToggle />
       </div>
       
       <div className={`flex flex-col items-center gap-10 w-full max-w-md ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
         <div className={`flex flex-col items-center gap-4 w-full ${hasAnimated ? 'animate-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
           <h2 className="gradient-text text-center text-3xl font-bold">Create Password</h2>
-          <p className="text-neutral-gray text-center">This password helps you secure your app</p>
+          <p className="text-neutral-gray dark:text-dark-textSecondary text-center transition-colors duration-300">This password helps you secure your app</p>
         </div>
         
         <div className={`flex flex-col gap-6 w-full ${hasAnimated ? 'animate-stagger-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
           <div className="flex flex-col gap-2 w-full">
-            <label className="text-neutral-dark text-base font-normal">Password</label>
-            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 ${errors.password ? 'input-error' : isPasswordValid && password ? 'input-success' : 'border-neutral-lightgray'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
+            <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Password</label>
+            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.password ? 'input-error' : isPasswordValid && password ? 'input-success' : 'border-neutral-lightgray dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
               <input
                 type={showPassword ? "text" : "password"}
-                className="flex-1 border-none outline-none bg-transparent text-neutral-dark placeholder:text-neutral-placeholder placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2"
+                className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-placeholder dark:placeholder:text-dark-textSecondary placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2 transition-colors duration-300"
                 placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
               />
               <svg
-                className="w-4 h-4 cursor-pointer text-neutral-gray hover:text-primary-blue hover:scale-110 transition-all duration-150"
+                className="w-4 h-4 cursor-pointer text-neutral-gray dark:text-dark-textSecondary hover:text-primary-blue hover:scale-110 transition-all duration-150"
                 onClick={() => setShowPassword(!showPassword)}
                 viewBox="0 0 16 16" fill="none"
               >
@@ -92,24 +94,24 @@ const CreatePassword = ({ onNext }) => {
                 )}
               </svg>
             </div>
-            <span className={`text-xs mt-1 transition-colors duration-200 ${errors.password ? 'text-error' : (isPasswordValid && password ? 'text-success' : 'text-neutral-600')}`}>
+            <span className={`text-xs mt-1 transition-colors duration-200 ${errors.password ? 'text-error' : (isPasswordValid && password ? 'text-success' : 'text-neutral-600 dark:text-dark-textSecondary')}`}>
               {errors.password || 'Minimum 8 characters with letters and numbers'}
             </span>
           </div>
           
           <div className="flex flex-col gap-2 w-full">
-            <label className="text-neutral-dark text-base font-normal">Confirm Password</label>
-            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 ${errors.confirmPassword ? 'input-error' : isConfirmPasswordValid ? 'input-success' : 'border-neutral-lightgray'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
+            <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Confirm Password</label>
+            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.confirmPassword ? 'input-error' : isConfirmPasswordValid ? 'input-success' : 'border-neutral-lightgray dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
               <input
                 type={showConfirmPassword ? "text" : "password"}
-                className="flex-1 border-none outline-none bg-transparent text-neutral-dark placeholder:text-neutral-placeholder placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2"
+                className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-placeholder dark:placeholder:text-dark-textSecondary placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2 transition-colors duration-300"
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
               />
               <svg
-                className="w-4 h-4 cursor-pointer text-neutral-gray hover:text-primary-blue hover:scale-110 transition-all duration-150"
+                className="w-4 h-4 cursor-pointer text-neutral-gray dark:text-dark-textSecondary hover:text-primary-blue hover:scale-110 transition-all duration-150"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 viewBox="0 0 16 16" fill="none"
               >
@@ -124,7 +126,7 @@ const CreatePassword = ({ onNext }) => {
               </svg>
             </div>
             {confirmPassword && (
-              <span className={`text-xs mt-1 transition-colors duration-200 ${errors.confirmPassword ? 'text-error' : (isConfirmPasswordValid ? 'text-success' : 'text-neutral-600')}`}>
+              <span className={`text-xs mt-1 transition-colors duration-200 ${errors.confirmPassword ? 'text-error' : (isConfirmPasswordValid ? 'text-success' : 'text-neutral-600 dark:text-dark-textSecondary')}`}>
                 {errors.confirmPassword || (isConfirmPasswordValid ? 'Your password match' : '')}
               </span>
             )}

@@ -1,41 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import DarkModeToggle from './DarkModeToggle';
 
 const Signin = ({ onNext, onCreateAccount }) => {
-  const [email, setEmail] = useState('enyina3848@gmail.com');
-  const [password, setPassword] = useState('DemoPassword123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [hasAnimated, setHasAnimated] = useState(false);
 
-  // Demo credentials
-  const demoCredentials = [
-    { email: 'enyina3848@gmail.com', password: 'DemoPassword123' },
-    { email: 'john.doe@example.com', password: 'SecurePass456' },
-    { email: 'sarah.wilson@demo.com', password: 'TestLogin789' },
-    { email: 'mike.johnson@test.org', password: 'MyPass2024' }
-  ];
-
   useEffect(() => {
-    // Trigger animation only once
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    // Cycle through demo credentials every 12 seconds
-    const interval = setInterval(() => {
-      const currentIndex = demoCredentials.findIndex(cred => cred.email === email);
-      const nextIndex = (currentIndex + 1) % demoCredentials.length;
-      if (!touched.email && !touched.password) {
-        setEmail(demoCredentials[nextIndex].email);
-        setPassword(demoCredentials[nextIndex].password);
-      }
-    }, 12000);
-
-    return () => clearInterval(interval);
-  }, [email, touched, demoCredentials]);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -93,7 +71,6 @@ const Signin = ({ onNext, onCreateAccount }) => {
     setIsLoading(true);
     setErrors({});
     
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       onNext();
@@ -113,15 +90,13 @@ const Signin = ({ onNext, onCreateAccount }) => {
   };
 
   return (
-    <div className="flex w-full min-h-screen">
+    <div className="flex w-full min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
       {/* Left Section */}
       <div className="hidden lg:flex lg:w-1/2 gradient-primary relative overflow-hidden">
-        {/* Floating background effect */}
         <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-radial from-white/10 to-transparent animate-float" />
         
         <div className={`flex flex-col items-center px-16 xl:px-20 py-20 z-10 w-full ${hasAnimated ? 'animate-slide-in-left animate-once' : 'opacity-0'}`}>
           <div className="flex flex-col gap-10 w-full max-w-2xl">
-            {/* Hero Visual */}
             <div className={`flex items-center relative ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
               <div className="relative w-full max-w-lg h-96 xl:h-[536px] rounded-2xl border border-primary-light backdrop-blur-sm bg-white/10 hover:transform hover:-translate-y-2 hover:shadow-large transition-all duration-300">
                 <div className="absolute left-8 top-20 xl:left-9 xl:top-28 w-4/5 h-80">
@@ -136,7 +111,6 @@ const Signin = ({ onNext, onCreateAccount }) => {
               <div className="w-36 h-38 bg-primary-pink rounded-3xl animate-bounce-slow" />
             </div>
             
-            {/* Download Section */}
             <div className={`flex items-center gap-2 w-full ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
               <span className="text-white text-lg xl:text-2xl font-bold">Get the app on:</span>
               <div className="flex items-center gap-2 flex-1">
@@ -159,35 +133,35 @@ const Signin = ({ onNext, onCreateAccount }) => {
       </div>
       
       {/* Right Section */}
-      <div className="flex flex-col items-center justify-center w-full lg:w-1/2 p-8 xl:p-10 bg-white relative">
-        {/* Logo */}
+      <div className="flex flex-col items-center justify-center w-full lg:w-1/2 p-8 xl:p-10 bg-white dark:bg-dark-bg relative transition-colors duration-300">
         <div className={`absolute top-12 left-20 flex items-center ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
           <div className="w-13 h-9 mr-3">
             <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
               <rect width="52" height="37" fill="#6C63FF" />
             </svg>
           </div>
-          <div className="text-black/80 font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
+          <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
+        </div>
+
+        <div className={`absolute top-12 right-20 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+          <DarkModeToggle />
         </div>
         
-        {/* Form Card */}
-        <div className={`flex flex-col justify-center items-center w-full max-w-lg p-8 xl:p-12 rounded-2xl bg-white shadow-soft hover:shadow-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-scale-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+        <div className={`flex flex-col justify-center items-center w-full max-w-lg p-8 xl:p-12 rounded-2xl bg-white dark:bg-dark-surface shadow-soft dark:shadow-dark-soft hover:shadow-large dark:hover:shadow-dark-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-scale-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
           <div className="flex flex-col items-center gap-6 w-full max-w-md">
-            {/* Header */}
             <div className={`flex flex-col items-center gap-10 w-full ${hasAnimated ? 'animate-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
               <div className="flex flex-col items-center gap-2 w-full">
                 <h2 className="gradient-text text-center text-2xl font-bold">Login to your account</h2>
-                <p className="text-neutral-gray text-center opacity-80">Send money across borders with ease and confidence</p>
+                <p className="text-neutral-gray dark:text-dark-textSecondary text-center opacity-80 transition-colors duration-300">Send money across borders with ease and confidence</p>
               </div>
               
-              {/* Form */}
               <form onSubmit={handleSubmit} className={`flex flex-col gap-6 w-full ${hasAnimated ? 'animate-stagger-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
                 <div className="flex flex-col gap-2 w-full">
-                  <label className="text-neutral-dark text-base font-normal">Email</label>
-                  <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 ${errors.email ? 'input-error' : email && validateEmail(email) ? 'input-success' : 'border-neutral-lightgray'} ${!errors.email && !email ? 'hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px' : ''}`}>
+                  <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Email</label>
+                  <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.email ? 'input-error' : email && validateEmail(email) ? 'input-success' : 'border-neutral-lightgray dark:border-dark-border'} ${!errors.email && !email ? 'hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px' : ''}`}>
                     <input
                       type="email"
-                      className="flex-1 border-none outline-none bg-transparent text-neutral-dark placeholder:text-neutral-placeholder placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2"
+                      className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-placeholder dark:placeholder:text-dark-textSecondary placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2 transition-colors duration-300"
                       placeholder="your@email.com"
                       value={email}
                       onChange={handleEmailChange}
@@ -207,11 +181,11 @@ const Signin = ({ onNext, onCreateAccount }) => {
                 </div>
                 
                 <div className="flex flex-col gap-2 w-full">
-                  <label className="text-neutral-dark text-base font-normal">Password</label>
-                  <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 ${errors.password ? 'input-error' : password && validatePassword(password) ? 'input-success' : 'border-neutral-lightgray'} ${!errors.password && !password ? 'hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px' : ''}`}>
+                  <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Password</label>
+                  <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.password ? 'input-error' : password && validatePassword(password) ? 'input-success' : 'border-neutral-lightgray dark:border-dark-border'} ${!errors.password && !password ? 'hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px' : ''}`}>
                     <input
                       type={showPassword ? "text" : "password"}
-                      className="flex-1 border-none outline-none bg-transparent text-neutral-dark placeholder:text-neutral-placeholder placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2"
+                      className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-placeholder dark:placeholder:text-dark-textSecondary placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2 transition-colors duration-300"
                       placeholder="Enter Password"
                       value={password}
                       onChange={handlePasswordChange}
@@ -220,7 +194,7 @@ const Signin = ({ onNext, onCreateAccount }) => {
                       disabled={isLoading}
                     />
                     <svg
-                      className="w-4 h-4 cursor-pointer text-neutral-gray hover:text-primary-blue hover:scale-110 transition-all duration-150"
+                      className="w-4 h-4 cursor-pointer text-neutral-gray dark:text-dark-textSecondary hover:text-primary-blue hover:scale-110 transition-all duration-150"
                       onClick={() => setShowPassword(!showPassword)}
                       viewBox="0 0 16 16" fill="none"
                     >
@@ -239,11 +213,10 @@ const Signin = ({ onNext, onCreateAccount }) => {
                   )}
                 </div>
                 
-                <span className="text-neutral-dark text-xs underline cursor-pointer hover:text-primary-blue hover:-translate-y-px transition-all duration-150" onClick={handleForgotPassword}>Reset Password?</span>
+                <span className="text-neutral-dark dark:text-dark-text text-xs underline cursor-pointer hover:text-primary-blue hover:-translate-y-px transition-all duration-150" onClick={handleForgotPassword}>Reset Password?</span>
               </form>
             </div>
             
-            {/* Actions */}
             <div className={`flex flex-col gap-4 w-full ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '1s' }}>
               <button 
                 type="submit" 
@@ -260,22 +233,20 @@ const Signin = ({ onNext, onCreateAccount }) => {
                   'Login'
                 )}
               </button>
-              <span className="text-neutral-dark text-xs text-center underline cursor-pointer hover:text-primary-blue hover:-translate-y-px transition-all duration-150" onClick={onCreateAccount}>
+              <span className="text-neutral-dark dark:text-dark-text text-xs text-center underline cursor-pointer hover:text-primary-blue hover:-translate-y-px transition-all duration-150" onClick={onCreateAccount}>
                 Don't have an account? <strong>Create an account</strong>
               </span>
             </div>
             
-            {/* Divider */}
             <div className="flex justify-center items-center gap-0.5 w-full relative my-2">
-              <div className="flex-1 h-px bg-neutral-lightgray transition-colors duration-150 hover:bg-primary-blue"></div>
-              <span className="text-neutral-dark text-base px-4 bg-white">or</span>
-              <div className="flex-1 h-px bg-neutral-lightgray transition-colors duration-150 hover:bg-primary-blue"></div>
+              <div className="flex-1 h-px bg-neutral-lightgray dark:bg-dark-border transition-colors duration-150 hover:bg-primary-blue"></div>
+              <span className="text-neutral-dark dark:text-dark-text text-base px-4 bg-white dark:bg-dark-surface transition-colors duration-300">or</span>
+              <div className="flex-1 h-px bg-neutral-lightgray dark:bg-dark-border transition-colors duration-150 hover:bg-primary-blue"></div>
             </div>
             
-            {/* Social Login */}
             <div className="flex flex-col gap-4 w-full">
               <button 
-                className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg border border-neutral-lightgray bg-white cursor-pointer w-full text-neutral-dark text-lg font-bold hover:bg-gray-50 hover:border-primary-blue hover:-translate-y-px hover:shadow-lg transition-all duration-300"
+                className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg border border-neutral-lightgray dark:border-dark-border bg-white dark:bg-dark-card cursor-pointer w-full text-neutral-dark dark:text-dark-text text-lg font-bold hover:bg-gray-50 dark:hover:bg-dark-surface hover:border-primary-blue hover:-translate-y-px hover:shadow-lg transition-all duration-300"
                 type="button"
                 onClick={() => handleSocialLogin('Google')}
                 disabled={isLoading}
@@ -287,17 +258,12 @@ const Signin = ({ onNext, onCreateAccount }) => {
                     <path d="M4.74826 11.9773C4.54023 11.3551 4.41983 10.6883 4.41983 9.99948C4.41983 9.31055 4.54023 8.64391 4.73731 8.0217L4.7318 7.88918L1.65187 5.46191L1.5511 5.51055C0.883227 6.86613 0.5 8.38838 0.5 9.99948C0.5 11.6106 0.883227 13.1328 1.5511 14.4883L4.74826 11.9773Z" fill="#FBBC05"/>
                     <path d="M10.354 3.86664C12.2044 3.86664 13.4526 4.67775 14.1643 5.35557L16.9454 2.6C15.2374 0.988893 13.0146 0 10.354 0C6.49982 0 3.17125 2.24443 1.55078 5.51107L4.73699 8.02221C5.53636 5.6111 7.74809 3.86664 10.354 3.86664Z" fill="#EB4335"/>
                   </g>
-                  <defs>
-                    <clipPath id="clip0_1398_302">
-                      <rect width="20" height="20" fill="white" transform="translate(0.5)"/>
-                    </clipPath>
-                  </defs>
                 </svg>
                 Continue with Google
               </button>
               
               <button 
-                className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg border border-neutral-lightgray bg-white cursor-pointer w-full text-neutral-dark text-lg font-bold hover:bg-gray-50 hover:border-primary-blue hover:-translate-y-px hover:shadow-lg transition-all duration-300"
+                className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg border border-neutral-lightgray dark:border-dark-border bg-white dark:bg-dark-card cursor-pointer w-full text-neutral-dark dark:text-dark-text text-lg font-bold hover:bg-gray-50 dark:hover:bg-dark-surface hover:border-primary-blue hover:-translate-y-px hover:shadow-lg transition-all duration-300"
                 type="button"
                 onClick={() => handleSocialLogin('Apple')}
                 disabled={isLoading}
