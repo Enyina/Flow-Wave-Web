@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import DarkModeToggle from './DarkModeToggle';
 
 const VerifyEmail = ({ onNext }) => {
   const [otp, setOtp] = useState(['', '', '', '']);
   const [countdown, setCountdown] = useState(256); // 4:16 in seconds
   const [canResend, setCanResend] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-
-  // Demo OTP codes that cycle
-  const demoCodes = ['1234', '5678', '9012', '3456'];
-  const [currentDemoIndex, setCurrentDemoIndex] = useState(0);
 
   useEffect(() => {
     // Trigger animation only once
@@ -31,34 +27,6 @@ const VerifyEmail = ({ onNext }) => {
 
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    // Auto-fill demo code every 15 seconds
-    const autoFillTimer = setInterval(() => {
-      if (otp.every(digit => digit === '')) {
-        setIsAutoFilling(true);
-        const demoCode = demoCodes[currentDemoIndex];
-        
-        // Animate filling each digit
-        demoCode.split('').forEach((digit, index) => {
-          setTimeout(() => {
-            setOtp(prev => {
-              const newOtp = [...prev];
-              newOtp[index] = digit;
-              return newOtp;
-            });
-          }, index * 200);
-        });
-        
-        setTimeout(() => {
-          setIsAutoFilling(false);
-          setCurrentDemoIndex((prev) => (prev + 1) % demoCodes.length);
-        }, 1000);
-      }
-    }, 15000);
-
-    return () => clearInterval(autoFillTimer);
-  }, [otp, currentDemoIndex, demoCodes]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -132,46 +100,25 @@ const VerifyEmail = ({ onNext }) => {
     alert('Verification code has been resent to your email!');
   };
 
-  const handleAutoFill = () => {
-    const demoCode = demoCodes[currentDemoIndex];
-    setIsAutoFilling(true);
-    
-    // Clear first
-    setOtp(['', '', '', '']);
-    
-    // Fill with animation
-    demoCode.split('').forEach((digit, index) => {
-      setTimeout(() => {
-        setOtp(prev => {
-          const newOtp = [...prev];
-          newOtp[index] = digit;
-          return newOtp;
-        });
-      }, index * 150);
-    });
-    
-    setTimeout(() => {
-      setIsAutoFilling(false);
-      setCurrentDemoIndex((prev) => (prev + 1) % demoCodes.length);
-    }, 800);
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200">
+    <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-dark-bg dark:to-dark-surface transition-colors duration-300">
       {/* Logo */}
-      <div className={`flex items-center mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
-        <div className="w-13 h-9 mr-3">
-          <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-            <rect width="52" height="37" fill="#6C63FF" />
-          </svg>
+      <div className={`flex items-center justify-between w-full max-w-md mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+        <div className="flex items-center">
+          <div className="w-13 h-9 mr-3">
+            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+              <rect width="52" height="37" fill="#6C63FF" />
+            </svg>
+          </div>
+          <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
         </div>
-        <div className="text-black/80 font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
+        <DarkModeToggle />
       </div>
       
       <div className={`flex flex-col items-center gap-10 w-full max-w-md ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
         <div className={`flex flex-col items-center gap-4 w-full ${hasAnimated ? 'animate-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
           <h2 className="gradient-text text-center text-3xl font-bold">Verify your email address</h2>
-          <p className="text-neutral-gray text-center">A verification code has been sent to enyina3848@gmail.com</p>
+          <p className="text-neutral-gray dark:text-dark-textSecondary text-center transition-colors duration-300">A verification code has been sent to your email</p>
         </div>
         
         <div className={`flex items-center gap-6 ${hasAnimated ? 'animate-bounce-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }} onPaste={handlePaste}>
@@ -180,12 +127,12 @@ const VerifyEmail = ({ onNext }) => {
               key={index}
               data-index={index}
               type="text"
-              className={`w-12 h-16 md:w-14 md:h-18 rounded-lg bg-primary-light flex items-center justify-center text-2xl font-bold text-neutral-dark transition-all duration-200 border-2 border-transparent cursor-pointer hover:bg-white hover:-translate-y-1 focus:outline-none focus:border-primary-blue focus:bg-white focus:ring-4 focus:ring-primary-blue/10 focus:scale-105 ${digit ? 'bg-white border-primary-blue shadow-lg' : ''} ${isAutoFilling ? 'scale-110' : ''}`}
+              className={`w-12 h-16 md:w-14 md:h-18 rounded-lg bg-primary-light dark:bg-dark-card flex items-center justify-center text-2xl font-bold text-neutral-dark dark:text-dark-text transition-all duration-200 border-2 border-transparent cursor-pointer hover:bg-white dark:hover:bg-dark-surface hover:-translate-y-1 focus:outline-none focus:border-primary-blue focus:bg-white dark:focus:bg-dark-surface focus:ring-4 focus:ring-primary-blue/10 focus:scale-105 ${digit ? 'bg-white dark:bg-dark-surface border-primary-blue shadow-lg' : ''}`}
               value={digit}
               onChange={(e) => handleOtpChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               maxLength="1"
-              disabled={isLoading || isAutoFilling}
+              disabled={isLoading}
               style={{
                 textAlign: 'center'
               }}
@@ -193,20 +140,11 @@ const VerifyEmail = ({ onNext }) => {
           ))}
         </div>
         
-        <div className="text-center mb-5">
-          <button 
-            onClick={handleAutoFill}
-            className="bg-transparent border border-dashed border-primary-blue text-primary-blue px-4 py-2 rounded-full cursor-pointer text-xs transition-all duration-200 hover:bg-primary-blue hover:text-white"
-          >
-            📱 Try Demo Code
-          </button>
-        </div>
-        
         <div className={`flex flex-col gap-4 w-full ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
           <button 
             className={`flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold relative overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-blue/30 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${isLoading ? 'button-loading' : ''}`}
             onClick={handleSubmit}
-            disabled={isLoading || isAutoFilling || !otp.every(digit => digit !== '')}
+            disabled={isLoading || !otp.every(digit => digit !== '')}
           >
             {isLoading ? (
               <>
@@ -218,7 +156,7 @@ const VerifyEmail = ({ onNext }) => {
             )}
           </button>
           
-          <p className="text-neutral-gray text-center text-sm">
+          <p className="text-neutral-gray dark:text-dark-textSecondary text-center text-sm transition-colors duration-300">
             {countdown > 0 ? (
               `Didn't receive an email? Resend in ${formatTime(countdown)}`
             ) : (

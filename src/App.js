@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
+import { DarkModeProvider } from './contexts/DarkModeContext';
 import CreateAccount from './components/CreateAccount';
 import Signin from './components/Signin';
 import VerifyEmail from './components/VerifyEmail';
@@ -40,9 +41,11 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {renderScreen()}
-    </div>
+    <DarkModeProvider>
+      <div className="min-h-screen flex bg-white dark:bg-dark-bg transition-colors duration-300">
+        {renderScreen()}
+      </div>
+    </DarkModeProvider>
   );
 }
 

@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -22,6 +23,15 @@ module.exports = {
         },
         error: '#D00416',
         success: '#1FC16B',
+        // Dark mode colors
+        dark: {
+          bg: '#0F172A',
+          surface: '#1E293B',
+          card: '#334155',
+          text: '#F8FAFC',
+          textSecondary: '#CBD5E1',
+          border: '#475569',
+        }
       },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'Roboto', 'Helvetica', 'sans-serif'],
@@ -110,6 +120,8 @@ module.exports = {
         'soft': '0 0 4px 0 rgba(0, 0, 0, 0.20)',
         'large': '0 8px 25px 0 rgba(0, 0, 0, 0.15)',
         'toast': '0 3px 5px 0 rgba(0, 0, 0, 0.20), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12)',
+        'dark-soft': '0 0 4px 0 rgba(0, 0, 0, 0.40)',
+        'dark-large': '0 8px 25px 0 rgba(0, 0, 0, 0.30)',
       },
       backdropBlur: {
         xs: '2px',
