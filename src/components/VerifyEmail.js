@@ -127,7 +127,7 @@ const VerifyEmail = ({ onNext }) => {
               key={index}
               data-index={index}
               type="text"
-              className={`w-12 h-16 md:w-14 md:h-18 rounded-lg bg-primary-light dark:bg-dark-card flex items-center justify-center text-2xl font-bold text-neutral-dark dark:text-dark-text transition-all duration-200 border-2 border-transparent cursor-pointer hover:bg-white dark:hover:bg-dark-surface hover:-translate-y-1 focus:outline-none focus:border-primary-blue focus:bg-white dark:focus:bg-dark-surface focus:ring-4 focus:ring-primary-blue/10 focus:scale-105 ${digit ? 'bg-white dark:bg-dark-surface border-primary-blue shadow-lg' : ''}`}
+              className={`w-12 h-16 md:w-14 md:h-18 rounded-lg bg-white dark:bg-dark-card flex items-center justify-center text-2xl font-bold text-neutral-dark dark:text-dark-text transition-all duration-200 border-2 border-neutral-gray/30 dark:border-dark-border cursor-pointer hover:bg-white dark:hover:bg-dark-surface hover:-translate-y-1 hover:border-primary-blue/50 focus:outline-none focus:border-primary-blue focus:bg-white dark:focus:bg-dark-surface focus:ring-4 focus:ring-primary-blue/10 focus:scale-105 ${digit ? 'bg-white dark:bg-dark-surface border-primary-blue shadow-lg' : ''}`}
               value={digit}
               onChange={(e) => handleOtpChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
