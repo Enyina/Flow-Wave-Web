@@ -6,10 +6,17 @@ const VerifyEmail = ({ onNext }) => {
   const [canResend, setCanResend] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   // Demo OTP codes that cycle
   const demoCodes = ['1234', '5678', '9012', '3456'];
   const [currentDemoIndex, setCurrentDemoIndex] = useState(0);
+
+  useEffect(() => {
+    // Trigger animation only once
+    const timer = setTimeout(() => setHasAnimated(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -51,7 +58,7 @@ const VerifyEmail = ({ onNext }) => {
     }, 15000);
 
     return () => clearInterval(autoFillTimer);
-  }, [otp, currentDemoIndex]);
+  }, [otp, currentDemoIndex, demoCodes]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -150,82 +157,54 @@ const VerifyEmail = ({ onNext }) => {
   };
 
   return (
-    <div className="single-screen">
-      <div className="logo-container">
-        <div className="logo-icon">
+    <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200">
+      {/* Logo */}
+      <div className={`flex items-center mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+        <div className="w-13 h-9 mr-3">
           <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-            <rect width="52" height="37" fill="url(#pattern0)" />
-            <defs>
-              <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
-                <rect width="52" height="37" fill="#6C63FF" />
-              </pattern>
-            </defs>
+            <rect width="52" height="37" fill="#6C63FF" />
           </svg>
         </div>
-        <div className="logo-text">FLOWWAVE</div>
+        <div className="text-black/80 font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
       </div>
       
-      <div className="single-screen-content">
-        <div className="form-title-section">
-          <h2 className="large-title">Verify your email address</h2>
-          <p className="form-subtitle">A verification code has been sent to enyina3848@gmail.com</p>
+      <div className={`flex flex-col items-center gap-10 w-full max-w-md ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+        <div className={`flex flex-col items-center gap-4 w-full ${hasAnimated ? 'animate-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+          <h2 className="gradient-text text-center text-3xl font-bold">Verify your email address</h2>
+          <p className="text-neutral-gray text-center">A verification code has been sent to enyina3848@gmail.com</p>
         </div>
         
-        <div className="otp-container" onPaste={handlePaste}>
+        <div className={`flex items-center gap-6 ${hasAnimated ? 'animate-bounce-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }} onPaste={handlePaste}>
           {otp.map((digit, index) => (
             <input
               key={index}
               data-index={index}
               type="text"
-              className={`otp-box ${isAutoFilling ? 'auto-filling' : ''}`}
+              className={`w-12 h-16 md:w-14 md:h-18 rounded-lg bg-primary-light flex items-center justify-center text-2xl font-bold text-neutral-dark transition-all duration-200 border-2 border-transparent cursor-pointer hover:bg-white hover:-translate-y-1 focus:outline-none focus:border-primary-blue focus:bg-white focus:ring-4 focus:ring-primary-blue/10 focus:scale-105 ${digit ? 'bg-white border-primary-blue shadow-lg' : ''} ${isAutoFilling ? 'scale-110' : ''}`}
               value={digit}
               onChange={(e) => handleOtpChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               maxLength="1"
               disabled={isLoading || isAutoFilling}
               style={{
-                border: 'none',
-                background: digit ? 'var(--neutral-white)' : 'var(--primary-light)',
-                textAlign: 'center',
-                fontSize: '24px',
-                fontWeight: '700',
-                boxShadow: digit ? '0 0 0 2px var(--primary-blue)' : 'none',
-                transform: isAutoFilling ? 'scale(1.1)' : 'scale(1)',
-                transition: 'all 0.2s ease'
+                textAlign: 'center'
               }}
             />
           ))}
         </div>
         
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <div className="text-center mb-5">
           <button 
             onClick={handleAutoFill}
-            style={{
-              background: 'transparent',
-              border: '1px dashed var(--primary-blue)',
-              color: 'var(--primary-blue)',
-              padding: '8px 16px',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = 'var(--primary-blue)';
-              e.target.style.color = 'white';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = 'transparent';
-              e.target.style.color = 'var(--primary-blue)';
-            }}
+            className="bg-transparent border border-dashed border-primary-blue text-primary-blue px-4 py-2 rounded-full cursor-pointer text-xs transition-all duration-200 hover:bg-primary-blue hover:text-white"
           >
             📱 Try Demo Code
           </button>
         </div>
         
-        <div className="form-actions">
+        <div className={`flex flex-col gap-4 w-full ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
           <button 
-            className={`primary-button ${isLoading ? 'button-loading' : ''}`}
+            className={`flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold relative overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-blue/30 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${isLoading ? 'button-loading' : ''}`}
             onClick={handleSubmit}
             disabled={isLoading || isAutoFilling || !otp.every(digit => digit !== '')}
           >
@@ -239,19 +218,13 @@ const VerifyEmail = ({ onNext }) => {
             )}
           </button>
           
-          <p className="form-subtitle">
+          <p className="text-neutral-gray text-center text-sm">
             {countdown > 0 ? (
               `Didn't receive an email? Resend in ${formatTime(countdown)}`
             ) : (
               <span 
-                className="link-text" 
+                className="text-primary-blue cursor-pointer font-semibold hover:text-primary-pink transition-colors duration-200"
                 onClick={handleResend}
-                style={{ 
-                  color: 'var(--primary-blue)', 
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  fontSize: '14px'
-                }}
               >
                 Resend Code
               </span>

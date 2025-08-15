@@ -6,6 +6,14 @@ const CreatePassword = ({ onNext }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  React.useEffect(() => {
+    // Trigger animation only once
+    const timer = setTimeout(() => setHasAnimated(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const validatePassword = (pass) => {
     const hasMinLength = pass.length >= 8;
@@ -28,7 +36,11 @@ const CreatePassword = ({ onNext }) => {
     setErrors(newErrors);
     
     if (Object.keys(newErrors).length === 0) {
-      onNext();
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+        onNext();
+      }, 1500);
     }
   };
 
@@ -36,101 +48,103 @@ const CreatePassword = ({ onNext }) => {
   const isConfirmPasswordValid = password === confirmPassword && confirmPassword !== '';
 
   return (
-    <div className="single-screen">
-      <div className="logo-container">
-        <div className="logo-icon">
+    <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200">
+      {/* Logo */}
+      <div className={`flex items-center mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+        <div className="w-13 h-9 mr-3">
           <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-            <rect width="52" height="37" fill="url(#pattern0)" />
-            <defs>
-              <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
-                <rect width="52" height="37" fill="#6C63FF" />
-              </pattern>
-            </defs>
+            <rect width="52" height="37" fill="#6C63FF" />
           </svg>
         </div>
-        <div className="logo-text">FLOWWAVE</div>
+        <div className="text-black/80 font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
       </div>
       
-      <div className="single-screen-content">
-        <div className="form-title-section">
-          <h2 className="large-title">Create Password</h2>
-          <p className="form-subtitle">This password helps you secure your app</p>
+      <div className={`flex flex-col items-center gap-10 w-full max-w-md ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+        <div className={`flex flex-col items-center gap-4 w-full ${hasAnimated ? 'animate-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+          <h2 className="gradient-text text-center text-3xl font-bold">Create Password</h2>
+          <p className="text-neutral-gray text-center">This password helps you secure your app</p>
         </div>
         
-        <div className="form-fields">
-          <div className="input-field">
-            <label className="input-label">Password</label>
-            <div className="input-container">
+        <div className={`flex flex-col gap-6 w-full ${hasAnimated ? 'animate-stagger-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
+          <div className="flex flex-col gap-2 w-full">
+            <label className="text-neutral-dark text-base font-normal">Password</label>
+            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 ${errors.password ? 'input-error' : isPasswordValid && password ? 'input-success' : 'border-neutral-lightgray'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
               <input
                 type={showPassword ? "text" : "password"}
-                className="input"
+                className="flex-1 border-none outline-none bg-transparent text-neutral-dark placeholder:text-neutral-placeholder placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2"
                 placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
               <svg
-                className="eye-icon"
+                className="w-4 h-4 cursor-pointer text-neutral-gray hover:text-primary-blue hover:scale-110 transition-all duration-150"
                 onClick={() => setShowPassword(!showPassword)}
-                width="16" height="16" viewBox="0 0 16 16" fill="none"
+                viewBox="0 0 16 16" fill="none"
               >
                 {showPassword ? (
-                  <path d="M11.9603 11.9603C10.8207 12.829 9.43306 13.3102 8.00033 13.3337C3.33366 13.3337 0.666992 8.00033 0.666992 8.00033C1.49625 6.45492 2.64642 5.10473 4.04033 4.04033M6.60032 2.82699C7.05921 2.71958 7.52903 2.66588 8.00033 2.66699C12.667 2.66699 15.3337 8.00033 15.3337 8.00033C14.929 8.7574 14.4464 9.47015 13.8937 10.127M9.41366 9.41366C9.23056 9.61016 9.00976 9.76776 8.76443 9.87707C8.51909 9.98639 8.25426 10.0452 7.98572 10.0499C7.71718 10.0546 7.45043 10.0052 7.2014 9.90465C6.95236 9.80406 6.72614 9.65434 6.53622 9.46443C6.34631 9.27451 6.19659 9.04829 6.096 8.79925C5.99541 8.55022 5.94601 8.28347 5.95075 8.01493C5.95549 7.74639 6.01426 7.48156 6.12358 7.23622C6.23289 6.99089 6.39049 6.77009 6.58699 6.58699M0.666992 0.666992L15.3337 15.3337" stroke="#777777" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M11.9603 11.9603C10.8207 12.829 9.43306 13.3102 8.00033 13.3337C3.33366 13.3337 0.666992 8.00033 0.666992 8.00033C1.49625 6.45492 2.64642 5.10473 4.04033 4.04033M6.60032 2.82699C7.05921 2.71958 7.52903 2.66588 8.00033 2.66699C12.667 2.66699 15.3337 8.00033 15.3337 8.00033C14.929 8.7574 14.4464 9.47015 13.8937 10.127M9.41366 9.41366C9.23056 9.61016 9.00976 9.76776 8.76443 9.87707C8.51909 9.98639 8.25426 10.0452 7.98572 10.0499C7.71718 10.0546 7.45043 10.0052 7.2014 9.90465C6.95236 9.80406 6.72614 9.65434 6.53622 9.46443C6.34631 9.27451 6.19659 9.04829 6.096 8.79925C5.99541 8.55022 5.94601 8.28347 5.95075 8.01493C5.95549 7.74639 6.01426 7.48156 6.12358 7.23622C6.23289 6.99089 6.39049 6.77009 6.58699 6.58699M0.666992 0.666992L15.3337 15.3337" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                 ) : (
                   <>
-                    <path d="M0.666992 8.00033C0.666992 8.00033 3.33366 2.66699 8.00033 2.66699C12.667 2.66699 15.3337 8.00033 15.3337 8.00033C15.3337 8.00033 12.667 13.3337 8.00033 13.3337C3.33366 13.3337 0.666992 8.00033 0.666992 8.00033Z" stroke="#777777" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M8.00033 10.0003C9.10489 10.0003 10.0003 9.10489 10.0003 8.00033C10.0003 6.89576 9.10489 6.00033 8.00033 6.00033C6.89576 6.00033 6.00033 6.89576 6.00033 8.00033C6.00033 9.10489 6.89576 10.0003 8.00033 10.0003Z" stroke="#777777" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M0.666992 8.00033C0.666992 8.00033 3.33366 2.66699 8.00033 2.66699C12.667 2.66699 15.3337 8.00033 15.3337 8.00033C15.3337 8.00033 12.667 13.3337 8.00033 13.3337C3.33366 13.3337 0.666992 8.00033 0.666992 8.00033Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M8.00033 10.0003C9.10489 10.0003 10.0003 9.10489 10.0003 8.00033C10.0003 6.89576 9.10489 6.00033 8.00033 6.00033C6.89576 6.00033 6.00033 6.89576 6.00033 8.00033C6.00033 9.10489 6.89576 10.0003 8.00033 10.0003Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                   </>
                 )}
               </svg>
             </div>
-            <span style={{
-              color: errors.password ? 'var(--error-red)' : (isPasswordValid ? 'var(--success-green)' : '#606060'),
-              fontSize: '12px',
-              lineHeight: '18px'
-            }}>
+            <span className={`text-xs mt-1 transition-colors duration-200 ${errors.password ? 'text-error' : (isPasswordValid && password ? 'text-success' : 'text-neutral-600')}`}>
               {errors.password || 'Minimum 8 characters with letters and numbers'}
             </span>
           </div>
           
-          <div className="input-field">
-            <label className="input-label">Confirm Password</label>
-            <div className="input-container">
+          <div className="flex flex-col gap-2 w-full">
+            <label className="text-neutral-dark text-base font-normal">Confirm Password</label>
+            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 ${errors.confirmPassword ? 'input-error' : isConfirmPasswordValid ? 'input-success' : 'border-neutral-lightgray'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
               <input
                 type={showConfirmPassword ? "text" : "password"}
-                className="input"
+                className="flex-1 border-none outline-none bg-transparent text-neutral-dark placeholder:text-neutral-placeholder placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2"
                 placeholder="Confirm password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={isLoading}
               />
               <svg
-                className="eye-icon"
+                className="w-4 h-4 cursor-pointer text-neutral-gray hover:text-primary-blue hover:scale-110 transition-all duration-150"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                width="16" height="16" viewBox="0 0 16 16" fill="none"
+                viewBox="0 0 16 16" fill="none"
               >
                 {showConfirmPassword ? (
-                  <path d="M11.9603 11.9603C10.8207 12.829 9.43306 13.3102 8.00033 13.3337C3.33366 13.3337 0.666992 8.00033 0.666992 8.00033C1.49625 6.45492 2.64642 5.10473 4.04033 4.04033M6.60032 2.82699C7.05921 2.71958 7.52903 2.66588 8.00033 2.66699C12.667 2.66699 15.3337 8.00033 15.3337 8.00033C14.929 8.7574 14.4464 9.47015 13.8937 10.127M9.41366 9.41366C9.23056 9.61016 9.00976 9.76776 8.76443 9.87707C8.51909 9.98639 8.25426 10.0452 7.98572 10.0499C7.71718 10.0546 7.45043 10.0052 7.2014 9.90465C6.95236 9.80406 6.72614 9.65434 6.53622 9.46443C6.34631 9.27451 6.19659 9.04829 6.096 8.79925C5.99541 8.55022 5.94601 8.28347 5.95075 8.01493C5.95549 7.74639 6.01426 7.48156 6.12358 7.23622C6.23289 6.99089 6.39049 6.77009 6.58699 6.58699M0.666992 0.666992L15.3337 15.3337" stroke="#777777" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M11.9603 11.9603C10.8207 12.829 9.43306 13.3102 8.00033 13.3337C3.33366 13.3337 0.666992 8.00033 0.666992 8.00033C1.49625 6.45492 2.64642 5.10473 4.04033 4.04033M6.60032 2.82699C7.05921 2.71958 7.52903 2.66588 8.00033 2.66699C12.667 2.66699 15.3337 8.00033 15.3337 8.00033C14.929 8.7574 14.4464 9.47015 13.8937 10.127M9.41366 9.41366C9.23056 9.61016 9.00976 9.76776 8.76443 9.87707C8.51909 9.98639 8.25426 10.0452 7.98572 10.0499C7.71718 10.0546 7.45043 10.0052 7.2014 9.90465C6.95236 9.80406 6.72614 9.65434 6.53622 9.46443C6.34631 9.27451 6.19659 9.04829 6.096 8.79925C5.99541 8.55022 5.94601 8.28347 5.95075 8.01493C5.95549 7.74639 6.01426 7.48156 6.12358 7.23622C6.23289 6.99089 6.39049 6.77009 6.58699 6.58699M0.666992 0.666992L15.3337 15.3337" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                 ) : (
                   <>
-                    <path d="M0.666992 8.00033C0.666992 8.00033 3.33366 2.66699 8.00033 2.66699C12.667 2.66699 15.3337 8.00033 15.3337 8.00033C15.3337 8.00033 12.667 13.3337 8.00033 13.3337C3.33366 13.3337 0.666992 8.00033 0.666992 8.00033Z" stroke="#777777" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M8.00033 10.0003C9.10489 10.0003 10.0003 9.10489 10.0003 8.00033C10.0003 6.89576 9.10489 6.00033 8.00033 6.00033C6.89576 6.00033 6.00033 6.89576 6.00033 8.00033C6.00033 9.10489 6.89576 10.0003 8.00033 10.0003Z" stroke="#777777" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M0.666992 8.00033C0.666992 8.00033 3.33366 2.66699 8.00033 2.66699C12.667 2.66699 15.3337 8.00033 15.3337 8.00033C15.3337 8.00033 12.667 13.3337 8.00033 13.3337C3.33366 13.3337 0.666992 8.00033 0.666992 8.00033Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M8.00033 10.0003C9.10489 10.0003 10.0003 9.10489 10.0003 8.00033C10.0003 6.89576 9.10489 6.00033 8.00033 6.00033C6.89576 6.00033 6.00033 6.89576 6.00033 8.00033C6.00033 9.10489 6.89576 10.0003 8.00033 10.0003Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                   </>
                 )}
               </svg>
             </div>
             {confirmPassword && (
-              <span style={{
-                color: errors.confirmPassword ? 'var(--error-red)' : (isConfirmPasswordValid ? 'var(--success-green)' : '#606060'),
-                fontSize: '12px',
-                lineHeight: '18px'
-              }}>
+              <span className={`text-xs mt-1 transition-colors duration-200 ${errors.confirmPassword ? 'text-error' : (isConfirmPasswordValid ? 'text-success' : 'text-neutral-600')}`}>
                 {errors.confirmPassword || (isConfirmPasswordValid ? 'Your password match' : '')}
               </span>
             )}
           </div>
         </div>
         
-        <button className="primary-button" onClick={handleSubmit}>
-          Create Password
+        <button 
+          className={`flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold relative overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-blue/30 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${isLoading ? 'button-loading' : ''} ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
+          style={{ animationDelay: '0.8s' }}
+          onClick={handleSubmit}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <div className="loading-spinner"></div>
+              Creating Password...
+            </>
+          ) : (
+            'Create Password'
+          )}
         </button>
       </div>
     </div>
