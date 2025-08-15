@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DarkModeToggle from './DarkModeToggle';
 
 const ConfirmPin = ({ onNext }) => {
   const [pin, setPin] = useState(['', '', '', '']);
@@ -44,30 +45,33 @@ const ConfirmPin = ({ onNext }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200">
-      <div className={`flex items-center mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
-        <div className="w-13 h-9 mr-3">
-          <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-            <rect width="52" height="37" fill="#6C63FF" />
-          </svg>
+    <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-dark-bg dark:to-dark-surface transition-colors duration-300">
+      <div className={`flex items-center justify-between w-full max-w-md mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+        <div className="flex items-center">
+          <div className="w-13 h-9 mr-3">
+            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+              <rect width="52" height="37" fill="#6C63FF" />
+            </svg>
+          </div>
+          <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold transition-colors duration-300">FLOWWAVE</div>
         </div>
-        <div className="text-black/80 font-times text-2xl font-bold">FLOWWAVE</div>
+        <DarkModeToggle />
       </div>
       
       {showToast && (
-        <div className="fixed top-12 right-5 flex p-2 px-5 items-center gap-2 rounded-2xl bg-white shadow-toast z-50 animate-toast-slide-in animate-once">
+        <div className="fixed top-12 right-5 flex p-2 px-5 items-center gap-2 rounded-2xl bg-white dark:bg-dark-surface shadow-toast dark:shadow-dark-large z-50 animate-toast-slide-in animate-once">
           <svg className="w-6 h-6 text-success animate-checkmark animate-once" viewBox="0 0 24 24" fill="none">
             <path d="M0 12C0 5.37258 5.37258 0 12 0C18.6274 0 24 5.37258 24 12C24 18.6274 18.6274 24 12 24C5.37258 24 0 18.6274 0 12Z" fill="currentColor"/>
             <path d="M9.54961 17.9996L3.84961 12.2996L5.27461 10.8746L9.54961 15.1496L18.7246 5.97461L20.1496 7.39961L9.54961 17.9996Z" fill="white"/>
           </svg>
-          <span className="text-neutral-dark text-xl font-bold">Pin successfully created</span>
+          <span className="text-neutral-dark dark:text-dark-text text-xl font-bold">Pin successfully created</span>
         </div>
       )}
       
       <div className={`flex flex-col items-center gap-10 w-full max-w-md ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
         <div className="flex flex-col items-center gap-4 w-full">
           <h2 className="gradient-text text-center text-3xl font-bold">Confirm Pin</h2>
-          <p className="text-neutral-gray text-center">Enter a secure 4-digit pin to always access the app</p>
+          <p className="text-neutral-gray dark:text-dark-textSecondary text-center transition-colors duration-300">Enter a secure 4-digit pin to always access the app</p>
         </div>
         
         <div className={`flex items-center gap-6 ${hasAnimated ? 'animate-bounce-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
@@ -76,9 +80,9 @@ const ConfirmPin = ({ onNext }) => {
               key={index}
               data-confirm-pin-index={index}
               type="text"
-              className="w-12 h-16 md:w-14 md:h-18 rounded-lg bg-primary-light text-2xl font-bold text-neutral-dark transition-all duration-200 border-2 border-transparent cursor-pointer hover:bg-white hover:-translate-y-1 focus:outline-none focus:border-primary-blue focus:bg-white focus:ring-4 focus:ring-primary-blue/10 focus:scale-105 text-center"
+              className="w-12 h-16 md:w-14 md:h-18 rounded-lg bg-primary-light dark:bg-dark-card text-2xl font-bold text-neutral-dark dark:text-dark-text transition-all duration-200 border-2 border-transparent cursor-pointer hover:bg-white dark:hover:bg-dark-surface hover:-translate-y-1 focus:outline-none focus:border-primary-blue focus:bg-white dark:focus:bg-dark-surface focus:ring-4 focus:ring-primary-blue/10 focus:scale-105 text-center"
               style={{ 
-                background: digit ? 'white' : '#EBEDF6',
+                background: digit ? (document.documentElement.classList.contains('dark') ? '#334155' : 'white') : (document.documentElement.classList.contains('dark') ? '#1E293B' : '#EBEDF6'),
                 borderColor: digit ? '#3A49A4' : 'transparent',
                 boxShadow: digit ? '0 4px 12px rgba(58, 73, 164, 0.15)' : 'none'
               }}
