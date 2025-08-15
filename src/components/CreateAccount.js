@@ -78,16 +78,19 @@ const CreateAccount = ({ onNext, onSignin }) => {
             {/* Hero Visual */}
             <div className={`flex items-center relative ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
               <div className="relative w-full max-w-lg h-96 xl:h-[536px] rounded-2xl border border-primary-light backdrop-blur-sm bg-white/10 hover:transform hover:-translate-y-2 hover:shadow-large transition-all duration-300">
-                <div className="absolute left-8 top-20 xl:left-9 xl:top-28 w-4/5 h-80">
-                  <h1 className="text-white text-3xl xl:text-5xl font-bold leading-tight text-center">
-                    <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                      Cross Border Payment Made Easy
-                    </span>
+                <div className="absolute left-9 top-24 xl:left-9 xl:top-28 w-4/5">
+                  <h1 className="text-white text-4xl xl:text-6xl font-bold leading-tight">
+                    Cross<br />
+                    Border<br />
+                    Payment<br />
+                    Made Easy
                   </h1>
                 </div>
-                <div className="absolute right-4 bottom-20 w-44 h-38 bg-secondary-light rounded-3xl animate-pulse-slow" />
+                {/* Large pink decorative box */}
+                <div className="absolute right-0 bottom-0 w-44 h-40 xl:w-48 xl:h-44 bg-secondary-light" />
               </div>
-              <div className="w-36 h-38 bg-primary-pink rounded-3xl animate-bounce-slow" />
+              {/* Small pink box outside */}
+              <div className="w-36 h-40 xl:w-40 xl:h-44 bg-primary-pink animate-bounce-slow ml-4" />
             </div>
             
             {/* Download Section */}
