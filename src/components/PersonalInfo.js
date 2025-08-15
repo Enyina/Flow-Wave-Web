@@ -83,7 +83,7 @@ const PersonalInfo = ({ onNext }) => {
               <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">
                 {label} {required && <span className="text-error">*</span>}
               </label>
-              <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors[key] ? 'border-error ring-4 ring-error/10' : 'border-neutral-lightgray dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10`}>
+              <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors[key] ? 'border-error ring-4 ring-error/10' : 'border-neutral-gray/40 dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10`}>
                 <input
                   type={type}
                   className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-gray/70 dark:placeholder:text-dark-textSecondary transition-colors duration-300"
@@ -103,7 +103,7 @@ const PersonalInfo = ({ onNext }) => {
             <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">
               Country <span className="text-error">*</span>
             </label>
-            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.country ? 'border-error ring-4 ring-error/10' : 'border-neutral-lightgray dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10`}>
+            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.country ? 'border-error ring-4 ring-error/10' : 'border-neutral-gray/40 dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10`}>
               <select
                 className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text"
                 value={formData.country}
