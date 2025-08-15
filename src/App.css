@@ -39,10 +39,16 @@
   /* Enhanced input visibility */
   .input-field {
     @apply bg-gray-50 dark:bg-dark-card border-2 border-neutral-gray/30 dark:border-dark-border;
-    @apply transition-all duration-200;
-    @apply hover:border-primary-blue/50 hover:bg-white dark:hover:bg-dark-surface;
+    @apply transition-all duration-200 shadow-sm;
+    @apply hover:border-primary-blue/50 hover:bg-white dark:hover:bg-dark-surface hover:shadow-md;
     @apply focus-within:border-primary-blue focus-within:bg-white dark:focus-within:bg-dark-surface;
-    @apply focus-within:ring-4 focus-within:ring-primary-blue/10;
+    @apply focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:shadow-md;
+  }
+
+  /* Make PIN/OTP inputs more visible */
+  .pin-input {
+    @apply bg-white dark:bg-dark-card border-2 border-neutral-gray/30 dark:border-dark-border;
+    @apply shadow-sm hover:shadow-md transition-all duration-200;
   }
 }
 
