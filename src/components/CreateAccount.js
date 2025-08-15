@@ -143,10 +143,10 @@ const CreateAccount = ({ onNext, onSignin }) => {
               <form onSubmit={handleSubmit} className={`flex flex-col gap-4 w-full ${hasAnimated ? 'animate-stagger-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
                 <div className="flex flex-col gap-2 w-full">
                   <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Email</label>
-                  <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.email ? 'input-error' : email && validateEmail(email) ? 'input-success' : 'border-neutral-lightgray dark:border-dark-border'} ${!errors.email && !email ? 'hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px' : ''}`}>
+                  <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border-2 transition-all duration-150 bg-white dark:bg-dark-card ${errors.email ? 'input-error' : email && validateEmail(email) ? 'input-success' : 'border-neutral-gray/40 dark:border-dark-border'} ${!errors.email && !email ? 'hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px' : ''}`}>
                     <input
                       type="email"
-                      className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-placeholder dark:placeholder:text-dark-textSecondary placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2 transition-colors duration-300"
+                      className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-gray/70 dark:placeholder:text-dark-textSecondary placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2 transition-colors duration-300"
                       placeholder="your@email.com"
                       value={email}
                       onChange={handleEmailChange}
