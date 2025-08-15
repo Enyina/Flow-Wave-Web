@@ -35,7 +35,14 @@ const CreatePin = ({ onNext }) => {
     <div className="single-screen">
       <div className="logo-container">
         <div className="logo-icon">
-          {/* Logo SVG would go here */}
+          <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+            <rect width="52" height="37" fill="url(#pattern0)" />
+            <defs>
+              <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
+                <rect width="52" height="37" fill="#6C63FF" />
+              </pattern>
+            </defs>
+          </svg>
         </div>
         <div className="logo-text">FLOWWAVE</div>
       </div>
