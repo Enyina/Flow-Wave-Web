@@ -28,7 +28,8 @@ const Signin = ({ onNext, onCreateAccount }) => {
           <div className="download-section">
             <span className="download-text">Get the app on:</span>
             <div className="download-buttons">
-              {/* App store badges would go here */}
+              <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on App Store" style={{ height: '40px' }} />
+              <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style={{ height: '40px' }} />
             </div>
           </div>
         </div>
@@ -37,7 +38,14 @@ const Signin = ({ onNext, onCreateAccount }) => {
       <div className="right-section">
         <div className="logo-container">
           <div className="logo-icon">
-            {/* Logo SVG would go here */}
+            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+              <rect width="52" height="37" fill="url(#pattern0)" />
+              <defs>
+                <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
+                  <rect width="52" height="37" fill="#6C63FF" />
+                </pattern>
+              </defs>
+            </svg>
           </div>
           <div className="logo-text">FLOWWAVE</div>
         </div>
