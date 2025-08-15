@@ -77,20 +77,20 @@ const CreateAccount = ({ onNext, onSignin }) => {
           <div className="flex flex-col gap-10 w-full max-w-2xl">
             {/* Hero Visual */}
             <div className={`flex items-center relative ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
-              <div className="relative w-full max-w-lg h-96 xl:h-[536px] rounded-2xl border border-primary-light backdrop-blur-sm bg-white/10 hover:transform hover:-translate-y-2 hover:shadow-large transition-all duration-300">
-                <div className="absolute left-9 top-24 xl:left-9 xl:top-28 w-4/5">
-                  <h1 className="text-white text-4xl xl:text-6xl font-bold leading-tight">
+              <div className="relative w-full max-w-lg h-96 xl:h-[536px] rounded-2xl border border-primary-light backdrop-blur-sm bg-white/10 hover:transform hover:-translate-y-2 hover:shadow-large transition-all duration-300 overflow-hidden">
+                <div className="absolute left-9 top-20 xl:left-9 xl:top-24 w-3/4">
+                  <h1 className="text-white text-3xl xl:text-5xl font-bold leading-tight xl:leading-tight">
                     Cross<br />
                     Border<br />
                     Payment<br />
                     Made Easy
                   </h1>
                 </div>
-                {/* Large pink decorative box */}
-                <div className="absolute right-0 bottom-0 w-44 h-40 xl:w-48 xl:h-44 bg-secondary-light" />
+                {/* Large pink decorative box inside */}
+                <div className="absolute right-0 bottom-0 w-40 h-36 xl:w-44 xl:h-40 bg-secondary-light" />
               </div>
               {/* Small pink box outside */}
-              <div className="w-36 h-40 xl:w-40 xl:h-44 bg-primary-pink animate-bounce-slow ml-4" />
+              <div className="w-32 h-36 xl:w-36 xl:h-40 bg-primary-pink animate-bounce-slow ml-4 flex-shrink-0" />
             </div>
             
             {/* Download Section */}
