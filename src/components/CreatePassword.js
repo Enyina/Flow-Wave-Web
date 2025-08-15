@@ -70,7 +70,7 @@ const CreatePassword = ({ onNext }) => {
         <div className={`flex flex-col gap-6 w-full ${hasAnimated ? 'animate-stagger-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
           <div className="flex flex-col gap-2 w-full">
             <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Password</label>
-            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.password ? 'input-error' : isPasswordValid && password ? 'input-success' : 'border-neutral-gray/40 dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
+            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border-2 transition-all duration-150 bg-white dark:bg-dark-card ${errors.password ? 'input-error' : isPasswordValid && password ? 'input-success' : 'border-neutral-gray/40 dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
               <input
                 type={showPassword ? "text" : "password"}
                 className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-gray/70 dark:placeholder:text-dark-textSecondary placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2 transition-colors duration-300"
@@ -101,7 +101,7 @@ const CreatePassword = ({ onNext }) => {
           
           <div className="flex flex-col gap-2 w-full">
             <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Confirm Password</label>
-            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border transition-all duration-150 bg-white dark:bg-dark-card ${errors.confirmPassword ? 'input-error' : isConfirmPasswordValid ? 'input-success' : 'border-neutral-gray/40 dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
+            <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border-2 transition-all duration-150 bg-white dark:bg-dark-card ${errors.confirmPassword ? 'input-error' : isConfirmPasswordValid ? 'input-success' : 'border-neutral-gray/40 dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 className="flex-1 border-none outline-none bg-transparent text-neutral-dark dark:text-dark-text placeholder:text-neutral-gray/70 dark:placeholder:text-dark-textSecondary placeholder:transition-all placeholder:duration-150 focus:placeholder:opacity-50 focus:placeholder:translate-x-2 transition-colors duration-300"
