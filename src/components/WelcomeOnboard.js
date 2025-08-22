@@ -42,7 +42,7 @@ const WelcomeOnboard = ({ onNext }) => {
             </svg>
             <p className="text-neutral-dark dark:text-dark-text text-center transition-colors duration-300">Your profile has been created</p>
             <button className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold hover:-translate-y-1 hover:shadow-xl transition-all duration-300" onClick={() => setShowProfileSuccess(false)}>
-              Go to Dashboard
+              <span onClick={() => onNext()}>Go to Dashboard</span>
             </button>
           </div>
         </div>
@@ -62,7 +62,7 @@ const WelcomeOnboard = ({ onNext }) => {
               <p className="text-neutral-dark dark:text-dark-text transition-colors duration-300">Let's help you send money to anywhere, at anytime.</p>
             </div>
             <button className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold hover:-translate-y-1 hover:shadow-xl transition-all duration-300" onClick={onNext}>
-              Let's Go
+              <span onClick={() => onNext()}>Let's Go</span>
             </button>
           </div>
         </div>

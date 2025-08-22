@@ -9,6 +9,7 @@ import CreatePin from './components/CreatePin';
 import ConfirmPin from './components/ConfirmPin';
 import PersonalInfo from './components/PersonalInfo';
 import WelcomeOnboard from './components/WelcomeOnboard';
+import Dashboard from './components/Dashboard';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState('create-account');
@@ -35,6 +36,8 @@ function App() {
         return <PersonalInfo onNext={() => handleScreenChange('welcome')} />;
       case 'welcome':
         return <WelcomeOnboard onNext={() => handleScreenChange('create-account')} />;
+      case 'dashboard':
+        return <Dashboard onLogout={() => handleScreenChange('create-account')} />;
       default:
         return <CreateAccount onNext={() => handleScreenChange('verify-email')} onSignin={() => handleScreenChange('signin')} />;
     }
