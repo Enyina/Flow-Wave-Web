@@ -35,7 +35,7 @@ function App() {
       case 'personal-info':
         return <PersonalInfo onNext={() => handleScreenChange('welcome')} />;
       case 'welcome':
-        return <WelcomeOnboard onNext={() => handleScreenChange('create-account')} />;
+        return <WelcomeOnboard onNext={() => handleScreenChange('dashboard')} />;
       case 'dashboard':
         return <Dashboard onLogout={() => handleScreenChange('create-account')} />;
       default:

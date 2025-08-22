@@ -37,6 +37,13 @@ module.exports = {
         sans: ['Inter', '-apple-system', 'Roboto', 'Helvetica', 'sans-serif'],
         times: ['Times New Roman', 'serif'],
       },
+      spacing: {
+        '13': '52px',
+        '30': '120px',
+      },
+      gap: {
+        '30': '120px',
+      },
       animation: {
         'float': 'float 6s ease-in-out infinite',
         'bounce-slow': 'bounce 3s ease-in-out infinite',
