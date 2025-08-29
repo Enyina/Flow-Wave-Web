@@ -175,7 +175,7 @@ const CountrySelector = () => {
 
           {/* Continue Button */}
           <button
-            onClick={onBack}
+            onClick={() => navigate('/dashboard')}
             className={`w-full py-4 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 mb-8 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
             style={{ animationDelay: '1s' }}
           >
