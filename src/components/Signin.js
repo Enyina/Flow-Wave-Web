@@ -175,6 +175,11 @@ const Signin = () => {
               </div>
               
               <form onSubmit={handleSubmit} className={`flex flex-col gap-6 w-full ${hasAnimated ? 'animate-stagger-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
+                {errors.general && (
+                  <div className="text-error text-sm text-center p-3 bg-error/10 rounded-lg animate-slide-in-down animate-once">
+                    {errors.general}
+                  </div>
+                )}
                 <div className="flex flex-col gap-2 w-full">
                   <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Email</label>
                   <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border-2 transition-all duration-150 bg-white dark:bg-dark-card ${errors.email ? 'input-error' : email && validateEmail(email) ? 'input-success' : 'border-neutral-gray/40 dark:border-dark-border'} ${!errors.email && !email ? 'hover:border-primary-blue focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px' : ''}`}>
