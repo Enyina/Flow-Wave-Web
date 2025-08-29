@@ -41,7 +41,7 @@ const CreatePassword = () => {
       setIsLoading(true);
       setTimeout(() => {
         setIsLoading(false);
-        onNext();
+        navigate('/create-pin');
       }, 1500);
     }
   };
