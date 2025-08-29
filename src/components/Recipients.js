@@ -122,7 +122,7 @@ const Recipients = () => {
 
             {/* Add New Recipient */}
             <button
-              onClick={onAddRecipient}
+              onClick={handleAddRecipient}
               className={`w-full flex items-center justify-between p-4 bg-white dark:bg-dark-surface rounded-lg shadow-soft dark:shadow-dark-soft hover:shadow-large dark:hover:shadow-dark-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
               style={{ animationDelay: '0.6s' }}
             >
