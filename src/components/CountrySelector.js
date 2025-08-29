@@ -46,7 +46,10 @@ const CountrySelector = () => {
     } else {
       updateToCurrency(country);
     }
-    navigate('/dashboard');
+    // Add a small delay to ensure state is updated before navigation
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 100);
   };
 
   return (
