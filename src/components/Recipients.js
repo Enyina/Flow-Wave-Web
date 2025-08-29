@@ -41,7 +41,8 @@ const Recipients = () => {
 
   const handleSelectRecipient = (recipient) => {
     console.log('Selected recipient:', recipient);
-    navigate('/dashboard');
+    // Store recipient data if needed (could extend CurrencyContext)
+    navigate('/payment-description');
   };
 
   return (

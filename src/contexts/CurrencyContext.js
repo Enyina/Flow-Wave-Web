@@ -23,8 +23,8 @@ export const CurrencyProvider = ({ children }) => {
     name: 'United States' 
   });
 
-  const [sendAmount, setSendAmount] = useState('0.00');
-  const [receiveAmount, setReceiveAmount] = useState('0.00');
+  const [sendAmount, setSendAmount] = useState('');
+  const [receiveAmount, setReceiveAmount] = useState('');
 
   const updateFromCurrency = (currency) => {
     setFromCurrency(currency);
@@ -37,12 +37,12 @@ export const CurrencyProvider = ({ children }) => {
   const updateSendAmount = (amount) => {
     setSendAmount(amount);
     // Simple conversion calculation (1500 NGN = 1 USD)
-    if (amount && !isNaN(amount)) {
+    if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
       const rate = fromCurrency.code === 'NGN' ? 1500 : 1;
       const converted = (parseFloat(amount) / rate).toFixed(2);
       setReceiveAmount(converted);
     } else {
-      setReceiveAmount('0.00');
+      setReceiveAmount('');
     }
   };
 

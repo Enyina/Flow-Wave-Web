@@ -65,9 +65,8 @@ const Dashboard = () => {
   const handleSendAmountChange = (e) => {
     const value = e.target.value;
     updateSendAmount(value);
-    if (value === '') {
-      setErrors({ amount: 'This cannot be empty' });
-    } else {
+    // Clear errors when user starts typing
+    if (value && parseFloat(value) > 0) {
       setErrors({});
     }
   };
@@ -78,12 +77,12 @@ const Dashboard = () => {
   };
 
   const handleContinue = () => {
-    if (!sendAmount || sendAmount === '0.00') {
+    if (!sendAmount || sendAmount === '' || parseFloat(sendAmount) <= 0) {
       setErrors({ amount: 'This cannot be empty' });
       return;
     }
-    // Navigate to payment description page
-    navigate('/payment-description');
+    // Navigate to recipients page first
+    navigate('/recipients');
   };
 
   return (
