@@ -54,6 +54,7 @@ module.exports = {
         'modal-slide-up': 'modalSlideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
         'toast-slide-in': 'toastSlideIn 0.5s ease-out forwards',
         'checkmark': 'checkmark 0.6s ease-in-out forwards',
+        'shake': 'shake 0.5s ease-in-out',
       },
       keyframes: {
         float: {
@@ -114,6 +115,11 @@ module.exports = {
           '0%': { opacity: '0', transform: 'scale(0)' },
           '50%': { opacity: '1', transform: 'scale(1.2)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-10px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(10px)' },
         },
       },
       boxShadow: {
