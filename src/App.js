@@ -21,6 +21,11 @@ import Dashboard from './components/Dashboard';
 import CountrySelector from './components/CountrySelector';
 import Recipients from './components/Recipients';
 import AddRecipient from './components/AddRecipient';
+import PaymentDescription from './components/PaymentDescription';
+import PaymentReview from './components/PaymentReview';
+import EnterPin from './components/EnterPin';
+import PaymentInstructions from './components/PaymentInstructions';
+import TransactionSuccessful from './components/TransactionSuccessful';
 
 function App() {
   return (
@@ -65,13 +70,53 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              <Route 
-                path="/add-recipient" 
+              <Route
+                path="/add-recipient"
                 element={
                   <ProtectedRoute>
                     <AddRecipient />
                   </ProtectedRoute>
-                } 
+                }
+              />
+              <Route
+                path="/payment-description"
+                element={
+                  <ProtectedRoute>
+                    <PaymentDescription />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/review"
+                element={
+                  <ProtectedRoute>
+                    <PaymentReview />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/enter-pin"
+                element={
+                  <ProtectedRoute>
+                    <EnterPin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/payment-instructions"
+                element={
+                  <ProtectedRoute>
+                    <PaymentInstructions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/transaction-successful"
+                element={
+                  <ProtectedRoute>
+                    <TransactionSuccessful />
+                  </ProtectedRoute>
+                }
               />
 
               {/* Default redirect */}

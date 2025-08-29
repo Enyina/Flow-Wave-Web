@@ -82,8 +82,8 @@ const Dashboard = () => {
       setErrors({ amount: 'This cannot be empty' });
       return;
     }
-    // Navigate to recipients page
-    navigate('/recipients');
+    // Navigate to payment description page
+    navigate('/payment-description');
   };
 
   return (
