@@ -65,7 +65,14 @@ const WelcomeOnboard = () => {
               <h3 className="gradient-text text-2xl font-bold mb-2">Welcome Onboard!</h3>
               <p className="text-neutral-dark dark:text-dark-text transition-colors duration-300">Let's help you send money to anywhere, at anytime.</p>
             </div>
-            <button className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold hover:-translate-y-1 hover:shadow-xl transition-all duration-300" onClick={onNext}>
+            <button
+              className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+              onClick={async () => {
+                // Complete the signup process and authenticate the user
+                await signup({ email: 'user@example.com' }); // This would normally come from previous steps
+                navigate('/dashboard');
+              }}
+            >
               Let's Go
             </button>
           </div>
