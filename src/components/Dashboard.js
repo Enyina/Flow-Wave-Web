@@ -34,6 +34,11 @@ const Dashboard = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   const handleContinue = () => {
     if (!sendAmount || sendAmount === '0.00') {
       setErrors({ amount: 'This cannot be empty' });
