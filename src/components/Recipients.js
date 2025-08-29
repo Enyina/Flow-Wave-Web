@@ -30,6 +30,20 @@ const Recipients = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleAddRecipient = () => {
+    navigate('/add-recipient');
+  };
+
+  const handleSelectRecipient = (recipient) => {
+    console.log('Selected recipient:', recipient);
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
       {/* Header */}
