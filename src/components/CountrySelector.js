@@ -32,9 +32,15 @@ const CountrySelector = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   const handleCountrySelect = (country) => {
-    onSelectCountry(country);
-    onBack();
+    // In a real app, you'd save the selected country to state/context
+    console.log('Selected country:', country);
+    navigate('/dashboard');
   };
 
   return (
