@@ -16,6 +16,52 @@ const Dashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Exchange rates (in base currency units per 1 USD)
+  const exchangeRates = {
+    'NGN': 1500,
+    'USD': 1,
+    'GBP': 0.79,
+    'EUR': 0.85,
+    'CAD': 1.35,
+    'AUD': 1.52,
+    'JPY': 110,
+    'CHF': 0.92,
+    'ZAR': 18.5
+  };
+
+  const getExchangeRate = () => {
+    const fromRate = exchangeRates[fromCurrency.code] || 1;
+    const toRate = exchangeRates[toCurrency.code] || 1;
+    return fromRate / toRate;
+  };
+
+  const formatCurrency = (amount, currencyCode) => {
+    const symbols = {
+      'NGN': '₦',
+      'USD': '$',
+      'GBP': '£',
+      'EUR': '€',
+      'CAD': 'C$',
+      'AUD': 'A$',
+      'JPY': '¥',
+      'CHF': 'CHF ',
+      'ZAR': 'R'
+    };
+    return `${symbols[currencyCode] || ''}${amount}`;
+  };
+
+  const calculateFee = () => {
+    const amount = parseFloat(sendAmount) || 0;
+    const feePercentage = 0.02; // 2% fee
+    return (amount * feePercentage).toFixed(2);
+  };
+
+  const calculateTotalPay = () => {
+    const amount = parseFloat(sendAmount) || 0;
+    const fee = parseFloat(calculateFee());
+    return (amount + fee).toFixed(2);
+  };
+
   const handleSendAmountChange = (e) => {
     const value = e.target.value;
     updateSendAmount(value);
@@ -139,23 +185,33 @@ const Dashboard = () => {
 
           {/* Exchange Rate Section */}
           <div className={`flex items-center gap-3 mb-6 ${hasAnimated ? 'animate-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
-            <div className="w-1.5 h-24 bg-primary-blue flex-shrink-0 rounded-full relative">
-              <div className="absolute top-0 w-3 h-3 bg-primary-blue rounded-full -translate-x-0.5"></div>
-              <div className="absolute top-1/3 w-3 h-3 bg-primary-blue rounded-full -translate-x-0.5"></div>
-              <div className="absolute top-2/3 w-3 h-3 bg-primary-blue rounded-full -translate-x-0.5"></div>
-              <div className="absolute bottom-0 w-3 h-3 bg-primary-blue rounded-full -translate-x-0.5"></div>
-            </div>
-            
-            <div className="flex-1 grid grid-cols-2 gap-4 text-xs">
-              <div className="space-y-3">
-                <p className="text-neutral-dark dark:text-dark-text">Fee:</p>
-                <p className="text-neutral-dark dark:text-dark-text">Total Pay:</p>
-                <p className="text-neutral-dark dark:text-dark-text">Rate:</p>
+            {/* Vertical Line with Dots - Exact Figma Design */}
+            <svg width="6" height="102" viewBox="0 0 6 102" fill="none" className="flex-shrink-0">
+              <path d="M3.5 0V12H3V0H3.5Z" fill="#3A49A4"/>
+              <path d="M3.5 90V102H3V90H3.5Z" fill="#3A49A4"/>
+              <path d="M3.5 60V72H3V60H3.5Z" fill="#3A49A4"/>
+              <circle cx="3" cy="81" r="3" fill="#3A49A4"/>
+              <path d="M3.5 30V42H3V30H3.5Z" fill="#3A49A4"/>
+              <circle cx="3" cy="21" r="3" fill="#3A49A4"/>
+              <circle cx="3" cy="51" r="3" fill="#3A49A4"/>
+            </svg>
+
+            <div className="flex-1 flex justify-between items-center">
+              <div className="flex flex-col gap-3">
+                <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">Fee:</p>
+                <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">Total Pay:</p>
+                <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">Rate:</p>
               </div>
-              <div className="space-y-3 text-right">
-                <p className="text-neutral-dark dark:text-dark-text">₦0.00</p>
-                <p className="text-neutral-dark dark:text-dark-text">₦0.00</p>
-                <p className="text-neutral-dark dark:text-dark-text">₦1500.00 = $1.00</p>
+              <div className="flex flex-col gap-3 text-right">
+                <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">
+                  {formatCurrency(calculateFee(), fromCurrency.code)}
+                </p>
+                <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">
+                  {formatCurrency(calculateTotalPay(), fromCurrency.code)}
+                </p>
+                <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">
+                  {formatCurrency(getExchangeRate().toFixed(2), fromCurrency.code)} = {formatCurrency('1.00', toCurrency.code)}
+                </p>
               </div>
             </div>
           </div>
