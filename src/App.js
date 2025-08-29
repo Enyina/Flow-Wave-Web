@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import './App.css';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Authentication components
@@ -25,7 +26,8 @@ function App() {
   return (
     <DarkModeProvider>
       <AuthProvider>
-        <Router>
+        <CurrencyProvider>
+          <Router>
           <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
             <Routes>
               {/* Public Routes */}
@@ -79,7 +81,8 @@ function App() {
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </div>
-        </Router>
+          </Router>
+        </CurrencyProvider>
       </AuthProvider>
     </DarkModeProvider>
   );
