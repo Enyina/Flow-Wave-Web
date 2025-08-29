@@ -123,6 +123,17 @@ const EnterPin = () => {
       {/* Main Content */}
       <main className="flex flex-col items-center px-4 lg:px-0 pb-24">
         <div className={`w-full max-w-lg ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+          {/* Back Button */}
+          <button
+            onClick={() => navigate('/review')}
+            className="flex items-center gap-2 mb-6 text-neutral-gray hover:text-neutral-dark transition-colors"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="text-sm font-medium">Back</span>
+          </button>
+
           {/* Title and Description */}
           <div className="flex flex-col items-center gap-4 mb-10">
             <h1 className="text-center text-2xl lg:text-3xl font-bold text-primary-pink">

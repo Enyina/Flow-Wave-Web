@@ -79,6 +79,17 @@ const TransactionSuccessful = () => {
       {/* Main Content */}
       <main className="flex flex-col items-center justify-center px-4 lg:px-0 pb-24 min-h-[calc(100vh-200px)]">
         <div className={`w-full max-w-lg flex flex-col items-center ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+          {/* Back Button */}
+          <button
+            onClick={() => navigate('/payment-instructions')}
+            className="flex items-center gap-2 mb-6 text-neutral-gray hover:text-neutral-dark transition-colors self-start"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="text-sm font-medium">Back</span>
+          </button>
+
           {/* Success Icon */}
           <div className="mb-10">
             <svg width="235" height="173" viewBox="0 0 235 173" fill="none" className="w-60 h-44">
