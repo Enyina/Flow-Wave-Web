@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useCurrency } from '../contexts/CurrencyContext';
 import DarkModeToggle from './DarkModeToggle';
 
 const CountrySelector = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { updateFromCurrency, updateToCurrency } = useCurrency();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [hasAnimated, setHasAnimated] = useState(false);
+  const selectionType = searchParams.get('type') || 'from';
 
   const countries = [
-    { code: 'AUD', name: 'Australia', flag: '🇦🇺' },
-    { code: 'NGN', name: 'Canada', flag: '🇨🇦' },
-    { code: 'ZAR', name: 'South Africa', flag: '🇿🇦' },
-    { code: 'GBP', name: 'United Kingdom', flag: '🇬🇧' },
-    { code: 'USD', name: 'United States', flag: '🇺🇸' },
-    { code: 'NGN', name: 'Nigeria', flag: '🇳🇬' },
-    { code: 'EUR', name: 'European Union', flag: '🇪🇺' },
-    { code: 'JPY', name: 'Japan', flag: '🇯🇵' },
-    { code: 'CAD', name: 'Canada', flag: '🇨🇦' },
-    { code: 'CHF', name: 'Switzerland', flag: '🇨🇭' },
+    { code: 'AUD', name: 'Australia', flag: 'https://flagcdn.com/21x21/au.png' },
+    { code: 'CAD', name: 'Canada', flag: 'https://flagcdn.com/21x21/ca.png' },
+    { code: 'ZAR', name: 'South Africa', flag: 'https://flagcdn.com/21x21/za.png' },
+    { code: 'GBP', name: 'United Kingdom', flag: 'https://flagcdn.com/21x21/gb.png' },
+    { code: 'USD', name: 'United States', flag: 'https://flagcdn.com/21x21/us.png' },
+    { code: 'NGN', name: 'Nigeria', flag: 'https://flagcdn.com/21x21/ng.png' },
+    { code: 'EUR', name: 'European Union', flag: 'https://flagcdn.com/21x21/eu.png' },
+    { code: 'JPY', name: 'Japan', flag: 'https://flagcdn.com/21x21/jp.png' },
+    { code: 'CHF', name: 'Switzerland', flag: 'https://flagcdn.com/21x21/ch.png' },
   ];
 
   const filteredCountries = countries.filter(country =>
@@ -38,8 +41,11 @@ const CountrySelector = () => {
   };
 
   const handleCountrySelect = (country) => {
-    // In a real app, you'd save the selected country to state/context
-    console.log('Selected country:', country);
+    if (selectionType === 'from') {
+      updateFromCurrency(country);
+    } else {
+      updateToCurrency(country);
+    }
     navigate('/dashboard');
   };
 
@@ -211,7 +217,7 @@ const CountrySelector = () => {
                   style={{ animationDelay: `${1.4 + index * 0.1}s` }}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-xl">{country.flag}</span>
+                    <img src={country.flag} alt={country.name} className="w-6 h-6 rounded-full object-cover" />
                     <span className="text-neutral-dark dark:text-dark-text font-medium">{country.name}</span>
                   </div>
                   <span className="text-neutral-gray text-sm font-medium">{country.code}</span>
