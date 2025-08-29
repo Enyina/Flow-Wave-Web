@@ -224,9 +224,9 @@ const CreateAccount = () => {
                   'Create Account'
                 )}
               </button>
-              <span className="text-neutral-dark dark:text-dark-text text-xs text-center underline cursor-pointer hover:text-primary-blue hover:-translate-y-px transition-all duration-150" onClick={onSignin}>
+              <Link to="/login" className="text-neutral-dark dark:text-dark-text text-xs text-center underline cursor-pointer hover:text-primary-blue hover:-translate-y-px transition-all duration-150">
                 Already have an account? <strong>Signin</strong>
-              </span>
+              </Link>
             </div>
             
             {/* Divider */}
