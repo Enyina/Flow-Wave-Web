@@ -56,6 +56,7 @@ module.exports = {
         'toast-slide-in': 'toastSlideIn 0.5s ease-out forwards',
         'checkmark': 'checkmark 0.6s ease-in-out forwards',
         'shake': 'shake 0.5s ease-in-out',
+        'once': 'once 1s ease-out forwards',
       },
       keyframes: {
         float: {
@@ -121,6 +122,10 @@ module.exports = {
           '0%, 100%': { transform: 'translateX(0)' },
           '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-10px)' },
           '20%, 40%, 60%, 80%': { transform: 'translateX(10px)' },
+        },
+        once: {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
         },
       },
       boxShadow: {
