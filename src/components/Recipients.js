@@ -146,7 +146,7 @@ const Recipients = () => {
               {filteredRecipients.map((recipient, index) => (
                 <button
                   key={recipient.id}
-                  onClick={() => onSelectRecipient(recipient)}
+                  onClick={() => handleSelectRecipient(recipient)}
                   className={`w-full p-4 bg-secondary-light rounded-lg hover:shadow-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
                   style={{ animationDelay: `${0.8 + index * 0.1}s` }}
                 >
