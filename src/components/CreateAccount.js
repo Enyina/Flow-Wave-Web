@@ -38,14 +38,21 @@ const CreateAccount = () => {
     }
   };
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!email || !validateEmail(email)) {
       setErrors({ email: 'Please enter a valid email address' });
       return;
     }
-    
+
     if (!agreedToTerms) {
       setErrors({ terms: 'Please agree to the Terms of Service and Privacy Policy' });
       return;
@@ -53,12 +60,19 @@ const CreateAccount = () => {
 
     setIsLoading(true);
     setErrors({});
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const result = await signup({ email });
+      if (result.success) {
+        navigate('/verify-email');
+      } else {
+        setErrors({ general: result.error || 'Account creation failed. Please try again.' });
+      }
+    } catch (error) {
+      setErrors({ general: 'Account creation failed. Please try again.' });
+    } finally {
       setIsLoading(false);
-      onNext();
-    }, 1500);
+    }
   };
 
   const handleSocialLogin = (provider) => {
