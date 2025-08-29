@@ -84,7 +84,7 @@ const VerifyEmail = () => {
       // Simulate verification
       setTimeout(() => {
         setIsLoading(false);
-        onNext();
+        navigate('/create-password');
       }, 1500);
     }
   };
