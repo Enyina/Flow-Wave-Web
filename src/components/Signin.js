@@ -54,19 +54,26 @@ const Signin = () => {
     }
   };
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     let newErrors = {};
-    
+
     if (!email || !validateEmail(email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     if (!password || !validatePassword(password)) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -74,11 +81,19 @@ const Signin = () => {
 
     setIsLoading(true);
     setErrors({});
-    
-    setTimeout(() => {
+
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setErrors({ general: result.error || 'Login failed. Please try again.' });
+      }
+    } catch (error) {
+      setErrors({ general: 'Login failed. Please try again.' });
+    } finally {
       setIsLoading(false);
-      onNext();
-    }, 1500);
+    }
   };
 
   const handleForgotPassword = () => {
