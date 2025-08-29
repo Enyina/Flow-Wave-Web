@@ -9,12 +9,30 @@ import CreatePin from './components/CreatePin';
 import ConfirmPin from './components/ConfirmPin';
 import PersonalInfo from './components/PersonalInfo';
 import WelcomeOnboard from './components/WelcomeOnboard';
+import Dashboard from './components/Dashboard';
+import CountrySelector from './components/CountrySelector';
+import Recipients from './components/Recipients';
+import AddRecipient from './components/AddRecipient';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState('create-account');
+  const [currentScreen, setCurrentScreen] = useState('dashboard');
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [recipients, setRecipients] = useState([]);
 
   const handleScreenChange = (screen) => {
     setCurrentScreen(screen);
+  };
+
+  const handleCountrySelect = (country) => {
+    setSelectedCountry(country);
+  };
+
+  const handleSaveRecipient = (recipientData) => {
+    setRecipients(prev => [...prev, { id: Date.now(), ...recipientData }]);
+  };
+
+  const handleLogout = () => {
+    handleScreenChange('create-account');
   };
 
   const renderScreen = () => {
@@ -22,7 +40,7 @@ function App() {
       case 'create-account':
         return <CreateAccount onNext={() => handleScreenChange('verify-email')} onSignin={() => handleScreenChange('signin')} />;
       case 'signin':
-        return <Signin onNext={() => handleScreenChange('create-pin')} onCreateAccount={() => handleScreenChange('create-account')} />;
+        return <Signin onNext={() => handleScreenChange('dashboard')} onCreateAccount={() => handleScreenChange('create-account')} />;
       case 'verify-email':
         return <VerifyEmail onNext={() => handleScreenChange('create-password')} />;
       case 'create-password':
@@ -34,7 +52,37 @@ function App() {
       case 'personal-info':
         return <PersonalInfo onNext={() => handleScreenChange('welcome')} />;
       case 'welcome':
-        return <WelcomeOnboard onNext={() => handleScreenChange('create-account')} />;
+        return <WelcomeOnboard onNext={() => handleScreenChange('dashboard')} />;
+      case 'dashboard':
+        return <Dashboard
+          onCountrySelect={() => handleScreenChange('country-selector')}
+          onRecipients={() => handleScreenChange('recipients')}
+          onTransactions={() => handleScreenChange('dashboard')}
+          onProfile={() => handleScreenChange('dashboard')}
+          onLogout={handleLogout}
+        />;
+      case 'country-selector':
+        return <CountrySelector
+          onBack={() => handleScreenChange('dashboard')}
+          onSelectCountry={handleCountrySelect}
+          onLogout={handleLogout}
+        />;
+      case 'recipients':
+        return <Recipients
+          onBack={() => handleScreenChange('dashboard')}
+          onAddRecipient={() => handleScreenChange('add-recipient')}
+          onSelectRecipient={(recipient) => {
+            console.log('Selected recipient:', recipient);
+            handleScreenChange('dashboard');
+          }}
+          onLogout={handleLogout}
+        />;
+      case 'add-recipient':
+        return <AddRecipient
+          onBack={() => handleScreenChange('recipients')}
+          onSave={handleSaveRecipient}
+          onLogout={handleLogout}
+        />;
       default:
         return <CreateAccount onNext={() => handleScreenChange('verify-email')} onSignin={() => handleScreenChange('signin')} />;
     }
