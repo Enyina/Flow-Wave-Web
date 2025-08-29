@@ -108,10 +108,10 @@ const CountrySelector = () => {
 
           {/* You Send Section (Static) */}
           <div className={`mb-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-            <div className="p-6 rounded-lg bg-secondary-light">
+            <div className="p-4 rounded-lg bg-secondary-light">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex-1">
-                  <p className="text-neutral-dark dark:text-dark-text text-base mb-4">You Send</p>
+                  <p className="text-neutral-dark dark:text-dark-text text-sm mb-3">You Send</p>
                   <div className="flex items-center gap-2">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path d="M3.33398 7.5H5.00065V2.5H6.66732L9.51732 7.5H13.334V2.5H15.0007V7.5H16.6673V9.16667H15.0007V10.8333H16.6673V12.5H15.0007V17.5H13.334L10.4757 12.5H6.66732V17.5H5.00065V12.5H3.33398V10.8333H5.00065V9.16667H3.33398V7.5ZM6.66732 7.5H7.60898L6.66732 5.85833V7.5ZM6.66732 9.16667V10.8333H9.51732L8.56732 9.16667H6.66732ZM13.334 14.1667V12.5H12.3757L13.334 14.1667ZM10.4673 9.16667L11.4257 10.8333H13.334V9.16667H10.4673Z" fill="#A4A4A4"/>
@@ -156,10 +156,10 @@ const CountrySelector = () => {
 
           {/* Receiver Gets Section (Static) */}
           <div className={`mb-8 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
-            <div className="p-6 rounded-lg bg-secondary-light">
+            <div className="p-4 rounded-lg bg-secondary-light">
               <div className="flex justify-between items-center">
                 <div className="flex-1">
-                  <p className="text-neutral-dark dark:text-dark-text text-base mb-4">Receiver Gets</p>
+                  <p className="text-neutral-dark dark:text-dark-text text-sm mb-3">Receiver Gets</p>
                   <div className="flex items-center gap-2">
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <path d="M12 6.375H13.5C13.5 4.24725 11.4337 3.27675 9.75 3.05325V1.5H8.25V3.05325C6.56625 3.27675 4.5 4.24725 4.5 6.375C4.5 8.4045 6.4995 9.45975 8.25 9.6975V13.425C7.164 13.2367 6 12.657 6 11.625H4.5C4.5 13.5667 6.31875 14.7143 8.25 14.952V16.5H9.75V14.9475C11.4337 14.724 13.5 13.7528 13.5 11.625C13.5 9.49725 11.4337 8.52675 9.75 8.30325V4.575C10.7475 4.75425 12 5.28075 12 6.375ZM6 6.375C6 5.28075 7.2525 4.75425 8.25 4.575V8.17425C7.22175 7.9845 6 7.42275 6 6.375ZM12 11.625C12 12.7192 10.7475 13.2457 9.75 13.425V9.825C10.7475 10.0043 12 10.5308 12 11.625Z" fill="#A4A4A4"/>
