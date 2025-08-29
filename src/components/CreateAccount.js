@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
 
-const CreateAccount = ({ onNext, onSignin }) => {
+const CreateAccount = () => {
+  const navigate = useNavigate();
+  const { signup, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
