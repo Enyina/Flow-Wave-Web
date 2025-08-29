@@ -20,6 +20,7 @@ module.exports = {
           dark: '#333',
           lightgray: '#D2D2D2',
           placeholder: '#D2D2D2',
+          300: '#D2D2D2',
         },
         error: '#D00416',
         success: '#1FC16B',
