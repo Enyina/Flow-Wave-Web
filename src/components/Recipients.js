@@ -84,8 +84,8 @@ const Recipients = () => {
           <DarkModeToggle />
 
           {/* Logout Button */}
-          <button 
-            onClick={onLogout}
+          <button
+            onClick={handleLogout}
             className="px-4 py-2 lg:px-6 lg:py-3 border-2 border-primary-blue text-primary-blue rounded-lg font-bold text-sm lg:text-lg hover:bg-primary-blue hover:text-white transition-all duration-300"
           >
             Log Out
