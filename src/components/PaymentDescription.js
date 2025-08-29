@@ -21,13 +21,21 @@ const PaymentDescription = () => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
-      if (allowedTypes.includes(file.type)) {
-        setAttachedFile(file);
-        setErrors({});
-      } else {
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!allowedTypes.includes(file.type)) {
         setErrors({ file: 'Only PNG, JPEG, PDF files are supported' });
+        return;
       }
+
+      if (file.size > maxSize) {
+        setErrors({ file: 'File size must be less than 5MB' });
+        return;
+      }
+
+      setAttachedFile(file);
+      setErrors({});
     }
   };
 

@@ -56,11 +56,11 @@ const EnterPin = () => {
       return;
     }
 
-    // Simulate PIN validation
+    // Simulate PIN validation (use 1234 as valid PIN for demo)
     if (pinString === '1234') {
       navigate('/payment-instructions');
     } else {
-      setError('Invalid PIN. Please try again.');
+      setError('Invalid PIN. Please try again. (Hint: use 1234 for demo)');
       setPin(['', '', '', '']);
       inputRefs.current[0]?.focus();
     }
