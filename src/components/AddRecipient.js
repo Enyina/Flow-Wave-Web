@@ -45,10 +45,15 @@ const AddRecipient = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   const validateForm = () => {
     const newErrors = {};
     const requiredFields = ['fullName', 'bank', 'accountNumber', 'swiftCode', 'address', 'state', 'city', 'zipCode', 'phoneNumber', 'email'];
-    
+
     requiredFields.forEach(field => {
       if (!formData[field] || formData[field] === 'Choose Bank') {
         newErrors[field] = 'This field is required';
