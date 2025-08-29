@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import { DarkModeProvider } from './contexts/DarkModeContext';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Authentication components
 import CreateAccount from './components/CreateAccount';
 import Signin from './components/Signin';
 import VerifyEmail from './components/VerifyEmail';
@@ -9,90 +14,73 @@ import CreatePin from './components/CreatePin';
 import ConfirmPin from './components/ConfirmPin';
 import PersonalInfo from './components/PersonalInfo';
 import WelcomeOnboard from './components/WelcomeOnboard';
+
+// Dashboard components
 import Dashboard from './components/Dashboard';
 import CountrySelector from './components/CountrySelector';
 import Recipients from './components/Recipients';
 import AddRecipient from './components/AddRecipient';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState('dashboard');
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [recipients, setRecipients] = useState([]);
-
-  const handleScreenChange = (screen) => {
-    setCurrentScreen(screen);
-  };
-
-  const handleCountrySelect = (country) => {
-    setSelectedCountry(country);
-  };
-
-  const handleSaveRecipient = (recipientData) => {
-    setRecipients(prev => [...prev, { id: Date.now(), ...recipientData }]);
-  };
-
-  const handleLogout = () => {
-    handleScreenChange('create-account');
-  };
-
-  const renderScreen = () => {
-    switch (currentScreen) {
-      case 'create-account':
-        return <CreateAccount onNext={() => handleScreenChange('verify-email')} onSignin={() => handleScreenChange('signin')} />;
-      case 'signin':
-        return <Signin onNext={() => handleScreenChange('dashboard')} onCreateAccount={() => handleScreenChange('create-account')} />;
-      case 'verify-email':
-        return <VerifyEmail onNext={() => handleScreenChange('create-password')} />;
-      case 'create-password':
-        return <CreatePassword onNext={() => handleScreenChange('create-pin')} />;
-      case 'create-pin':
-        return <CreatePin onNext={() => handleScreenChange('confirm-pin')} />;
-      case 'confirm-pin':
-        return <ConfirmPin onNext={() => handleScreenChange('personal-info')} />;
-      case 'personal-info':
-        return <PersonalInfo onNext={() => handleScreenChange('welcome')} />;
-      case 'welcome':
-        return <WelcomeOnboard onNext={() => handleScreenChange('dashboard')} />;
-      case 'dashboard':
-        return <Dashboard
-          onCountrySelect={() => handleScreenChange('country-selector')}
-          onRecipients={() => handleScreenChange('recipients')}
-          onTransactions={() => handleScreenChange('dashboard')}
-          onProfile={() => handleScreenChange('dashboard')}
-          onLogout={handleLogout}
-        />;
-      case 'country-selector':
-        return <CountrySelector
-          onBack={() => handleScreenChange('dashboard')}
-          onSelectCountry={handleCountrySelect}
-          onLogout={handleLogout}
-        />;
-      case 'recipients':
-        return <Recipients
-          onBack={() => handleScreenChange('dashboard')}
-          onAddRecipient={() => handleScreenChange('add-recipient')}
-          onSelectRecipient={(recipient) => {
-            console.log('Selected recipient:', recipient);
-            handleScreenChange('dashboard');
-          }}
-          onLogout={handleLogout}
-        />;
-      case 'add-recipient':
-        return <AddRecipient
-          onBack={() => handleScreenChange('recipients')}
-          onSave={handleSaveRecipient}
-          onLogout={handleLogout}
-        />;
-      default:
-        return <CreateAccount onNext={() => handleScreenChange('verify-email')} onSignin={() => handleScreenChange('signin')} />;
-    }
-  };
-
   return (
     <DarkModeProvider>
-      <div className="min-h-screen flex bg-white dark:bg-dark-bg transition-colors duration-300">
-        {renderScreen()}
-      </div>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Signin />} />
+              <Route path="/signup" element={<CreateAccount />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/create-password" element={<CreatePassword />} />
+              <Route path="/create-pin" element={<CreatePin />} />
+              <Route path="/confirm-pin" element={<ConfirmPin />} />
+              <Route path="/personal-info" element={<PersonalInfo />} />
+              <Route path="/welcome" element={<WelcomeOnboard />} />
+
+              {/* Protected Routes */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/country-selector" 
+                element={
+                  <ProtectedRoute>
+                    <CountrySelector />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/recipients" 
+                element={
+                  <ProtectedRoute>
+                    <Recipients />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/add-recipient" 
+                element={
+                  <ProtectedRoute>
+                    <AddRecipient />
+                  </ProtectedRoute>
+                } 
+              />
+
+              {/* Default redirect */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              
+              {/* Catch all route */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
     </DarkModeProvider>
   );
 }
