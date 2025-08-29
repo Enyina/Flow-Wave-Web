@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 
-const VerifyEmail = ({ onNext }) => {
+const VerifyEmail = () => {
+  const navigate = useNavigate();
   const [otp, setOtp] = useState(['', '', '', '']);
   const [countdown, setCountdown] = useState(256); // 4:16 in seconds
   const [canResend, setCanResend] = useState(false);
