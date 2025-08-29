@@ -226,7 +226,7 @@ const Dashboard = () => {
             <span className="text-xs font-medium">Transactions</span>
           </button>
 
-          <button onClick={onRecipients} className="flex flex-col items-center gap-1 text-neutral-gray">
+          <button onClick={() => navigate('/recipients')} className="flex flex-col items-center gap-1 text-neutral-gray">
             <svg width="51" height="50" viewBox="0 0 51 50" fill="none" className="w-10 h-10">
               <path d="M25.3375 9.97926C35.2839 6.58844 40.2571 4.89305 42.9321 7.56794C45.6069 10.2428 43.9114 15.2161 40.5208 25.1625L38.2117 31.9358C35.6077 39.5746 34.3056 43.394 32.1592 43.71C31.5823 43.795 30.985 43.744 30.4139 43.5606C28.2906 42.879 27.1681 38.8519 24.9231 30.7979C24.4252 29.0115 24.1762 28.1181 23.6092 27.4358C23.4446 27.2379 23.2621 27.0554 23.0642 26.8908C22.3819 26.3238 21.4885 26.0748 19.7022 25.5769C11.6481 23.3319 7.62112 22.2094 6.93937 20.086C6.75608 19.5151 6.70493 18.9178 6.78991 18.3407C7.10599 16.1944 10.9254 14.8924 18.5642 12.2883L25.3375 9.97926Z" stroke="currentColor" strokeWidth="3"/>
             </svg>
