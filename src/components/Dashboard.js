@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
 
-const Dashboard = ({ onCountrySelect, onRecipients, onTransactions, onProfile, onLogout }) => {
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [sendAmount, setSendAmount] = useState('0.00');
   const [receiveAmount, setReceiveAmount] = useState('0.00');
   const [fromCurrency, setFromCurrency] = useState({ code: 'NGN', flag: '🇳🇬', name: 'Nigeria' });
