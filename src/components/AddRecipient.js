@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
 
-const AddRecipient = ({ onBack, onSave, onLogout }) => {
+const AddRecipient = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     bank: '',
