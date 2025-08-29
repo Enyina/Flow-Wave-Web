@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
 
-const Recipients = ({ onBack, onAddRecipient, onSelectRecipient, onLogout }) => {
+const Recipients = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [hasAnimated, setHasAnimated] = useState(false);
 
