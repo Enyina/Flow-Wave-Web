@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
 
-const WelcomeOnboard = ({ onNext }) => {
+const WelcomeOnboard = () => {
+  const navigate = useNavigate();
+  const { signup } = useAuth();
   const [showProfileSuccess, setShowProfileSuccess] = useState(true);
   const [hasAnimated, setHasAnimated] = useState(false);
 
