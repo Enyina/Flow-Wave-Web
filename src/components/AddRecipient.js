@@ -81,8 +81,9 @@ const AddRecipient = () => {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      onSave(formData);
-      onBack();
+      // In a real app, you'd save the recipient data to state/context
+      console.log('Saved recipient:', formData);
+      navigate('/recipients');
     }, 1500);
   };
 
