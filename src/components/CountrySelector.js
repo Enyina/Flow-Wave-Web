@@ -119,9 +119,9 @@ const CountrySelector = () => {
                     <span className="text-lg font-bold text-neutral-gray">0.00</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full">
-                  <span className="text-lg">🇳🇬</span>
+                  <img src="https://flagcdn.com/21x21/ng.png" alt="Nigeria" className="w-5 h-5 rounded-full object-cover" />
                   <span className="text-xs font-medium text-neutral-dark">NGN</span>
                   <svg width="10" height="5" viewBox="0 0 10 5" fill="none">
                     <path d="M5.35355 4.64645C5.15829 4.84171 4.84171 4.84171 4.64645 4.64645L0.853553 0.853553C0.53857 0.53857 0.761654 0 1.20711 0H8.79289C9.23835 0 9.46143 0.538571 9.14645 0.853553L5.35355 4.64645Z" fill="#333333"/>
@@ -167,10 +167,10 @@ const CountrySelector = () => {
                     <span className="text-lg font-bold text-neutral-gray">0.00</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full">
-                  <span className="text-lg">🇳🇬</span>
-                  <span className="text-xs font-medium text-neutral-dark">NGN</span>
+                  <img src="https://flagcdn.com/21x21/us.png" alt="United States" className="w-5 h-5 rounded-full object-cover" />
+                  <span className="text-xs font-medium text-neutral-dark">USD</span>
                   <svg width="10" height="5" viewBox="0 0 10 5" fill="none">
                     <path d="M5.35355 4.64645C5.15829 4.84171 4.84171 4.84171 4.64645 4.64645L0.853553 0.853553C0.53857 0.53857 0.761654 0 1.20711 0H8.79289C9.23835 0 9.46143 0.538571 9.14645 0.853553L5.35355 4.64645Z" fill="#333333"/>
                   </svg>
