@@ -262,6 +262,30 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/account-limit"
+                element={
+                  <ProtectedRoute>
+                    <AccountLimit />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/two-factor-auth"
+                element={
+                  <ProtectedRoute>
+                    <TwoFactorAuth />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/notification-settings"
+                element={
+                  <ProtectedRoute>
+                    <NotificationSettings />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/login" replace />} />
