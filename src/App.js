@@ -42,8 +42,6 @@ import EmailUpdated from './components/EmailUpdated';
 import MobileNumber from './components/MobileNumber';
 import UpdateMobileNumber from './components/UpdateMobileNumber';
 import VerifyNumber from './components/VerifyNumber';
-import MobileVerifyEmail from './components/MobileVerifyEmail';
-import MobileEmailUpdated from './components/MobileEmailUpdated';
 import MobilePinEntry from './components/MobilePinEntry';
 import MobileNumberUpdated from './components/MobileNumberUpdated';
 
@@ -242,22 +240,6 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <VerifyNumber />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/mobile-verify-email"
-                element={
-                  <ProtectedRoute>
-                    <MobileVerifyEmail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/mobile-email-updated"
-                element={
-                  <ProtectedRoute>
-                    <MobileEmailUpdated />
                   </ProtectedRoute>
                 }
               />
