@@ -44,6 +44,9 @@ import UpdateMobileNumber from './components/UpdateMobileNumber';
 import VerifyNumber from './components/VerifyNumber';
 import MobilePinEntry from './components/MobilePinEntry';
 import MobileNumberUpdated from './components/MobileNumberUpdated';
+import AccountLimit from './components/AccountLimit';
+import TwoFactorAuth from './components/TwoFactorAuth';
+import NotificationSettings from './components/NotificationSettings';
 
 function App() {
   return (
