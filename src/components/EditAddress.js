@@ -2,12 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
-import BackButton from './BackButton';
 
-const EmailUpdated = () => {
+const EditAddress = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [formData, setFormData] = useState({
+    country: '',
+    state: '',
+    city: '',
+    postalCode: '',
+    address: ''
+  });
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -19,18 +26,49 @@ const EmailUpdated = () => {
     navigate('/login');
   };
 
-  const handleProceedToEditAddress = () => {
-    navigate('/edit-address');
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.country) newErrors.country = 'Country is required';
+    if (!formData.state) newErrors.state = 'State is required';
+    if (!formData.city) newErrors.city = 'City is required';
+    if (!formData.postalCode) newErrors.postalCode = 'Postal Code is required';
+    if (!formData.address) newErrors.address = 'Address is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSave = () => {
+    if (validateForm()) {
+      // Here you would typically save the address data
+      console.log('Saving address:', formData);
+      // Navigate back to personal information or account page
+      navigate('/personal-information');
+    }
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
       {/* Header */}
       <header className={`flex justify-between items-center px-4 lg:px-20 py-4 lg:py-6 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
-        {/* Back Button and Logo */}
+        {/* Logo */}
         <div className="flex items-center">
-          <BackButton />
-          <Logo className="ml-2" />
+          <Logo />
           <div className="text-black/80 dark:text-dark-text font-times text-lg lg:text-2xl font-bold ml-3 transition-colors duration-300">
             FLOWWAVE
           </div>
@@ -49,10 +87,7 @@ const EmailUpdated = () => {
           </button>
 
           {/* Notifications */}
-          <button 
-            onClick={() => navigate('/notifications')}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface transition-all duration-200"
-          >
+          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface transition-all duration-200">
             <svg width="40" height="40" viewBox="0 0 50 50" fill="none" className="w-8 h-8 lg:w-10 lg:h-10">
               <path d="M32.2923 37.5C32.2923 41.5271 29.0277 44.7917 25.0007 44.7917C20.9736 44.7917 17.709 41.5271 17.709 37.5" stroke="#3A49A4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M40.0648 37.4997H9.93515C7.8999 37.4997 6.25 35.8497 6.25 33.8145C6.25 32.8372 6.63825 31.8999 7.32935 31.2086L8.58608 29.952C9.75819 28.7799 10.4167 27.1901 10.4167 25.5326V19.7913C10.4167 11.7372 16.9459 5.20801 25 5.20801C33.0542 5.20801 39.5833 11.7372 39.5833 19.7913V25.5326C39.5833 27.1901 40.2419 28.7799 41.414 29.952L42.6706 31.2086C43.3617 31.8999 43.75 32.8372 43.75 33.8145C43.75 35.8497 42.1 37.4997 40.0648 37.4997Z" stroke="#3A49A4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
@@ -73,47 +108,122 @@ const EmailUpdated = () => {
       <main className="flex flex-col items-center px-4 lg:px-0 pb-32">
         <div className={`w-full max-w-lg ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
           
-          {/* Success Content */}
+          {/* Content Container */}
           <div className="flex flex-col items-center gap-10">
-            
-            {/* Success Icon */}
-            <div className="w-32 h-28">
-              <svg width="150" height="135" viewBox="0 0 150 135" fill="none" className="w-full h-full">
-                <g clipPath="url(#clip0_1351_3296)">
-                  <path d="M148.683 51.6267C148.63 51.6268 148.577 51.6103 148.533 51.5794L75.7544 0.763046C75.5329 0.609122 75.2697 0.526862 75.0002 0.527323C74.7307 0.527784 74.4678 0.610942 74.2469 0.765622L1.99248 51.5789C1.93533 51.6191 1.8646 51.6349 1.79584 51.6228C1.72708 51.6107 1.66593 51.5717 1.62585 51.5144C1.58576 51.4571 1.57002 51.3862 1.58209 51.3173C1.59416 51.2483 1.63304 51.187 1.69019 51.1468L73.9447 0.333534C74.254 0.117014 74.6221 0.000624144 74.9994 2.5032e-06C75.3767 -0.000619138 75.7451 0.114556 76.0552 0.330055L148.834 51.1463C148.88 51.1784 148.914 51.2244 148.932 51.2776C148.951 51.3308 148.951 51.3884 148.934 51.442C148.918 51.4956 148.884 51.5424 148.839 51.5756C148.794 51.6088 148.739 51.6268 148.683 51.6267Z" fill="#3F3D56"/>
-                  <path d="M6.12305 53.4284L75.0736 2.19531L144.547 57.0739L78.6262 96.2541L42.8367 88.0751L6.12305 53.4284Z" fill="#E6E6E6"/>
-                  <path d="M45.8559 120.453H11.7927C11.5835 120.453 11.3764 120.412 11.183 120.332C10.9897 120.252 10.8141 120.134 10.6661 119.986C10.5181 119.838 10.4007 119.662 10.3206 119.468C10.2405 119.275 10.1992 119.067 10.1992 118.857C10.1992 118.648 10.2405 118.44 10.3206 118.246C10.4007 118.052 10.5181 117.877 10.6661 117.728C10.8141 117.58 10.9897 117.463 11.183 117.383C11.3764 117.303 11.5835 117.261 11.7927 117.262H45.8559C46.0651 117.261 46.2722 117.303 46.4655 117.383C46.6589 117.463 46.8345 117.58 46.9825 117.728C47.1305 117.877 47.2479 118.052 47.328 118.246C47.4081 118.44 47.4494 118.648 47.4494 118.857C47.4494 119.067 47.4081 119.275 47.328 119.468C47.2479 119.662 47.1305 119.838 46.9825 119.986C46.8345 120.134 46.6589 120.252 46.4655 120.332C46.2722 120.412 46.0651 120.453 45.8559 120.453Z" fill="#6C63FF"/>
-                  <path d="M24.0138 113.593H11.7927C11.5835 113.594 11.3764 113.553 11.183 113.473C10.9897 113.392 10.8141 113.275 10.6661 113.127C10.5181 112.979 10.4007 112.803 10.3206 112.609C10.2405 112.415 10.1992 112.208 10.1992 111.998C10.1992 111.788 10.2405 111.581 10.3206 111.387C10.4007 111.193 10.5181 111.017 10.6661 110.869C10.8141 110.721 10.9897 110.603 11.183 110.523C11.3764 110.443 11.5835 110.402 11.7927 110.402H24.0138C24.223 110.402 24.4301 110.443 24.6234 110.523C24.8168 110.603 24.9924 110.721 25.1404 110.869C25.2884 111.017 25.4058 111.193 25.4859 111.387C25.566 111.581 25.6073 111.788 25.6073 111.998C25.6073 112.208 25.566 112.415 25.4859 112.609C25.4058 112.803 25.2884 112.979 25.1404 113.127C24.9924 113.275 24.8168 113.392 24.6234 113.473C24.4301 113.553 24.223 113.594 24.0138 113.593Z" fill="#ED59C0"/>
-                  <path d="M76.0426 81.9646C75.7837 81.9649 75.5272 81.9145 75.2876 81.8163L32.7637 64.1262V8.75313C32.7642 8.26348 32.9585 7.79405 33.3038 7.44782C33.6492 7.10159 34.1174 6.90682 34.6058 6.90625H116.185C116.673 6.90682 117.141 7.10159 117.487 7.44782C117.832 7.79405 118.026 8.26348 118.027 8.75313V64.1648L117.947 64.1991L76.8205 81.8077C76.5742 81.9114 76.3097 81.9648 76.0426 81.9646Z" fill="white"/>
-                  <path d="M76.0414 82.0955C75.7653 82.0958 75.4918 82.0421 75.2362 81.9375L32.6309 64.2134V8.75223C32.6315 8.22761 32.8396 7.72464 33.2096 7.35367C33.5796 6.9827 34.0813 6.77403 34.6045 6.77344H116.183C116.707 6.77403 117.208 6.9827 117.578 7.35367C117.948 7.72464 118.157 8.22761 118.157 8.75223V64.251L76.8709 81.928C76.6083 82.0388 76.3263 82.0957 76.0414 82.0955ZM33.1572 63.8609L75.4369 81.4497C75.8313 81.6101 76.2729 81.6074 76.6653 81.4423L117.631 63.9027V8.75223C117.63 8.36751 117.478 7.99868 117.206 7.72664C116.935 7.4546 116.567 7.30157 116.184 7.30112H34.6046C34.2208 7.30157 33.8529 7.4546 33.5816 7.72664C33.3103 7.99868 33.1576 8.36751 33.1572 8.75223L33.1572 63.8609Z" fill="#3F3D56"/>
-                  <path d="M148.158 51.0996H148.105L117.895 64.033L76.5606 81.7287C76.3991 81.7969 76.2257 81.8324 76.0505 81.8333C75.8753 81.8342 75.7016 81.8005 75.5394 81.734L32.8947 63.9961L1.94207 51.1207L1.89479 51.0996H1.84211C1.35371 51.1002 0.885481 51.2949 0.540137 51.6411C0.194793 51.9874 0.000541908 52.4568 0 52.9465V133.154C0.000542603 133.643 0.194793 134.113 0.540137 134.459C0.885481 134.805 1.35372 135 1.84211 135.001H148.158C148.646 135 149.115 134.805 149.46 134.459C149.805 134.113 149.999 133.643 150 133.154V52.9465C149.999 52.4568 149.805 51.9874 149.46 51.6411C149.115 51.2949 148.646 51.1002 148.158 51.0996ZM149.474 133.154C149.474 133.504 149.335 133.839 149.088 134.086C148.841 134.334 148.507 134.473 148.158 134.473H1.84211C1.49318 134.473 1.15859 134.334 0.911857 134.086C0.665129 133.839 0.526455 133.504 0.526316 133.154V52.9465C0.526793 52.6053 0.658779 52.2776 0.894679 52.0317C1.13058 51.7859 1.45213 51.641 1.79212 51.6273L32.8947 64.566L75.3369 82.2221C75.7963 82.4095 76.3111 82.4067 76.7685 82.2142L117.895 64.6055L148.211 51.6273C148.55 51.642 148.871 51.7873 149.106 52.033C149.341 52.2787 149.473 52.6059 149.474 52.9465V133.154Z" fill="#3F3D56"/>
-                  <path d="M75.6176 66.2625C74.0477 66.2654 72.5195 65.7565 71.2634 64.8124L71.1855 64.7538L54.7879 52.1667C54.0285 51.5833 53.3911 50.8557 52.9122 50.0254C52.4333 49.195 52.1221 48.2783 51.9966 47.3274C51.871 46.3765 51.9335 45.4102 52.1805 44.4835C52.4275 43.5568 52.854 42.688 53.4359 41.9266C54.0178 41.1653 54.7435 40.5263 55.5717 40.0461C56.3999 39.5659 57.3143 39.254 58.2627 39.1281C59.2111 39.0022 60.175 39.0649 61.0992 39.3125C62.0235 39.5601 62.8901 39.9878 63.6495 40.5711L74.2706 48.7364L99.3701 15.9183C99.9522 15.1571 100.678 14.5183 101.507 14.0384C102.335 13.5585 103.249 13.2469 104.198 13.1214C105.146 12.9959 106.11 13.0589 107.034 13.3068C107.958 13.5548 108.825 13.9828 109.584 14.5665L109.428 14.7789L109.588 14.5696C111.12 15.7496 112.122 17.4905 112.374 19.4103C112.627 21.3301 112.11 23.2721 110.936 24.8101L81.4135 63.4121C80.7307 64.3016 79.8526 65.0214 78.8475 65.5158C77.8423 66.0101 76.7371 66.2656 75.6176 66.2625Z" fill="#6C63FF"/>
-                </g>
-                <defs>
-                  <clipPath id="clip0_1351_3296">
-                    <rect width="150" height="135" fill="white"/>
-                  </clipPath>
-                </defs>
-              </svg>
-            </div>
+            {/* Title */}
+            <h1 className="text-primary-pink text-3xl font-bold font-inter leading-10 text-center">
+              Edit Address
+            </h1>
 
-            {/* Success Message */}
-            <div className="flex flex-col items-center gap-4">
-              <h2 className="text-black text-2xl font-bold text-center">
-                Your email address has been updated
-              </h2>
-              <p className="text-black text-base text-center">
-                Olumide, you have successfully updated your email address
-              </p>
-            </div>
+            {/* Form */}
+            <div className="flex flex-col gap-10 w-full">
+              {/* Form Fields */}
+              <div className="flex flex-col gap-6">
+                {/* Country Field */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-neutral-dark text-base font-normal font-inter leading-5">
+                    Country <span className="text-error">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.country}
+                      onChange={(e) => handleInputChange('country', e.target.value)}
+                      className={`w-full h-10 px-4 py-3 rounded-lg border ${errors.country ? 'border-error' : 'border-neutral-300'} bg-white text-neutral-dark text-base font-normal font-inter leading-5 focus:outline-none focus:ring-2 focus:ring-primary-blue appearance-none`}
+                    >
+                      <option value="" disabled className="text-neutral-placeholder">
+                        Select your country
+                      </option>
+                      <option value="Nigeria">Nigeria</option>
+                      <option value="United States">United States</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Canada">Canada</option>
+                      <option value="Ghana">Ghana</option>
+                      <option value="South Africa">South Africa</option>
+                    </select>
+                    <svg 
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none" 
+                      width="16" 
+                      height="16" 
+                      viewBox="0 0 16 16" 
+                      fill="none"
+                    >
+                      <path d="M4 6L8 10L12 6" stroke="#333333" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  {errors.country && <span className="text-error text-sm">{errors.country}</span>}
+                </div>
 
-            {/* Continue Button */}
-            <button
-              onClick={handleProceedToEditAddress}
-              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
-            >
-              Continue
-            </button>
+                {/* State Field */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-neutral-dark text-base font-normal font-inter leading-5">
+                    State <span className="text-error">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.state}
+                    onChange={(e) => handleInputChange('state', e.target.value)}
+                    placeholder="State"
+                    className={`w-full h-10 px-4 py-3 rounded-lg border ${errors.state ? 'border-error' : 'border-neutral-300'} bg-white text-neutral-dark text-base font-normal font-inter leading-5 placeholder:text-neutral-placeholder focus:outline-none focus:ring-2 focus:ring-primary-blue`}
+                  />
+                  {errors.state && <span className="text-error text-sm">{errors.state}</span>}
+                </div>
+
+                {/* City Field */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-neutral-dark text-base font-normal font-inter leading-5">
+                    City <span className="text-error">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange('city', e.target.value)}
+                    placeholder="City"
+                    className={`w-full h-10 px-4 py-3 rounded-lg border ${errors.city ? 'border-error' : 'border-neutral-300'} bg-white text-neutral-dark text-base font-normal font-inter leading-5 placeholder:text-neutral-placeholder focus:outline-none focus:ring-2 focus:ring-primary-blue`}
+                  />
+                  {errors.city && <span className="text-error text-sm">{errors.city}</span>}
+                </div>
+
+                {/* Postal Code Field */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-neutral-dark text-base font-normal font-inter leading-5">
+                    Postal Code <span className="text-error">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.postalCode}
+                    onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                    placeholder="Postal Code"
+                    className={`w-full h-10 px-4 py-3 rounded-lg border ${errors.postalCode ? 'border-error' : 'border-neutral-300'} bg-white text-neutral-dark text-base font-normal font-inter leading-5 placeholder:text-neutral-placeholder focus:outline-none focus:ring-2 focus:ring-primary-blue`}
+                  />
+                  {errors.postalCode && <span className="text-error text-sm">{errors.postalCode}</span>}
+                </div>
+
+                {/* Address Field */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-neutral-dark text-base font-normal font-inter leading-5">
+                    Address <span className="text-error">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    placeholder="Address"
+                    className={`w-full h-10 px-4 py-3 rounded-lg border ${errors.address ? 'border-error' : 'border-neutral-300'} bg-white text-neutral-dark text-base font-normal font-inter leading-5 placeholder:text-neutral-placeholder focus:outline-none focus:ring-2 focus:ring-primary-blue`}
+                  />
+                  {errors.address && <span className="text-error text-sm">{errors.address}</span>}
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <button
+                onClick={handleSave}
+                className="w-full px-3 py-3 bg-primary-blue rounded-lg flex justify-center items-center gap-2 hover:bg-primary-blue/90 transition-colors"
+              >
+                <span className="text-white text-lg font-bold font-inter leading-5">
+                  Save
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </main>
@@ -157,4 +267,4 @@ const EmailUpdated = () => {
   );
 };
 
-export default EmailUpdated;
+export default EditAddress;

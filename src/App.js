@@ -54,6 +54,7 @@ import VerifyEmailAddress from './components/VerifyEmailAddress';
 import CreateNewPin from './components/CreateNewPin';
 import ConfirmNewPin from './components/ConfirmNewPin';
 import PinUpdated from './components/PinUpdated';
+import EditAddress from './components/EditAddress';
 
 function App() {
   return (
@@ -332,6 +333,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PinUpdated />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/edit-address"
+                element={
+                  <ProtectedRoute>
+                    <EditAddress />
                   </ProtectedRoute>
                 }
               />
