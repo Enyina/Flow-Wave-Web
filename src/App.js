@@ -137,6 +137,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/transactions"
+                element={
+                  <ProtectedRoute>
+                    <Transactions />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/login" replace />} />
