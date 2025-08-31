@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
+import Logo from './Logo';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { fromCurrency, toCurrency, sendAmount, receiveAmount, updateSendAmount } = useCurrency();
+  const { startFromAmount } = useFlow();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -81,7 +84,8 @@ const Dashboard = () => {
       setErrors({ amount: 'This cannot be empty' });
       return;
     }
-    // Navigate to recipients page first
+    // Start amount-first flow
+    startFromAmount(sendAmount, fromCurrency, toCurrency);
     navigate('/recipients');
   };
 
@@ -91,21 +95,7 @@ const Dashboard = () => {
       <header className={`flex justify-between items-center px-4 lg:px-20 py-4 lg:py-6 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
         {/* Logo */}
         <div className="flex items-center">
-          <div className="w-10 h-7 lg:w-13 lg:h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none" className="w-full h-full">
-              <defs>
-                <linearGradient id="flowwave-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6C63FF" />
-                  <stop offset="30%" stopColor="#9C5CFF" />
-                  <stop offset="60%" stopColor="#FF5C8A" />
-                  <stop offset="100%" stopColor="#FF8A5C" />
-                </linearGradient>
-              </defs>
-              <path d="M8 28C8 28 12 20 20 20C28 20 32 28 40 28C48 28 52 20 52 20V37H0V20C0 20 4 28 8 28Z" fill="url(#flowwave-gradient)" />
-              <path d="M4 18C4 18 8 10 16 10C24 10 28 18 36 18C44 18 48 10 48 10V27H-4V10C-4 10 0 18 4 18Z" fill="url(#flowwave-gradient)" opacity="0.7" />
-              <path d="M0 8C0 8 4 0 12 0C20 0 24 8 32 8C40 8 44 0 44 0V17H-8V0C-8 0 -4 8 0 8Z" fill="url(#flowwave-gradient)" opacity="0.4" />
-            </svg>
-          </div>
+          <Logo className="w-10 h-7 lg:w-13 lg:h-9 mr-3" />
           <div className="text-black/80 dark:text-dark-text font-times text-lg lg:text-2xl font-bold transition-colors duration-300">
             FLOWWAVE
           </div>
