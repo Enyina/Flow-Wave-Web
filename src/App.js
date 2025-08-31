@@ -120,6 +120,22 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/transaction-details"
+                element={
+                  <ProtectedRoute>
+                    <TransactionDetails />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <Notification />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/login" replace />} />
