@@ -4,6 +4,7 @@ import './App.css';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
+import { FlowProvider } from './contexts/FlowContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Authentication components
