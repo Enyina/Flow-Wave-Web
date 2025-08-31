@@ -36,7 +36,8 @@ function App() {
     <DarkModeProvider>
       <AuthProvider>
         <CurrencyProvider>
-          <Router>
+          <FlowProvider>
+            <Router>
           <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
             <Routes>
               {/* Public Routes */}
@@ -154,7 +155,8 @@ function App() {
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </div>
-          </Router>
+            </Router>
+          </FlowProvider>
         </CurrencyProvider>
       </AuthProvider>
     </DarkModeProvider>
