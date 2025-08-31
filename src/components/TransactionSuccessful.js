@@ -18,8 +18,7 @@ const TransactionSuccessful = () => {
   };
 
   const handleViewTransactionDetails = () => {
-    // Navigate to transaction details page (to be implemented)
-    navigate('/dashboard'); // For now, go back to dashboard
+    navigate('/transaction-details');
   };
 
   const handleLogout = () => {
