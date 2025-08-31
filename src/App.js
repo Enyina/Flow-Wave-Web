@@ -245,6 +245,38 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/mobile-verify-email"
+                element={
+                  <ProtectedRoute>
+                    <MobileVerifyEmail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mobile-email-updated"
+                element={
+                  <ProtectedRoute>
+                    <MobileEmailUpdated />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mobile-pin-entry"
+                element={
+                  <ProtectedRoute>
+                    <MobilePinEntry />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mobile-number-updated"
+                element={
+                  <ProtectedRoute>
+                    <MobileNumberUpdated />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/login" replace />} />
