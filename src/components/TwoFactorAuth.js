@@ -25,8 +25,7 @@ const TwoFactorAuth = () => {
   };
 
   const handleChangePin = () => {
-    // Navigate to change pin page - this would be implemented later
-    console.log('Navigate to change pin');
+    navigate('/verify-identity');
   };
 
   return (

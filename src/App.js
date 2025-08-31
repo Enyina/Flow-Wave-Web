@@ -48,6 +48,13 @@ import AccountLimit from './components/AccountLimit';
 import TwoFactorAuth from './components/TwoFactorAuth';
 import NotificationSettings from './components/NotificationSettings';
 
+// Authentication Flow components
+import VerifyIdentity from './components/VerifyIdentity';
+import VerifyEmailAddress from './components/VerifyEmailAddress';
+import CreateNewPin from './components/CreateNewPin';
+import ConfirmNewPin from './components/ConfirmNewPin';
+import PinUpdated from './components/PinUpdated';
+
 function App() {
   return (
     <DarkModeProvider>
@@ -283,6 +290,48 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <NotificationSettings />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Authentication Flow Routes */}
+              <Route
+                path="/verify-identity"
+                element={
+                  <ProtectedRoute>
+                    <VerifyIdentity />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/verify-email-address"
+                element={
+                  <ProtectedRoute>
+                    <VerifyEmailAddress />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create-new-pin"
+                element={
+                  <ProtectedRoute>
+                    <CreateNewPin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/confirm-new-pin"
+                element={
+                  <ProtectedRoute>
+                    <ConfirmNewPin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/pin-updated"
+                element={
+                  <ProtectedRoute>
+                    <PinUpdated />
                   </ProtectedRoute>
                 }
               />
