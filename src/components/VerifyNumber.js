@@ -70,8 +70,8 @@ const VerifyNumber = () => {
   const handleVerify = () => {
     const codeString = code.join('');
     if (codeString.length === 4) {
-      // Navigate back to personal information or account page
-      navigate('/personal-information');
+      // Navigate to mobile number updated success page
+      navigate('/mobile-number-updated');
     }
   };
 
