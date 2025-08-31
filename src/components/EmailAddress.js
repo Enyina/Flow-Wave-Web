@@ -27,9 +27,10 @@ const EmailAddress = () => {
     <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
       {/* Header */}
       <header className={`flex justify-between items-center px-4 lg:px-20 py-4 lg:py-6 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
-        {/* Logo */}
+        {/* Back Button and Logo */}
         <div className="flex items-center">
-          <Logo />
+          <BackButton />
+          <Logo className="ml-2" />
           <div className="text-black/80 dark:text-dark-text font-times text-lg lg:text-2xl font-bold ml-3 transition-colors duration-300">
             FLOWWAVE
           </div>
