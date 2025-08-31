@@ -20,7 +20,7 @@ const MobileNumber = () => {
   };
 
   const handleChangeNumber = () => {
-    navigate('/account-pin', { state: { action: 'change-mobile' } });
+    navigate('/mobile-verify-email');
   };
 
   return (
