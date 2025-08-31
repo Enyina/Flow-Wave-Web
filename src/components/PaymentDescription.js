@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import DarkModeToggle from './DarkModeToggle';
+import Logo from './Logo';
 
 const PaymentDescription = () => {
   const navigate = useNavigate();
@@ -69,11 +70,7 @@ const PaymentDescription = () => {
       <header className={`flex justify-between items-center px-4 lg:px-20 py-4 lg:py-6 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
         {/* Logo */}
         <div className="flex items-center">
-          <div className="w-10 h-7 lg:w-13 lg:h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none" className="w-full h-full">
-              <rect width="52" height="37" fill="#6C63FF" />
-            </svg>
-          </div>
+          <Logo className="w-10 h-7 lg:w-13 lg:h-9 mr-3" />
           <div className="text-black/80 dark:text-dark-text font-times text-lg lg:text-2xl font-bold transition-colors duration-300">
             FLOWWAVE
           </div>
@@ -210,7 +207,7 @@ const PaymentDescription = () => {
             <span className="text-xs font-medium">Home</span>
           </button>
 
-          <button className="flex flex-col items-center gap-1 text-neutral-gray">
+          <button onClick={() => navigate('/transactions')} className="flex flex-col items-center gap-1 text-neutral-gray">
             <svg width="50" height="50" viewBox="0 0 50 50" fill="none" className="w-10 h-10">
               <path d="M34.1418 6.25L36.2312 8.28279C37.1646 9.19094 37.6312 9.64502 37.4668 10.0309C37.3027 10.4167 36.6427 10.4167 35.3227 10.4167H19.154C10.8763 10.4167 4.16602 16.9459 4.16602 25C4.16602 28.0983 5.1591 30.9713 6.85247 33.3333" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M15.8574 43.7503L13.7682 41.7176C12.8349 40.8093 12.3682 40.3553 12.5324 39.9695C12.6967 39.5837 13.3567 39.5837 14.6766 39.5837H30.8454C39.1229 39.5837 45.8333 33.0545 45.8333 25.0003C45.8333 21.902 44.8402 19.0291 43.1469 16.667" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
