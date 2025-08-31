@@ -26,17 +26,17 @@ const Account = () => {
     },
     {
       title: 'Account Limit',
-      onClick: () => {}, // TODO: Add route
+      onClick: () => navigate('/account-limit'),
       hasArrow: true
     },
     {
       title: 'Two-factor authentication',
-      onClick: () => {}, // TODO: Add route
+      onClick: () => navigate('/two-factor-auth'),
       hasArrow: true
     },
     {
       title: 'Notification',
-      onClick: () => navigate('/notifications'),
+      onClick: () => navigate('/notification-settings'),
       hasArrow: true
     },
     {
