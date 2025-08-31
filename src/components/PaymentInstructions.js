@@ -10,6 +10,7 @@ const PaymentInstructions = () => {
   const { fromCurrency, sendAmount } = useCurrency();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
+  const [copyFeedback, setCopyFeedback] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -73,9 +74,15 @@ const PaymentInstructions = () => {
     navigate('/login');
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    // Could add a toast notification here
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyFeedback('Copied!');
+      setTimeout(() => setCopyFeedback(''), 2000);
+    } catch (err) {
+      setCopyFeedback('Failed to copy');
+      setTimeout(() => setCopyFeedback(''), 2000);
+    }
   };
 
   // Mock payment details
@@ -95,7 +102,17 @@ const PaymentInstructions = () => {
         <div className="flex items-center">
           <div className="w-10 h-7 lg:w-13 lg:h-9 mr-3">
             <svg width="52" height="37" viewBox="0 0 52 37" fill="none" className="w-full h-full">
-              <rect width="52" height="37" fill="#6C63FF" />
+              <defs>
+                <linearGradient id="flowwave-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6C63FF" />
+                  <stop offset="30%" stopColor="#9C5CFF" />
+                  <stop offset="60%" stopColor="#FF5C8A" />
+                  <stop offset="100%" stopColor="#FF8A5C" />
+                </linearGradient>
+              </defs>
+              <path d="M8 28C8 28 12 20 20 20C28 20 32 28 40 28C48 28 52 20 52 20V37H0V20C0 20 4 28 8 28Z" fill="url(#flowwave-gradient)" />
+              <path d="M4 18C4 18 8 10 16 10C24 10 28 18 36 18C44 18 48 10 48 10V27H-4V10C-4 10 0 18 4 18Z" fill="url(#flowwave-gradient)" opacity="0.7" />
+              <path d="M0 8C0 8 4 0 12 0C20 0 24 8 32 8C40 8 44 0 44 0V17H-8V0C-8 0 -4 8 0 8Z" fill="url(#flowwave-gradient)" opacity="0.4" />
             </svg>
           </div>
           <div className="text-black/80 dark:text-dark-text font-times text-lg lg:text-2xl font-bold transition-colors duration-300">
@@ -169,12 +186,16 @@ const PaymentInstructions = () => {
                 {/* Copy Button */}
                 <button
                   onClick={() => copyToClipboard(paymentDetails.accountNumber)}
-                  className="absolute top-4 right-4 p-2 hover:bg-white rounded transition-colors"
+                  className="absolute top-4 right-4 p-2 hover:bg-white rounded transition-colors flex items-center gap-1"
                 >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-primary-blue">
-                    <path d="M6 10C6 8.1144 6 7.1716 6.58579 6.58579C7.1716 6 8.1144 6 10 6H10.6667C12.5523 6 13.4951 6 14.0809 6.58579C14.6667 7.1716 14.6667 8.1144 14.6667 10V10.6667C14.6667 12.5523 14.6667 13.4951 14.0809 14.0809C13.4951 14.6667 12.5523 14.6667 10.6667 14.6667H10C8.1144 14.6667 7.1716 14.6667 6.58579 14.0809C6 13.4951 6 12.5523 6 10.6667V10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M11.3329 6.00065C11.3313 4.02926 11.3015 3.00812 10.7277 2.30894C10.6169 2.17391 10.4931 2.0501 10.3581 1.93929C9.62047 1.33398 8.52467 1.33398 6.33301 1.33398C4.14135 1.33398 3.04553 1.33398 2.30796 1.93929C2.17293 2.0501 2.04913 2.17391 1.93831 2.30894C1.33301 3.0465 1.33301 4.14233 1.33301 6.33398C1.33301 8.52565 1.33301 9.62145 1.93831 10.3591C2.04912 10.4941 2.17293 10.6179 2.30796 10.7287C3.00715 11.3025 4.02828 11.3323 5.99967 11.3339" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  {copyFeedback ? (
+                    <span className="text-xs text-green-600 font-medium">{copyFeedback}</span>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-primary-blue">
+                      <path d="M6 10C6 8.1144 6 7.1716 6.58579 6.58579C7.1716 6 8.1144 6 10 6H10.6667C12.5523 6 13.4951 6 14.0809 6.58579C14.6667 7.1716 14.6667 8.1144 14.6667 10V10.6667C14.6667 12.5523 14.6667 13.4951 14.0809 14.0809C13.4951 14.6667 12.5523 14.6667 10.6667 14.6667H10C8.1144 14.6667 7.1716 14.6667 6.58579 14.0809C6 13.4951 6 12.5523 6 10.6667V10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M11.3329 6.00065C11.3313 4.02926 11.3015 3.00812 10.7277 2.30894C10.6169 2.17391 10.4931 2.0501 10.3581 1.93929C9.62047 1.33398 8.52467 1.33398 6.33301 1.33398C4.14135 1.33398 3.04553 1.33398 2.30796 1.93929C2.17293 2.0501 2.04913 2.17391 1.93831 2.30894C1.33301 3.0465 1.33301 4.14233 1.33301 6.33398C1.33301 8.52565 1.33301 9.62145 1.93831 10.3591C2.04912 10.4941 2.17293 10.6179 2.30796 10.7287C3.00715 11.3025 4.02828 11.3323 5.99967 11.3339" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
                 </button>
 
                 <div className="space-y-4">
