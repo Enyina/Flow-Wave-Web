@@ -28,6 +28,7 @@ import PaymentInstructions from './components/PaymentInstructions';
 import TransactionSuccessful from './components/TransactionSuccessful';
 import TransactionDetails from './components/TransactionDetails';
 import Notification from './components/Notification';
+import Transactions from './components/Transactions';
 
 function App() {
   return (
