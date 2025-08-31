@@ -31,6 +31,18 @@ import TransactionDetails from './components/TransactionDetails';
 import Notification from './components/Notification';
 import Transactions from './components/Transactions';
 
+// Account Management components
+import Account from './components/Account';
+import PersonalInformation from './components/PersonalInformation';
+import EmailAddress from './components/EmailAddress';
+import AccountPin from './components/AccountPin';
+import NewEmailAddress from './components/NewEmailAddress';
+import AccountVerifyEmail from './components/AccountVerifyEmail';
+import EmailUpdated from './components/EmailUpdated';
+import MobileNumber from './components/MobileNumber';
+import UpdateMobileNumber from './components/UpdateMobileNumber';
+import VerifyNumber from './components/VerifyNumber';
+
 function App() {
   return (
     <DarkModeProvider>
