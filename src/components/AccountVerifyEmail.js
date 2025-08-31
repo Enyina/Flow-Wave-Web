@@ -1,97 +1,80 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
+import BackButton from './BackButton';
 
 const AccountVerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
-  const [code, setCode] = useState(['', '', '', '']);
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [countdown, setCountdown] = useState(256);
-  const [canResend, setCanResend] = useState(false);
-  const inputRefs = useRef([]);
+  const [verificationCode, setVerificationCode] = useState(['', '', '', '']);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const newEmail = location.state?.newEmail || 'aostglc@gmail.com';
+  const email = location.state?.email || 'aostglc@gmail.com';
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          setCanResend(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    // Focus on first input when component mounts
-    if (inputRefs.current[0]) {
-      inputRefs.current[0].focus();
-    }
-  }, []);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const handleCodeChange = (index, value) => {
-    if (value.length > 1) return;
-    if (value && !/^\d$/.test(value)) return;
-
-    const newCode = [...code];
-    newCode[index] = value;
-    setCode(newCode);
-
-    if (value && index < 3) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleVerify = () => {
-    const codeString = code.join('');
-    if (codeString.length === 4) {
-      navigate('/email-updated');
-    }
-  };
-
-  const handleResend = () => {
-    setCountdown(256);
-    setCanResend(false);
-    setCode(['', '', '', '']);
-    inputRefs.current[0]?.focus();
-  };
-
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const handleCodeChange = (index, value) => {
+    if (value.length <= 1) {
+      const newCode = [...verificationCode];
+      newCode[index] = value;
+      setVerificationCode(newCode);
+
+      // Auto-focus next input
+      if (value && index < 3) {
+        const nextInput = document.getElementById(`code-${index + 1}`);
+        if (nextInput) nextInput.focus();
+      }
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
+      const prevInput = document.getElementById(`code-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
+  const handleVerify = async () => {
+    const code = verificationCode.join('');
+    if (code.length !== 4) {
+      return;
+    }
+
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      navigate('/email-updated');
+    }, 2000);
+  };
+
+  const handleResend = () => {
+    // Simulate resend logic
+    setVerificationCode(['', '', '', '']);
+    document.getElementById('code-0')?.focus();
+  };
+
+  const isCodeComplete = verificationCode.every(digit => digit !== '');
+
   return (
     <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
       {/* Header */}
       <header className={`flex justify-between items-center px-4 lg:px-20 py-4 lg:py-6 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
-        {/* Logo */}
+        {/* Back Button and Logo */}
         <div className="flex items-center">
-          <Logo />
+          <BackButton />
+          <Logo className="ml-2" />
           <div className="text-black/80 dark:text-dark-text font-times text-lg lg:text-2xl font-bold ml-3 transition-colors duration-300">
             FLOWWAVE
           </div>
@@ -134,57 +117,53 @@ const AccountVerifyEmail = () => {
       <main className="flex flex-col items-center px-4 lg:px-0 pb-32">
         <div className={`w-full max-w-lg ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
           
-          {/* Title and Description */}
+          {/* Title Section */}
           <div className="flex flex-col items-center gap-4 mb-10">
             <h1 className="text-center text-2xl lg:text-3xl font-bold text-primary-pink">
               Verify your email address
             </h1>
             <p className="text-center text-neutral-gray text-base">
-              A verification code has been sent to {newEmail}
+              A verification code has been sent to {email}
             </p>
           </div>
 
-          {/* Verification Code Input */}
-          <div className="flex items-center justify-center gap-6 mb-8">
-            {code.map((digit, index) => (
+          {/* Verification Code Inputs */}
+          <div className="flex justify-center gap-6 mb-10">
+            {verificationCode.map((digit, index) => (
               <input
                 key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
+                id={`code-${index}`}
                 type="text"
-                inputMode="numeric"
                 maxLength="1"
                 value={digit}
                 onChange={(e) => handleCodeChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-16 text-center text-xl font-bold bg-primary-light border-2 border-transparent rounded-lg focus:border-primary-blue focus:outline-none transition-all duration-200"
+                className="w-12 h-16 text-center text-xl font-bold bg-primary-light border-2 border-transparent rounded-lg focus:border-primary-blue focus:bg-white focus:outline-none transition-all duration-200"
               />
             ))}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col gap-4">
-            {/* Verify Button */}
-            <button
-              onClick={handleVerify}
-              disabled={code.join('').length !== 4}
-              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-            >
-              Verify
-            </button>
+          {/* Verify Button */}
+          <button
+            onClick={handleVerify}
+            disabled={!isCodeComplete || isLoading}
+            className={`w-full py-3 px-6 rounded-lg font-bold text-lg transition-all duration-300 mb-4 ${
+              isCodeComplete && !isLoading
+                ? 'bg-primary-blue text-white hover:bg-primary-blue/90'
+                : 'bg-neutral-light text-neutral-gray cursor-not-allowed'
+            }`}
+          >
+            {isLoading ? 'Verifying...' : 'Verify'}
+          </button>
 
-            {/* Resend */}
-            <p className="text-center text-neutral-dark text-xs">
-              {countdown > 0 ? (
-                `Didn't receive an email? Resend in ${formatTime(countdown)} secs`
-              ) : (
-                <button 
-                  onClick={handleResend}
-                  className="text-primary-blue font-medium hover:text-primary-pink transition-colors"
-                >
-                  Resend
-                </button>
-              )}
-            </p>
+          {/* Resend Link */}
+          <div className="text-center">
+            <button
+              onClick={handleResend}
+              className="text-primary-blue text-sm hover:underline transition-all duration-200"
+            >
+              Resend
+            </button>
           </div>
         </div>
       </main>
