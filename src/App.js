@@ -160,6 +160,88 @@ function App() {
                 }
               />
 
+              {/* Account Management Routes */}
+              <Route
+                path="/account"
+                element={
+                  <ProtectedRoute>
+                    <Account />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/personal-information"
+                element={
+                  <ProtectedRoute>
+                    <PersonalInformation />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/email-address"
+                element={
+                  <ProtectedRoute>
+                    <EmailAddress />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/account-pin"
+                element={
+                  <ProtectedRoute>
+                    <AccountPin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/new-email-address"
+                element={
+                  <ProtectedRoute>
+                    <NewEmailAddress />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/account-verify-email"
+                element={
+                  <ProtectedRoute>
+                    <AccountVerifyEmail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/email-updated"
+                element={
+                  <ProtectedRoute>
+                    <EmailUpdated />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mobile-number"
+                element={
+                  <ProtectedRoute>
+                    <MobileNumber />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/update-mobile-number"
+                element={
+                  <ProtectedRoute>
+                    <UpdateMobileNumber />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/verify-number"
+                element={
+                  <ProtectedRoute>
+                    <VerifyNumber />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/login" replace />} />
               
