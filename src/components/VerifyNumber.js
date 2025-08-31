@@ -176,18 +176,20 @@ const VerifyNumber = () => {
             </button>
 
             {/* Resend */}
-            <p className="text-center text-neutral-dark text-xs">
+            <div className="text-center text-xs">
               {countdown > 0 ? (
-                `Didn't receive code? Resend in ${formatTime(countdown)} secs`
+                <p className="text-neutral-dark">
+                  Didn't receive code? Resend in {formatTime(countdown)} secs
+                </p>
               ) : (
-                <button 
+                <button
                   onClick={handleResend}
-                  className="text-primary-blue font-medium hover:text-primary-pink transition-colors"
+                  className="text-primary-blue font-normal hover:text-primary-pink transition-colors"
                 >
                   Resend
                 </button>
               )}
-            </p>
+            </div>
           </div>
         </div>
       </main>
