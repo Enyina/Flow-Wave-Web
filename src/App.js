@@ -26,6 +26,8 @@ import PaymentReview from './components/PaymentReview';
 import EnterPin from './components/EnterPin';
 import PaymentInstructions from './components/PaymentInstructions';
 import TransactionSuccessful from './components/TransactionSuccessful';
+import TransactionDetails from './components/TransactionDetails';
+import Notification from './components/Notification';
 
 function App() {
   return (
