@@ -20,7 +20,7 @@ const MobileNumber = () => {
   };
 
   const handleChangeNumber = () => {
-    navigate('/mobile-verify-email');
+    navigate('/mobile-pin-entry');
   };
 
   return (
