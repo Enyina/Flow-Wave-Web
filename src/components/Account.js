@@ -139,7 +139,7 @@ const Account = () => {
                   {item.title}
                 </span>
                 {item.hasArrow && (
-                  <svg width="24" height="24" viewBox="0 0 25 25" fill="none" className="transform -rotate-90">
+                  <svg width="24" height="24" viewBox="0 0 25 25" fill="none" className="flex-shrink-0">
                     <path 
                       d="M9.27539 18.6182L15.1823 12.5265L9.09068 6.61958" 
                       stroke="#333333" 
