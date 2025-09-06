@@ -36,7 +36,7 @@ const CreatePin = ({ onNext }) => {
       setIsLoading(true);
       setTimeout(() => {
         setIsLoading(false);
-        onNext();
+        if (typeof onNext === 'function') onNext();
       }, 1000);
     }
   };
