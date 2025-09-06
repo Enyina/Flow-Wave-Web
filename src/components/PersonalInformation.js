@@ -161,7 +161,7 @@ const PersonalInformation = () => {
                     </span>
                   )}
                   {detail.hasArrow && (
-                    <svg width="24" height="24" viewBox="0 0 25 25" fill="none" className="transform -rotate-90 flex-shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 25 25" fill="none" className="flex-shrink-0">
                       <path 
                         d="M9.27539 18.2285L15.1823 12.1369L9.09068 6.22994" 
                         stroke="#333333" 
