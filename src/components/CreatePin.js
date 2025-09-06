@@ -38,7 +38,8 @@ const CreatePin = ({ onNext }) => {
       setIsLoading(true);
       setTimeout(() => {
         setIsLoading(false);
-        if (typeof onNext === 'function') onNext();
+        // Navigate directly to welcome page after creating PIN
+        navigate('/welcome');
       }, 1000);
     }
   };
