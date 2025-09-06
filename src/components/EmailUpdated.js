@@ -109,7 +109,7 @@ const EmailUpdated = () => {
 
             {/* Continue Button */}
             <button
-              onClick={handleProceedToEditAddress}
+              onClick={handleProceedToProfile}
               className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
             >
               Continue
