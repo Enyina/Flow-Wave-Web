@@ -51,7 +51,12 @@ const PersonalInfo = ({ onNext }) => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      if (typeof onNext === 'function') onNext();
+      if (typeof onNext === 'function') {
+        onNext();
+      } else {
+        // Navigate to welcome and show profile created success modal
+        navigate('/welcome', { state: { profileCreated: true } });
+      }
     }, 2000);
   };
 
