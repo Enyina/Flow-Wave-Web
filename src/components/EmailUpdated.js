@@ -19,8 +19,8 @@ const EmailUpdated = () => {
     navigate('/login');
   };
 
-  const handleProceedToEditAddress = () => {
-    navigate('/edit-address');
+  const handleProceedToProfile = () => {
+    navigate('/account');
   };
 
   return (
