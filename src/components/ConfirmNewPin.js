@@ -48,9 +48,9 @@ const ConfirmNewPin = () => {
       const enteredPin = confirmPin.join('');
       
       if (originalPin === enteredPin) {
-        // PINs match, proceed to success screen
+        // PINs match, proceed to welcome onboard
         sessionStorage.removeItem('newPin');
-        navigate('/pin-updated');
+        navigate('/welcome');
       } else {
         // PINs don't match, show error
         setError('PINs do not match. Please try again.');
