@@ -39,7 +39,7 @@ const ConfirmPin = ({ onNext }) => {
       setTimeout(() => {
         setShowToast(false);
         setIsLoading(false);
-        onNext();
+        if (typeof onNext === 'function') onNext();
       }, 2000);
     }
   };
