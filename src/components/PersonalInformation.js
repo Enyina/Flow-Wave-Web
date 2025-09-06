@@ -56,7 +56,7 @@ const PersonalInformation = () => {
       label: 'Address',
       value: '',
       hasArrow: true,
-      onClick: () => {} // TODO: Add address management
+      onClick: () => navigate('/edit-address')
     }
   ];
 
