@@ -48,7 +48,7 @@ const PersonalInfo = ({ onNext }) => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      onNext();
+      if (typeof onNext === 'function') onNext();
     }, 2000);
   };
 
