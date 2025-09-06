@@ -166,8 +166,10 @@ const Dashboard = () => {
                 </div>
 
                 <button
-                  onClick={() => navigate('/country-selector?type=from')}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full"
+                  // From currency is fixed to NGN; top selector disabled
+                  onClick={() => {}}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full cursor-not-allowed"
+                  disabled
                 >
                   <img src={fromCurrency.flag} alt={fromCurrency.name} className="w-5 h-5 rounded-full object-cover" />
                   <span className="text-xs font-medium text-neutral-dark">{fromCurrency.code}</span>
