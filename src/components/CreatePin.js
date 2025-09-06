@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 
 const CreatePin = ({ onNext }) => {
+  const navigate = useNavigate();
   const [pin, setPin] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
