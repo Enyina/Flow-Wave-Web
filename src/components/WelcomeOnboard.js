@@ -1,23 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 
 const WelcomeOnboard = () => {
   const navigate = useNavigate();
-  const { signup } = useAuth();
-  const [showProfileSuccess, setShowProfileSuccess] = useState(true);
+  const location = useLocation();
+  const profileCreated = location.state && location.state.profileCreated;
   const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowProfileSuccess(false);
-    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -34,8 +26,8 @@ const WelcomeOnboard = () => {
         </div>
         <DarkModeToggle />
       </div>
-      
-      {showProfileSuccess && (
+
+      {profileCreated ? (
         <div className="fixed inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 animate-modal-fade-in animate-once">
           <div className="flex flex-col items-center gap-10 p-10 max-w-lg w-4/5 rounded-3xl bg-white dark:bg-dark-surface shadow-large dark:shadow-dark-large animate-modal-slide-up animate-once">
             <svg className="w-60 h-44 animate-float" viewBox="0 0 235 173" fill="none">
@@ -45,14 +37,12 @@ const WelcomeOnboard = () => {
               <path d="M130.367 122.588C127.073 127.95 120.051 129.634 114.689 126.34C109.316 123.046 107.64 116.025 110.934 110.654L148.78 48.9747C152.074 43.6071 159.095 41.9259 164.465 45.2198C169.83 48.5137 171.514 55.5329 168.22 60.9005L130.367 122.588Z" fill="#F6F5F7"/>
             </svg>
             <p className="text-neutral-dark dark:text-dark-text text-center transition-colors duration-300">Your profile has been created</p>
-            <button className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold hover:-translate-y-1 hover:shadow-xl transition-all duration-300" onClick={() => setShowProfileSuccess(false)}>
+            <button className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold hover:-translate-y-1 hover:shadow-xl transition-all duration-300" onClick={() => navigate('/dashboard')}>
               Go to Dashboard
             </button>
           </div>
         </div>
-      )}
-      
-      {!showProfileSuccess && (
+      ) : (
         <div className="fixed inset-0 bg-white/10 dark:bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 animate-modal-fade-in animate-once">
           <div className="flex flex-col items-center gap-10 p-10 max-w-lg w-4/5 rounded-3xl bg-white dark:bg-dark-surface shadow-large dark:shadow-dark-large animate-modal-slide-up animate-once">
             <svg className="w-60 h-44 animate-float" viewBox="0 0 235 173" fill="none">
@@ -67,11 +57,7 @@ const WelcomeOnboard = () => {
             </div>
             <button
               className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
-              onClick={async () => {
-                // Complete the signup process and authenticate the user
-                await signup({ email: 'user@example.com' }); // This would normally come from previous steps
-                navigate('/dashboard');
-              }}
+              onClick={() => navigate('/personal-info')}
             >
               Let's Go
             </button>
