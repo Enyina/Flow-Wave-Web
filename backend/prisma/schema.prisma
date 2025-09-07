@@ -74,3 +74,14 @@ model AuditLog {
   meta      Json?
   createdAt DateTime @default(now())
 }
+
+model Recipient {
+  id        String @id @map("_id") @default(auto())
+  userId    String
+  name      String
+  accountNumber String?
+  bankCode  String?
+  currency  String
+  meta      Json?
+  createdAt DateTime @default(now())
+}
