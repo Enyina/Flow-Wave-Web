@@ -14,6 +14,8 @@ const adminRoutes = require('./routes/admin');
 const { protect } = require('./middleware/auth');
 
 const app = express();
+const logger = require('./lib/logger');
+const errorHandler = require('./middleware/errorHandler');
 
 app.use(helmet());
 app.use(express.json());
@@ -49,11 +51,7 @@ app.use('/api/admin', protect, adminRoutes);
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-// error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  if (err.code === 'EBADCSRFTOKEN') return res.status(403).json({ error: 'Invalid CSRF token' });
-  res.status(500).json({ error: 'Server error' });
-});
+// Final error handler (centralized)
+app.use(errorHandler);
 
 module.exports = app;
