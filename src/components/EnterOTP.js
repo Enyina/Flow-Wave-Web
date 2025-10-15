@@ -99,18 +99,12 @@ const EnterOTP = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp: otpString })
-      });
+      const res = await apiFetch('/auth/verify-otp', { method: 'POST', body: { email, otp: otpString } });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate('/reset-password', { state: { token: data.token, email } });
+      if (res.ok) {
+        navigate('/reset-password', { state: { token: res.data.token, email } });
       } else {
-        setError(data.error || 'Invalid OTP. Please try again.');
+        setError(res.data?.error || 'Invalid OTP. Please try again.');
         setOtp(['', '', '', '']);
         inputRefs.current[0]?.focus();
       }
@@ -128,19 +122,15 @@ const EnterOTP = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
+      const res = await apiFetch('/auth/forgot-password', { method: 'POST', body: { email } });
 
-      if (response.ok) {
+      if (res.ok) {
         setTimer(256);
         setCanResend(false);
         setOtp(['', '', '', '']);
         inputRefs.current[0]?.focus();
       } else {
-        setError('Failed to resend OTP');
+        setError(res.data?.error || 'Failed to resend OTP');
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -152,16 +142,17 @@ const EnterOTP = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300 p-4">
       <div className={`w-full max-w-md ${hasAnimated ? 'animate-scale-in animate-once' : 'opacity-0'}`}>
-        <div className={`absolute top-12 left-20 flex items-center ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
-          <Logo className="w-13 h-9 mr-3" />
-          <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold">FLOWWAVE</div>
+        <div className={`absolute top-8 left-0 right-0 px-6 md:px-20 flex items-center justify-between ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+          <div className="flex items-center space-x-4">
+            <Logo className="w-13 h-9" />
+            <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold">FLOWWAVE</div>
+          </div>
+          <div className="flex items-center">
+            <DarkModeToggle />
+          </div>
         </div>
 
-        <div className={`absolute top-12 right-20 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
-          <DarkModeToggle />
-        </div>
-
-        <div className="flex flex-col items-center gap-10 mt-20">
+        <div className="flex flex-col items-center gap-10 mt-28">
           <div className="flex flex-col items-center gap-4 w-full">
             <h1 className="text-primary-pink dark:text-primary-pink text-center text-3xl font-bold leading-10">
               Enter OTP
