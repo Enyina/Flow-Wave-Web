@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 import DarkModeToggle from './DarkModeToggle';
+import { apiFetch } from '../utils/api';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
