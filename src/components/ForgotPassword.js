@@ -55,23 +55,13 @@ const ForgotPassword = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300 p-4">
       <div className={`w-full max-w-md ${hasAnimated ? 'animate-scale-in animate-once' : 'opacity-0'}`}>
-        <div className="absolute top-12 left-8 md:left-20 flex items-center">
-          <div className="w-13 h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-              <defs>
-                <linearGradient id="flowwave-gradient-fp" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6C63FF" />
-                  <stop offset="30%" stopColor="#9C5CFF" />
-                  <stop offset="60%" stopColor="#FF5C8A" />
-                  <stop offset="100%" stopColor="#FF8A5C" />
-                </linearGradient>
-              </defs>
-              <path d="M8 28C8 28 12 20 20 20C28 20 32 28 40 28C48 28 52 20 52 20V37H0V20C0 20 4 28 8 28Z" fill="url(#flowwave-gradient-fp)" />
-              <path d="M4 18C4 18 8 10 16 10C24 10 28 18 36 18C44 18 48 10 48 10V27H-4V10C-4 10 0 18 4 18Z" fill="url(#flowwave-gradient-fp)" opacity="0.7" />
-              <path d="M0 8C0 8 4 0 12 0C20 0 24 8 32 8C40 8 44 0 44 0V17H-8V0C-8 0 -4 8 0 8Z" fill="url(#flowwave-gradient-fp)" opacity="0.4" />
-            </svg>
-          </div>
+        <div className={`absolute top-12 left-20 flex items-center ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+          <Logo className="w-13 h-9 mr-3" />
           <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold">FLOWWAVE</div>
+        </div>
+
+        <div className={`absolute top-12 right-20 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
+          <DarkModeToggle />
         </div>
 
         <div className="flex flex-col items-start gap-10 mt-20">
