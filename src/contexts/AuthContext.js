@@ -16,35 +16,57 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
     const token = localStorage.getItem('authToken');
     const userData = localStorage.getItem('userData');
-    
+
     if (token && userData) {
       setIsAuthenticated(true);
       setUser(JSON.parse(userData));
     }
-    
+
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     try {
-      // Simulate API call
-      const userData = {
-        id: 1,
-        email: email,
-        name: 'User Name',
-        joinedAt: new Date().toISOString()
-      };
-      
-      // Store auth data
-      localStorage.setItem('authToken', 'mock-jwt-token');
-      localStorage.setItem('userData', JSON.stringify(userData));
-      
+      const { apiFetch } = await import('../utils/api');
+      const res = await apiFetch('/auth/login', { method: 'POST', body: { email, password } });
+
+      if (!res.ok) {
+        return { success: false, error: res.data?.error || 'Login failed' };
+      }
+
+      const accessToken = res.data?.accessToken || res.data?.token || null;
+      if (!accessToken) {
+        // If API returned no token but set cookie-based session, attempt to fetch user
+        // Fallback to fetching /users/me
+        const me = await apiFetch('/users/me', { method: 'GET' });
+        if (me.ok) {
+          localStorage.setItem('authToken', '');
+          localStorage.setItem('userData', JSON.stringify(me.data));
+          setIsAuthenticated(true);
+          setUser(me.data);
+          return { success: true };
+        }
+        return { success: false, error: 'No access token returned' };
+      }
+
+      // Store token and fetch user
+      localStorage.setItem('authToken', accessToken);
+
+      const me = await apiFetch('/users/me', { method: 'GET', headers: { Authorization: `Bearer ${accessToken}` } });
+      if (me.ok) {
+        localStorage.setItem('userData', JSON.stringify(me.data));
+        setIsAuthenticated(true);
+        setUser(me.data);
+        return { success: true };
+      }
+
+      // If /users/me failed, still mark authenticated with email
+      const fallbackUser = { email, id: null };
+      localStorage.setItem('userData', JSON.stringify(fallbackUser));
       setIsAuthenticated(true);
-      setUser(userData);
-      
+      setUser(fallbackUser);
       return { success: true };
     } catch (error) {
       return { success: false, error: 'Login failed' };
@@ -53,21 +75,20 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
-      // Simulate API call for signup
-      const newUser = {
-        id: Date.now(),
-        email: userData.email,
-        name: userData.fullName || 'User Name',
-        joinedAt: new Date().toISOString()
-      };
-      
-      // Store auth data
-      localStorage.setItem('authToken', 'mock-jwt-token');
-      localStorage.setItem('userData', JSON.stringify(newUser));
-      
-      setIsAuthenticated(true);
-      setUser(newUser);
-      
+      const { apiFetch } = await import('../utils/api');
+      const res = await apiFetch('/auth/register', { method: 'POST', body: userData });
+
+      if (!res.ok) {
+        return { success: false, error: res.data?.error || 'Signup failed' };
+      }
+
+      // After signup, attempt to login automatically
+      const email = userData.email;
+      const password = userData.password;
+      if (email && password) {
+        return await login(email, password);
+      }
+
       return { success: true };
     } catch (error) {
       return { success: false, error: 'Signup failed' };
