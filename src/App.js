@@ -16,6 +16,9 @@ import CreatePin from './components/CreatePin';
 import ConfirmPin from './components/ConfirmPin';
 import PersonalInfo from './components/PersonalInfo';
 import WelcomeOnboard from './components/WelcomeOnboard';
+import ForgotPassword from './components/ForgotPassword';
+import EnterOTP from './components/EnterOTP';
+import ResetPassword from './components/ResetPassword';
 
 // Dashboard components
 import Dashboard from './components/Dashboard';
@@ -74,6 +77,9 @@ function App() {
               <Route path="/confirm-pin" element={<ConfirmPin />} />
               <Route path="/personal-info" element={<PersonalInfo />} />
               <Route path="/welcome" element={<WelcomeOnboard />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/enter-otp" element={<EnterOTP />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* Protected Routes */}
               <Route 
