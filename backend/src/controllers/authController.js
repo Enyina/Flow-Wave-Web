@@ -112,4 +112,55 @@ async function logout(req, res) {
   res.json({ ok: true });
 }
 
-module.exports = { register, login, refresh, logout };
+async function forgotPassword(req, res) {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Missing email' });
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  // Respond generically to prevent user enumeration
+  if (!user) return res.json({ ok: true });
+
+  const crypto = require('crypto');
+  const raw = crypto.randomBytes(32).toString('hex');
+  const hash = crypto.createHash('sha256').update(raw).digest('hex');
+  const expiresAt = new Date(Date.now() + ms('1h'));
+
+  await prisma.passwordResetToken.create({ data: { userId: user.id, tokenHash: hash, expiresAt } });
+
+  // In production, send raw token via email to the user.
+  // We do not expose the token in responses for security.
+  res.json({ ok: true });
+}
+
+async function resetPassword(req, res) {
+  const { token, password } = req.body;
+  if (!token || !password) return res.status(400).json({ error: 'Missing token or password' });
+
+  const crypto = require('crypto');
+  const hash = crypto.createHash('sha256').update(token).digest('hex');
+  const record = await prisma.passwordResetToken.findFirst({ where: { tokenHash: hash, used: false } });
+  if (!record) return res.status(400).json({ error: 'Invalid or used token' });
+  if (new Date(record.expiresAt) < new Date()) return res.status(400).json({ error: 'Token expired' });
+
+  const user = await prisma.user.findUnique({ where: { id: record.userId } });
+  if (!user) return res.status(400).json({ error: 'Invalid token' });
+
+  const hashed = await bcrypt.hash(password, 10);
+  await prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
+  await prisma.passwordResetToken.update({ where: { id: record.id }, data: { used: true } });
+
+  res.json({ ok: true });
+}
+
+async function createPin(req, res) {
+  const { pin } = req.body;
+  if (!req.user || !req.user.id) return res.status(401).json({ error: 'Unauthorized' });
+  if (!pin || typeof pin !== 'string') return res.status(400).json({ error: 'PIN is required' });
+  if (!/^\d{4,6}$/.test(pin)) return res.status(400).json({ error: 'PIN must be 4-6 digits' });
+
+  const hash = await bcrypt.hash(pin, 10);
+  await prisma.user.update({ where: { id: req.user.id }, data: { pinHash: hash } });
+  res.json({ ok: true });
+}
+
+module.exports = { register, login, refresh, logout, forgotPassword, resetPassword, createPin };
