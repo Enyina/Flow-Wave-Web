@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_BASE || '';
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5500/api';
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
