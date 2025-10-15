@@ -1,29 +1,37 @@
+import axios from 'axios';
+
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5500/api';
 
+export const apiClient = axios.create({
+  baseURL: API_BASE.replace(/\/$/, ''),
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
+});
+
 export async function apiFetch(path, options = {}) {
-  const url = `${API_BASE.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
-  const opts = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-    credentials: options.credentials || 'include', // include cookies by default
-    ...options,
+  const url = `${path.replace(/^\//, '')}`;
+  const method = (options.method || 'GET').toLowerCase();
+  const headers = { ...(options.headers || {}) };
+
+  const axiosOptions = {
+    url,
+    method,
+    headers,
+    data: options.body,
+    params: options.params,
+    withCredentials: options.credentials === 'omit' ? false : true,
+    timeout: options.timeout || 0,
   };
 
-  if (opts.body && typeof opts.body === 'object') {
-    opts.body = JSON.stringify(opts.body);
+  try {
+    const res = await apiClient.request(axiosOptions);
+    return { ok: true, status: res.status, data: res.data };
+  } catch (err) {
+    if (err && err.response) {
+      return { ok: false, status: err.response.status, data: err.response.data };
+    }
+    return { ok: false, status: 0, data: { error: err.message || 'Network error' } };
   }
-
-  const res = await fetch(url, opts);
-  const contentType = res.headers.get('content-type') || '';
-  let data = null;
-  if (contentType.includes('application/json')) {
-    data = await res.json();
-  } else {
-    data = await res.text();
-  }
-  return { ok: res.ok, status: res.status, data };
 }
 
 export default apiFetch;
