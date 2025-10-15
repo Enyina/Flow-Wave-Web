@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from './Logo';
+import DarkModeToggle from './DarkModeToggle';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
