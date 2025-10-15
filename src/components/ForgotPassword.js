@@ -33,18 +33,11 @@ const ForgotPassword = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const res = await apiFetch('/auth/forgot-password', { method: 'POST', body: { email } });
+      if (res.ok) {
         navigate('/enter-otp', { state: { email } });
       } else {
-        setError(data.error || 'Failed to send OTP. Please try again.');
+        setError(res.data?.error || 'Failed to send OTP. Please try again.');
       }
     } catch (err) {
       setError('Network error. Please try again.');
