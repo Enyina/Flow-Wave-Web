@@ -67,18 +67,12 @@ const ResetPassword = () => {
     setErrors({});
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password: newPassword })
-      });
+      const res = await apiFetch('/auth/reset-password', { method: 'POST', body: { token, password: newPassword } });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (res.ok) {
         navigate('/login', { state: { message: 'Password reset successful! Please login with your new password.' } });
       } else {
-        setErrors({ general: data.error || 'Failed to reset password. Please try again.' });
+        setErrors({ general: res.data?.error || 'Failed to reset password. Please try again.' });
       }
     } catch (err) {
       setErrors({ general: 'Network error. Please try again.' });
