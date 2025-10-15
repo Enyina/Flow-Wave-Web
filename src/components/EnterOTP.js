@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Logo from './Logo';
+import DarkModeToggle from './DarkModeToggle';
 
 const EnterOTP = () => {
   const navigate = useNavigate();
