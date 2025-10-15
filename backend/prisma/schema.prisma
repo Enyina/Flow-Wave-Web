@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id                 String   @id @map("_id") @default(auto())
-  email              String   @unique
-  password           String
-  isEmailVerified    Boolean  @default(false)
-  mfaEnabled         Boolean  @default(false)
-  mfaSecret          String?  
-  failedLoginAttempts Int     @default(0)
-  lockedUntil        DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                  String   @id @map("_id") @default(auto())
+  email               String   @unique
+  password            String
+  pinHash             String?
+  isEmailVerified     Boolean  @default(false)
+  mfaEnabled          Boolean  @default(false)
+  mfaSecret           String?
+  failedLoginAttempts Int      @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model RefreshToken {
@@ -25,6 +26,15 @@ model RefreshToken {
   tokenHash String
   userId    String
   revoked   Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @map("_id") @default(auto())
+  userId    String
+  tokenHash String
+  used      Boolean  @default(false)
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
