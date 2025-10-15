@@ -12,6 +12,8 @@ model User {
   email               String   @unique
   password            String
   pinHash             String?
+  resetOtp            String?
+  resetOtpExpiry      DateTime?
   isEmailVerified     Boolean  @default(false)
   mfaEnabled          Boolean  @default(false)
   mfaSecret           String?

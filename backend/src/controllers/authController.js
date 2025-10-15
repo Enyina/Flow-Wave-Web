@@ -117,16 +117,43 @@ async function forgotPassword(req, res) {
   // Respond generically to prevent user enumeration
   if (!user) return res.json({ ok: true });
 
+  // Generate 4-digit OTP
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+  const otpExpiry = new Date(Date.now() + ms('5m'));
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { resetOtp: otp, resetOtpExpiry: otpExpiry }
+  });
+
+  // In production, send OTP via email to the user
+  console.log(`OTP for ${email}: ${otp}`);
+
+  res.json({ ok: true });
+}
+
+async function verifyOtp(req, res) {
+  const { email, otp } = req.body;
+  if (!email || !otp) return res.status(400).json({ error: 'Missing email or OTP' });
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.resetOtp) return res.status(400).json({ error: 'Invalid OTP' });
+  if (new Date(user.resetOtpExpiry) < new Date()) {
+    await prisma.user.update({ where: { id: user.id }, data: { resetOtp: null, resetOtpExpiry: null } });
+    return res.status(400).json({ error: 'OTP expired' });
+  }
+  if (user.resetOtp !== otp) return res.status(400).json({ error: 'Invalid OTP' });
+
+  // Generate reset token
   const crypto = require('crypto');
-  const raw = crypto.randomBytes(32).toString('hex');
-  const hash = crypto.createHash('sha256').update(raw).digest('hex');
-  const expiresAt = new Date(Date.now() + ms('1h'));
+  const token = crypto.randomBytes(32).toString('hex');
+  const hash = crypto.createHash('sha256').update(token).digest('hex');
+  const expiresAt = new Date(Date.now() + ms('15m'));
 
   await prisma.passwordResetToken.create({ data: { userId: user.id, tokenHash: hash, expiresAt } });
+  await prisma.user.update({ where: { id: user.id }, data: { resetOtp: null, resetOtpExpiry: null } });
 
-  // In production, send raw token via email to the user.
-  // We do not expose the token in responses for security.
-  res.json({ ok: true });
+  res.json({ ok: true, token });
 }
 
 async function resetPassword(req, res) {
@@ -160,4 +187,4 @@ async function createPin(req, res) {
   res.json({ ok: true });
 }
 
-module.exports = { register, login, refresh, logout, forgotPassword, resetPassword, createPin };
+module.exports = { register, login, refresh, logout, forgotPassword, verifyOtp, resetPassword, createPin };
