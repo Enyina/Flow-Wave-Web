@@ -13,20 +13,14 @@ const Recipients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [hasAnimated, setHasAnimated] = useState(false);
 
-  const recipients = [
-    {
-      id: 1,
-      name: 'Enyina Matthew',
-      bank: 'Lead Bank',
-      accountNumber: '0845037683',
-      avatar: 'https://api.builder.io/api/v1/image/assets/TEMP/04273d01ddb83b37c8d4e064d32b645782f153e4?width=62'
-    }
-  ];
+  const [recipients, setRecipients] = useState([]);
+  const [loadingRecipients, setLoadingRecipients] = useState(false);
+  const [listError, setListError] = useState('');
 
   const filteredRecipients = recipients.filter(recipient =>
-    recipient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipient.bank.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipient.accountNumber.includes(searchTerm)
+    (recipient.fullName || recipient.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (recipient.bankName || recipient.bank || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (recipient.accountNumber || '').includes(searchTerm)
   );
 
   useEffect(() => {
