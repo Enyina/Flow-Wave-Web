@@ -8,15 +8,16 @@ import { apiFetch } from '../utils/api';
 const EnterOTP = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email || sessionStorage.getItem('resetEmail') || '';
-
+  const initialEmail = location.state?.email || sessionStorage.getItem('resetEmail') || '';
+  const [email, setEmail] = React.useState(initialEmail);
   const [otp, setOtp] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [timer, setTimer] = useState(256);
   const [canResend, setCanResend] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-  
+  const [otpSent, setOtpSent] = useState(!!initialEmail);
+
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -25,10 +26,8 @@ const EnterOTP = () => {
   }, []);
 
   useEffect(() => {
-    if (!email) {
-      navigate('/forgot-password');
-      return;
-    }
+    // Start countdown only if an email is known and OTP has been sent
+    if (!email || !otpSent) return;
 
     const countdown = setInterval(() => {
       setTimer((prev) => {
@@ -42,7 +41,7 @@ const EnterOTP = () => {
     }, 1000);
 
     return () => clearInterval(countdown);
-  }, [email, navigate]);
+  }, [email, otpSent]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
