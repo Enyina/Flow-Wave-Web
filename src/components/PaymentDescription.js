@@ -76,12 +76,10 @@ const PaymentDescription = () => {
       const amountVal = amountValRaw ? parseFloat(amountValRaw) : 0;
 
       // Compute exchange rate and converted amount using CurrencyContext conventions
-      const toCurrency = (flowState?.toCurrency) || null; // flow may carry currencies
-      const ctxToCurrency = toCurrency || (typeof window !== 'undefined' && JSON.parse(JSON.stringify({ code: 'USD' }))) ;
+      const toCode = (toCurrency?.code) || flowState?.toCurrency || 'USD';
       // Build a simple exchangeRate lookup (keep in sync with PaymentReview)
       const exchangeRates = { NGN: 1500, USD: 1, GBP: 0.79, EUR: 0.85, CAD: 1.35, AUD: 1.52, JPY: 110, CHF: 0.92, ZAR: 18.5 };
-      const fromCode = fromCurrency?.code || flowState.fromCurrency || 'NGN';
-      const toCode = ctxToCurrency?.code || 'USD';
+      const fromCode = fromCurrency?.code || flowState?.fromCurrency || 'NGN';
       const fromRate = exchangeRates[fromCode] || 1;
       const toRate = exchangeRates[toCode] || 1;
       const exchangeRate = fromRate / toRate;
