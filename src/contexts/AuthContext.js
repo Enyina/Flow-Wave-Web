@@ -36,14 +36,19 @@ console.log({res})
         return { success: false, error: res.data?.error || 'Login failed' };
       }
 
-      const accessToken = res.data?.accessToken || res.data?.token || null;
+      // Extract access token from known response shapes (support nested `data` wrapper)
+      const accessToken =
+        res.data?.accessToken ||
+        res.data?.token ||
+        res.data?.data?.accessToken ||
+        res.data?.data?.token ||
+        null;
 
       if (!accessToken) {
         // If API returned no token but set cookie-based session, attempt to fetch user
-        // Fallback to fetching /users/me
         const me = await apiFetch('/users/me', { method: 'GET' });
         if (me.ok) {
-          localStorage.setItem('authToken', '');
+          try { localStorage.setItem('authToken', ''); } catch (e) {}
           localStorage.setItem('userData', JSON.stringify(me.data));
           setIsAuthenticated(true);
           setUser(me.data);
@@ -53,7 +58,7 @@ console.log({res})
       }
 
       // Store token and fetch user
-      localStorage.setItem('authToken', accessToken);
+      try { localStorage.setItem('authToken', accessToken); } catch (e) {}
 
       const me = await apiFetch('/users/me', { method: 'GET', headers: { Authorization: `Bearer ${accessToken}` } });
       if (me.ok) {
