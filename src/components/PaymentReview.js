@@ -180,9 +180,9 @@ const PaymentReview = () => {
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Exchange Rate:</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">
-                    {formatCurrency(getExchangeRate().toFixed(2), fromCurrency.code)} = {formatCurrency('1.00', toCurrency.code)}
+                  <span className="text-xs font-medium">Exchange Rate:</span>
+                  <span className="text-xs">
+                    {formatCurrency(displayExchange.toFixed(2), fromCurrency.code)} = {formatCurrency('1.00', toCurrency.code)}
                   </span>
                 </div>
                 
