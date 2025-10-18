@@ -102,10 +102,15 @@ const EnterOTP = () => {
       const res = await apiFetch('/auth/verify-otp', { method: 'POST', body: { email: email, otp: otpString } });
 
       if (res.ok) {
-        const token = res.data?.token || res.data?.resetToken || null;
-        if (token) {
-          try { sessionStorage.setItem('resetToken', token); } catch (e) {}
-          navigate('/reset-password', { state: { token, email } });
+        // Debug log for server response
+        try { console.debug('verify-otp response', res); } catch (e) {}
+        // Support multiple response shapes: { token }, { resetToken }, { data: { token } }
+        const token = res.data?.token || res.data?.resetToken || res.data?.data?.token || res.data?.data?.resetToken || res.data?.result?.token || null;
+        // Coerce numeric codes to string
+        const tokenStr = token != null ? String(token) : null;
+        if (tokenStr) {
+          try { sessionStorage.setItem('resetToken', tokenStr); } catch (e) {}
+          navigate('/reset-password', { state: { token: tokenStr, email } });
         } else {
           setError('OTP verified but no reset token received. Please check your email or try resending OTP.');
         }
