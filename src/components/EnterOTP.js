@@ -8,8 +8,8 @@ import { apiFetch } from '../utils/api';
 const EnterOTP = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email || '';
-  
+  const email = location.state?.email || sessionStorage.getItem('resetEmail') || '';
+
   const [otp, setOtp] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
