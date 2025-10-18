@@ -123,9 +123,21 @@ const AddRecipient = () => {
         email: formData.email,
       };
 
-      const res = await apiFetch('/recipients', { method: 'POST', body: payload });
+      let res;
+      if (location?.state?.recipient && (location.state.mode === 'edit' || location.state.recipient.id || location.state.recipient._id)) {
+        // Update existing recipient
+        const id = location.state.recipient.id || location.state.recipient._id;
+        res = await apiFetch(`/recipients/${id}`, { method: 'PUT', body: payload });
+      } else {
+        res = await apiFetch('/recipients', { method: 'POST', body: payload });
+      }
+
       if (res.ok) {
-        navigate('/recipients');
+        const saved = res.data || payload;
+        // update selectedRecipient in flow so review uses real recipient
+        updateFlowState({ selectedRecipient: saved, startedFromRecipient: true });
+        // Navigate to review step
+        navigate('/review');
       } else {
         setErrors({ general: res.data?.error || 'Failed to save recipient' });
       }
