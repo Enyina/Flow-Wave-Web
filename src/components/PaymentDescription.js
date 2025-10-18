@@ -240,9 +240,10 @@ const PaymentDescription = () => {
             {/* Continue Button */}
             <button
               onClick={handleContinue}
-              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+              disabled={isSubmitting}
+              className={`w-full py-3 text-white text-lg font-bold rounded-lg transition-all duration-300 ${isSubmitting ? 'bg-neutral-gray cursor-not-allowed' : 'bg-primary-blue hover:bg-primary-blue/90'}`}
             >
-              Continue
+              {isSubmitting ? 'Submitting...' : 'Continue'}
             </button>
           </div>
         </div>
