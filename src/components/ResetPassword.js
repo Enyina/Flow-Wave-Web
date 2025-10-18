@@ -9,8 +9,8 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const token = location.state?.token || params.get('token') || '';
-  const email = location.state?.email || params.get('email') || '';
+  const token = location.state?.token || params.get('token') || sessionStorage.getItem('resetToken') || '';
+  const email = location.state?.email || params.get('email') || sessionStorage.getItem('resetEmail') || '';
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
