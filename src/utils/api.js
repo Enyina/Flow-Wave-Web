@@ -13,6 +13,16 @@ export async function apiFetch(path, options = {}) {
   const method = (options.method || 'GET').toLowerCase();
   const headers = { ...(options.headers || {}) };
 
+  // Attach Authorization header from stored token if not provided
+  try {
+    const stored = localStorage.getItem('authToken');
+    if (stored && !headers.Authorization && !headers.authorization) {
+      headers.Authorization = `Bearer ${stored}`;
+    }
+  } catch (e) {
+    // ignore if localStorage unavailable
+  }
+
   const axiosOptions = {
     url,
     method,
