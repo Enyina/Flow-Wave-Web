@@ -204,9 +204,8 @@ const Recipients = () => {
                 <div className="text-error text-center py-8">{listError}</div>
               ) : (
                 filteredRecipients.map((recipient, index) => (
-                  <button
-                    key={recipient.id}
-                    onClick={() => handleSelectRecipient(recipient)}
+                  <div
+                    key={recipient.id || recipient._id}
                     className={`w-full p-4 bg-secondary-light rounded-lg hover:shadow-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
                     style={{ animationDelay: `${0.8 + index * 0.1}s` }}
                   >
@@ -221,11 +220,18 @@ const Recipients = () => {
                         </div>
                         <span className="text-neutral-dark dark:text-dark-text font-medium">{recipient.fullName || recipient.name}</span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-neutral-gray text-xs">{(recipient.bankName || recipient.bank) || ''} - {(recipient.accountNumber && recipient.accountNumber.length > 6) ? `***${recipient.accountNumber.slice(-4)}` : recipient.accountNumber}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right mr-4">
+                          <p className="text-neutral-gray text-xs">{(recipient.bankName || recipient.bank) || ''} - {(recipient.accountNumber && recipient.accountNumber.length > 6) ? `***${recipient.accountNumber.slice(-4)}` : recipient.accountNumber}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => navigate('/add-recipient', { state: { recipient, mode: 'view' } })} className="px-3 py-1 text-sm rounded bg-white border">View</button>
+                          <button onClick={() => navigate('/add-recipient', { state: { recipient, mode: 'edit' } })} className="px-3 py-1 text-sm rounded bg-primary-blue text-white">Edit</button>
+                          <button onClick={() => handleSelectRecipient(recipient)} className="px-3 py-1 text-sm rounded bg-primary-green text-white">Use</button>
+                        </div>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 ))
               )}
             </div>
