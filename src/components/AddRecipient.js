@@ -307,21 +307,27 @@ const AddRecipient = () => {
             </div>
 
             {/* Save Button */}
-            <button
-              type="submit"
-              className={`w-full py-4 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
-              style={{ animationDelay: '1.2s' }}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Saving...
-                </div>
-              ) : (
-                'Save & Continue'
-              )}
-            </button>
+            {isEditing ? (
+              <button
+                type="submit"
+                className={`w-full py-4 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
+                style={{ animationDelay: '1.2s' }}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  'Save & Continue'
+                )}
+              </button>
+            ) : (
+              <button onClick={() => navigate('/recipients')} className={`w-full py-4 bg-neutral-gray text-white text-lg font-bold rounded-lg transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '1.2s' }}>
+                Back
+              </button>
+            )}
           </form>
         </div>
       </main>
