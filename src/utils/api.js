@@ -37,6 +37,15 @@ export async function apiFetch(path, options = {}) {
 
   // If caller provided an Authorization header explicitly, keep it. Otherwise the interceptor will attach one.
 
+  // If body is FormData, remove Content-Type so browser/axios sets multipart boundary
+  if (options.body && typeof FormData !== 'undefined' && options.body instanceof FormData) {
+    // remove any content-type header so axios can set the correct multipart/form-data boundary
+    if (headers['Content-Type'] || headers['content-type']) {
+      delete headers['Content-Type'];
+      delete headers['content-type'];
+    }
+  }
+
   const axiosOptions = {
     url,
     method,
