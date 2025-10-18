@@ -8,6 +8,9 @@ import { useFlow } from '../contexts/FlowContext';
 const AddRecipient = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const location = useLocation();
+  const { flowState, updateFlowState } = useFlow();
+
   const [formData, setFormData] = useState({
     fullName: '',
     bank: '',
@@ -23,6 +26,7 @@ const AddRecipient = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const banks = [
     'Access Bank',
