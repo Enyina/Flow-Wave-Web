@@ -43,6 +43,28 @@ const AddRecipient = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    // Pre-fill when navigating with state (view/edit)
+    const state = location?.state || {};
+    if (state.recipient) {
+      const r = state.recipient;
+      setFormData({
+        fullName: r.fullName || r.name || '',
+        bank: r.bankName || r.bank || '',
+        accountNumber: r.accountNumber || r.account || '',
+        swiftCode: r.swiftOrSortCode || r.swiftCode || '',
+        address: r.address || '',
+        state: r.state || '',
+        city: r.city || '',
+        zipCode: r.zipCode || r.postalCode || '',
+        phoneNumber: r.phoneNumber || r.phone || '',
+        email: r.email || ''
+      });
+      if (state.mode === 'view') setIsEditing(false);
+      if (state.mode === 'edit') setIsEditing(true);
+    }
+  }, [location]);
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
