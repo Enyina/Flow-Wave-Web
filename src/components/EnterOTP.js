@@ -103,7 +103,13 @@ const EnterOTP = () => {
       const res = await apiFetch('/auth/verify-otp', { method: 'POST', body: { email, otp: otpString } });
 
       if (res.ok) {
-        navigate('/reset-password', { state: { token: res.data.token, email } });
+        const token = res.data?.token || res.data?.resetToken || null;
+        if (token) {
+          try { sessionStorage.setItem('resetToken', token); } catch (e) {}
+          navigate('/reset-password', { state: { token, email } });
+        } else {
+          setError('OTP verified but no reset token received. Please check your email or try resending OTP.');
+        }
       } else {
         setError(res.data?.error || 'Invalid OTP. Please try again.');
         setOtp(['', '', '', '']);
