@@ -43,7 +43,7 @@ const PaymentDescription = () => {
   };
 
   const { flowState, updateFlowState } = useFlow();
-  const { fromCurrency, sendAmount } = useCurrency();
+  const { fromCurrency, toCurrency, sendAmount } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleContinue = async () => {
