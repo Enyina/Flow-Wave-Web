@@ -36,6 +36,7 @@ const ForgotPassword = () => {
     try {
       const res = await apiFetch('/auth/forgot-password', { method: 'POST', body: { email } });
       if (res.ok) {
+        try { sessionStorage.setItem('resetEmail', email); } catch (e) {}
         navigate('/enter-otp', { state: { email } });
       } else {
         setError(res.data?.error || 'Failed to send OTP. Please try again.');
