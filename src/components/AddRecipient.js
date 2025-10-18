@@ -78,13 +78,34 @@ const AddRecipient = () => {
 
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const payload = {
+        fullName: formData.fullName,
+        firstName: '',
+        lastName: '',
+        bankName: formData.bank,
+        bankCode: '',
+        accountNumber: formData.accountNumber,
+        swiftOrSortCode: formData.swiftCode,
+        address: formData.address,
+        state: formData.state,
+        city: formData.city,
+        zipCode: formData.zipCode,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+      };
+
+      const res = await apiFetch('/recipients', { method: 'POST', body: payload });
+      if (res.ok) {
+        navigate('/recipients');
+      } else {
+        setErrors({ general: res.data?.error || 'Failed to save recipient' });
+      }
+    } catch (err) {
+      setErrors({ general: 'Network error. Please try again.' });
+    } finally {
       setIsLoading(false);
-      // In a real app, you'd save the recipient data to state/context
-      console.log('Saved recipient:', formData);
-      navigate('/recipients');
-    }, 1500);
+    }
   };
 
   const renderInputField = (label, field, type = 'text', placeholder = '') => (
