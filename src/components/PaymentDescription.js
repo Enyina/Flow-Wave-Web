@@ -46,6 +46,7 @@ const PaymentDescription = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleContinue = async () => {
+    console.log('handleContinue invoked', { description, attachedFile, flowState });
     const newErrors = {};
 
     if (!description.trim()) {
@@ -68,7 +69,7 @@ const PaymentDescription = () => {
     // Build form data for multipart upload as per OpenAPI
     const form = new FormData();
     const recipient = flowState.selectedRecipient;
-    const recipientId = recipient.id || recipient._id || recipient.recipientId || recipient.id_str || null;
+    const recipientId = recipient && (recipient.id || recipient._id || recipient.recipientId || recipient.id_str) || null;
     form.append('recipientId', recipientId);
 
     // Prefer sendAmount from CurrencyContext, fallback to flowState
@@ -83,6 +84,7 @@ const PaymentDescription = () => {
 
     try {
       const res = await apiFetch('/transactions', { method: 'POST', body: form });
+      console.log('transaction response', res);
       if (res.ok && (res.status === 201 || res.status === 200)) {
         // Save description and response transaction to flow and continue
         updateFlowState({ paymentDescription: description, currentStep: 'review', transaction: res.data });
@@ -91,6 +93,7 @@ const PaymentDescription = () => {
         setErrors({ form: res.data?.error || 'Failed to create transaction' });
       }
     } catch (err) {
+      console.error(err);
       setErrors({ form: err.message || 'Network error' });
     } finally {
       setIsSubmitting(false);
