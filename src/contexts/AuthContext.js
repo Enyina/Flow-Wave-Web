@@ -31,12 +31,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const { apiFetch } = await import('../utils/api');
       const res = await apiFetch('/auth/login', { method: 'POST', body: { email, password } });
-
+console.log({res})
       if (!res.ok) {
         return { success: false, error: res.data?.error || 'Login failed' };
       }
 
       const accessToken = res.data?.accessToken || res.data?.token || null;
+
       if (!accessToken) {
         // If API returned no token but set cookie-based session, attempt to fetch user
         // Fallback to fetching /users/me
