@@ -9,7 +9,8 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const token = location.state?.token || '';
-  
+  const email = location.state?.email || '';
+
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
