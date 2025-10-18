@@ -10,6 +10,8 @@ const PaymentReview = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { fromCurrency, toCurrency, sendAmount, receiveAmount } = useCurrency();
+  const { flowState } = useFlow();
+  const transaction = flowState?.transaction || null;
   const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
@@ -46,22 +48,33 @@ const PaymentReview = () => {
   };
 
   const getExchangeRate = () => {
+    // prefer transaction-provided rate when available
+    if (transaction?.exchangeRate) return transaction.exchangeRate;
     const fromRate = exchangeRates[fromCurrency.code] || 1;
     const toRate = exchangeRates[toCurrency.code] || 1;
     return fromRate / toRate;
   };
 
   const calculateFee = () => {
-    const amount = parseFloat(sendAmount) || 0;
+    const amount = parseFloat(transaction?.amount ?? sendAmount) || 0;
+    if (transaction?.transferFee) return parseFloat(transaction.transferFee).toFixed(2);
     const feePercentage = 0.02; // 2% fee
     return (amount * feePercentage).toFixed(2);
   };
 
   const calculateTotalPay = () => {
-    const amount = parseFloat(sendAmount) || 0;
+    if (transaction?.total) return parseFloat(transaction.total).toFixed(2);
+    const amount = parseFloat(transaction?.amount ?? sendAmount) || 0;
     const fee = parseFloat(calculateFee());
     return (amount + fee).toFixed(2);
   };
+
+  // values to display: prefer transaction fields
+  const displayAmount = transaction?.amount ?? sendAmount;
+  const displayConverted = transaction?.convertedAmount ?? receiveAmount;
+  const displayExchange = getExchangeRate();
+  const displayFee = transaction?.transferFee ?? calculateFee();
+  const displayTotal = transaction?.total ?? calculateTotalPay();
 
   const handleSend = () => {
     navigate('/enter-pin');
