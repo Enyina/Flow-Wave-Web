@@ -99,7 +99,7 @@ const EnterOTP = () => {
     setError('');
 
     try {
-      const res = await apiFetch('/auth/verify-otp', { method: 'POST', body: { email, otp: otpString } });
+      const res = await apiFetch('/auth/verify-otp', { method: 'POST', body: { email: email, otp: otpString } });
 
       if (res.ok) {
         const token = res.data?.token || res.data?.resetToken || null;
