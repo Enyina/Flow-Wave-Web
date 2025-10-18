@@ -69,7 +69,7 @@ const ResetPassword = () => {
     setErrors({});
 
     try {
-      const res = await apiFetch('/auth/reset-password', { method: 'POST', body: { token, password: newPassword } });
+      const res = await apiFetch('/auth/reset-password', { method: 'POST', body: { email, token, newPassword } });
 
       if (res.ok) {
         navigate('/login', { state: { message: 'Password reset successful! Please login with your new password.' } });
