@@ -161,7 +161,7 @@ const AddRecipient = () => {
         className={`w-full px-4 py-3 rounded-lg border ${
           errors[field] ? 'border-error' : 'border-neutral-lightgray dark:border-dark-border'
         } bg-white dark:bg-dark-card text-neutral-dark dark:text-dark-text placeholder:text-neutral-placeholder focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/10 transition-all duration-200`}
-        disabled={isLoading}
+        disabled={!isEditing || isLoading}
       />
       {errors[field] && (
         <p className="text-error text-xs animate-slide-in-down animate-once">{errors[field]}</p>
