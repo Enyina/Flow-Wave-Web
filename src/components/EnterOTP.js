@@ -164,18 +164,62 @@ const EnterOTP = () => {
             <h1 className="text-primary-pink dark:text-primary-pink text-center text-3xl font-bold leading-10">
               Enter OTP
             </h1>
-            <p className="text-neutral-gray dark:text-dark-textSecondary text-center text-base leading-5">
-              A 4-digit OTP has been sent to {email}
-            </p>
-            <div className="mt-2">
-              <button
-                type="button"
-                onClick={() => navigate('/forgot-password')}
-                className="text-primary-blue text-sm hover:underline"
-              >
-                Change email
-              </button>
-            </div>
+            {!otpSent ? (
+              <div className="flex flex-col items-center gap-2 w-full">
+                <p className="text-neutral-gray dark:text-dark-textSecondary text-center text-base leading-5">
+                  Enter the email you used to request the password reset
+                </p>
+                <div className="flex w-full gap-2">
+                  <input
+                    type="email"
+                    className="flex-1 px-4 py-3 rounded-lg border border-neutral-300 dark:border-dark-border bg-white dark:bg-dark-card"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      // send forgot-password from here
+                      if (!email) return setError('Please enter an email');
+                      setIsLoading(true);
+                      setError('');
+                      try {
+                        const res = await apiFetch('/auth/forgot-password', { method: 'POST', body: { email } });
+                        if (res.ok) {
+                          try { sessionStorage.setItem('resetEmail', email); } catch (e) {}
+                          setOtpSent(true);
+                          setTimer(256);
+                          setCanResend(false);
+                        } else {
+                          setError(res.data?.error || 'Failed to send OTP');
+                        }
+                      } catch (err) {
+                        setError('Network error. Please try again.');
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                    className="px-4 py-3 rounded-lg bg-primary-blue text-white"
+                  >
+                    Send OTP
+                  </button>
+                </div>
+                <div className="mt-2 w-full text-center">
+                  <button type="button" onClick={() => navigate('/forgot-password')} className="text-primary-blue text-sm hover:underline">Change email</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-neutral-gray dark:text-dark-textSecondary text-center text-base leading-5">
+                  A 4-digit OTP has been sent to {email}
+                </p>
+                <div className="mt-2">
+                  <button type="button" onClick={() => { setOtpSent(false); }} className="text-primary-blue text-sm hover:underline">Change email</button>
+                </div>
+              </>
+            )}
           </div>
 
           <form onSubmit={handleVerify} className="flex flex-col items-center gap-10 w-full">
