@@ -212,7 +212,7 @@ const PaymentDescription = () => {
             {/* File Upload */}
             <div className="flex flex-col gap-2">
               <label className="text-neutral-dark dark:text-dark-text text-base font-normal">
-                Attach Invoice <span className="text-error">*</span>
+                Attach Invoice <span className="text-neutral-gray text-sm">(optional)</span>
               </label>
               
               <div className="relative">
