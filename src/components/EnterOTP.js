@@ -162,6 +162,15 @@ const EnterOTP = () => {
             <p className="text-neutral-gray dark:text-dark-textSecondary text-center text-base leading-5">
               A 4-digit OTP has been sent to {email}
             </p>
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-primary-blue text-sm hover:underline"
+              >
+                Change email
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleVerify} className="flex flex-col items-center gap-10 w-full">
