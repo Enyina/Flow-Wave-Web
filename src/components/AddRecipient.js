@@ -26,7 +26,7 @@ const AddRecipient = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
 
   const banks = [
     'Access Bank',
