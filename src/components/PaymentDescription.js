@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
+import { apiFetch } from '../utils/api';
 
 const PaymentDescription = () => {
   const navigate = useNavigate();
