@@ -166,9 +166,9 @@ const PaymentReview = () => {
             <div className="p-7 rounded-lg bg-secondary-light text-neutral-dark dark:text-dark-text">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Amount</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">
-                    {formatCurrency(sendAmount, fromCurrency.code)}
+                  <span className="text-xs font-medium">Amount</span>
+                  <span className="text-xs">
+                    {formatCurrency(displayAmount, fromCurrency.code)}
                   </span>
                 </div>
                 
