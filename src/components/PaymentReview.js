@@ -173,9 +173,9 @@ const PaymentReview = () => {
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Received by recipient</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">
-                    {formatCurrency(receiveAmount, toCurrency.code)}
+                  <span className="text-xs font-medium">Received by recipient</span>
+                  <span className="text-xs">
+                    {formatCurrency(displayConverted, toCurrency.code)}
                   </span>
                 </div>
                 
