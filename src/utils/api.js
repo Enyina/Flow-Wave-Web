@@ -8,20 +8,34 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
+// Request interceptor: attach Authorization from localStorage when not explicitly provided
+apiClient.interceptors.request.use(
+  (config) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        config.headers = config.headers || {};
+        if (!config.headers.Authorization && !config.headers.authorization) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      }
+    } catch (e) {
+      // ignore localStorage errors (e.g., SSR)
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export async function apiFetch(path, options = {}) {
-  const url = `${path.replace(/^\//, '')}`;
+  // Ensure URL starts with a slash so axios concatenates baseURL correctly
+  const url = path && path.startsWith('/') ? path : `/${(path || '').replace(/^\//, '')}`;
   const method = (options.method || 'GET').toLowerCase();
+
+  // Clone provided headers so we don't mutate caller's object
   const headers = { ...(options.headers || {}) };
 
-  // Attach Authorization header from stored token if not provided
-  try {
-    const stored = localStorage.getItem('authToken');
-    if (stored && !headers.Authorization && !headers.authorization) {
-      headers.Authorization = `Bearer ${stored}`;
-    }
-  } catch (e) {
-    // ignore if localStorage unavailable
-  }
+  // If caller provided an Authorization header explicitly, keep it. Otherwise the interceptor will attach one.
 
   const axiosOptions = {
     url,
