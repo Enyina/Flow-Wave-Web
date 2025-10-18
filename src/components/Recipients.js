@@ -28,6 +28,28 @@ const Recipients = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoadingRecipients(true);
+      setListError('');
+      try {
+        const res = await apiFetch(`/recipients?page=1&limit=100&search=${encodeURIComponent(searchTerm)}`);
+        if (res.ok) {
+          if (mounted) setRecipients(res.data || []);
+        } else {
+          setListError(res.data?.error || 'Failed to load recipients');
+        }
+      } catch (err) {
+        setListError('Network error');
+      } finally {
+        if (mounted) setLoadingRecipients(false);
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, [searchTerm]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
