@@ -72,7 +72,23 @@ const PaymentDescription = () => {
       const recipientId = recipient && (recipient.id || recipient._id || recipient.recipientId || recipient.id_str) || null;
 
       // Prefer sendAmount from CurrencyContext, fallback to flowState
-      const amountVal = (typeof sendAmount !== 'undefined' && sendAmount) ? sendAmount : flowState.sendAmount;
+      const amountValRaw = (typeof sendAmount !== 'undefined' && sendAmount) ? sendAmount : flowState.sendAmount;
+      const amountVal = amountValRaw ? parseFloat(amountValRaw) : 0;
+
+      // Compute exchange rate and converted amount using CurrencyContext conventions
+      const toCurrency = (flowState?.toCurrency) || null; // flow may carry currencies
+      const ctxToCurrency = toCurrency || (typeof window !== 'undefined' && JSON.parse(JSON.stringify({ code: 'USD' }))) ;
+      // Build a simple exchangeRate lookup (keep in sync with PaymentReview)
+      const exchangeRates = { NGN: 1500, USD: 1, GBP: 0.79, EUR: 0.85, CAD: 1.35, AUD: 1.52, JPY: 110, CHF: 0.92, ZAR: 18.5 };
+      const fromCode = fromCurrency?.code || flowState.fromCurrency || 'NGN';
+      const toCode = ctxToCurrency?.code || 'USD';
+      const fromRate = exchangeRates[fromCode] || 1;
+      const toRate = exchangeRates[toCode] || 1;
+      const exchangeRate = fromRate / toRate;
+
+      const convertedAmount = exchangeRate && exchangeRate > 0 ? parseFloat((amountVal / exchangeRate).toFixed(2)) : 0;
+      const transferFee = parseFloat((amountVal * 0.02).toFixed(2)); // 2% fee
+      const total = parseFloat((amountVal + transferFee).toFixed(2));
 
       let res;
       if (attachedFile) {
@@ -80,9 +96,15 @@ const PaymentDescription = () => {
         const form = new FormData();
         form.append('recipientId', recipientId);
         form.append('amount', amountVal);
-        form.append('currency', fromCurrency?.code || flowState.fromCurrency || 'NGN');
+        form.append('currency', fromCode);
         form.append('description', description);
         form.append('file', attachedFile);
+
+        // Add calculated fields to FormData
+        form.append('exchangeRate', exchangeRate);
+        form.append('convertedAmount', convertedAmount);
+        form.append('transferFee', transferFee);
+        form.append('total', total);
 
         res = await apiFetch('/transactions', { method: 'POST', body: form });
       } else {
@@ -90,8 +112,12 @@ const PaymentDescription = () => {
         const payload = {
           recipientId,
           amount: amountVal,
-          currency: fromCurrency?.code || flowState.fromCurrency || 'NGN',
-          description
+          currency: fromCode,
+          description,
+          exchangeRate,
+          convertedAmount,
+          transferFee,
+          total
         };
         res = await apiFetch('/transactions', { method: 'POST', body: payload });
       }
