@@ -53,10 +53,7 @@ const PaymentDescription = () => {
       newErrors.description = 'Description is required';
     }
 
-    if (!attachedFile) {
-      newErrors.file = 'Invoice attachment is required';
-    }
-
+    // file is optional now
     if (!flowState?.selectedRecipient) {
       newErrors.recipient = 'No recipient selected';
     }
@@ -66,24 +63,38 @@ const PaymentDescription = () => {
       return;
     }
 
-    // Build form data for multipart upload as per OpenAPI
-    const form = new FormData();
-    const recipient = flowState.selectedRecipient;
-    const recipientId = recipient && (recipient.id || recipient._id || recipient.recipientId || recipient.id_str) || null;
-    form.append('recipientId', recipientId);
-
-    // Prefer sendAmount from CurrencyContext, fallback to flowState
-    const amountVal = (typeof sendAmount !== 'undefined' && sendAmount) ? sendAmount : flowState.sendAmount;
-    form.append('amount', amountVal);
-    form.append('currency', fromCurrency?.code || flowState.fromCurrency || 'NGN');
-    form.append('description', description);
-    form.append('file', attachedFile);
-
     setIsSubmitting(true);
     setErrors({});
 
     try {
-      const res = await apiFetch('/transactions', { method: 'POST', body: form });
+      const recipient = flowState.selectedRecipient;
+      const recipientId = recipient && (recipient.id || recipient._id || recipient.recipientId || recipient.id_str) || null;
+
+      // Prefer sendAmount from CurrencyContext, fallback to flowState
+      const amountVal = (typeof sendAmount !== 'undefined' && sendAmount) ? sendAmount : flowState.sendAmount;
+
+      let res;
+      if (attachedFile) {
+        // Build form data for multipart upload as per OpenAPI
+        const form = new FormData();
+        form.append('recipientId', recipientId);
+        form.append('amount', amountVal);
+        form.append('currency', fromCurrency?.code || flowState.fromCurrency || 'NGN');
+        form.append('description', description);
+        form.append('file', attachedFile);
+
+        res = await apiFetch('/transactions', { method: 'POST', body: form });
+      } else {
+        // JSON-only flow (no file)
+        const payload = {
+          recipientId,
+          amount: amountVal,
+          currency: fromCurrency?.code || flowState.fromCurrency || 'NGN',
+          description
+        };
+        res = await apiFetch('/transactions', { method: 'POST', body: payload });
+      }
+
       console.log('transaction response', res);
       if (res.ok && (res.status === 201 || res.status === 200)) {
         // Save description and response transaction to flow and continue
