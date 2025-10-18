@@ -10,7 +10,6 @@ import { apiFetch } from '../utils/api';
 const PaymentDescription = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { sendAmount } = useCurrency();
   const [description, setDescription] = useState('');
   const [attachedFile, setAttachedFile] = useState(null);
   const [hasAnimated, setHasAnimated] = useState(false);
