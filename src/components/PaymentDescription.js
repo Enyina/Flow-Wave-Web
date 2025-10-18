@@ -42,15 +42,23 @@ const PaymentDescription = () => {
     }
   };
 
-  const handleContinue = () => {
+  const { flowState, updateFlowState } = useFlow();
+  const { fromCurrency } = useCurrency();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleContinue = async () => {
     const newErrors = {};
-    
+
     if (!description.trim()) {
       newErrors.description = 'Description is required';
     }
-    
+
     if (!attachedFile) {
       newErrors.file = 'Invoice attachment is required';
+    }
+
+    if (!flowState?.selectedRecipient) {
+      newErrors.recipient = 'No recipient selected';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -58,7 +66,36 @@ const PaymentDescription = () => {
       return;
     }
 
-    navigate('/review');
+    // Build form data for multipart upload as per OpenAPI
+    const form = new FormData();
+    const recipient = flowState.selectedRecipient;
+    const recipientId = recipient.id || recipient._id || recipient.recipientId || recipient.id_str || null;
+    form.append('recipientId', recipientId);
+
+    // Prefer sendAmount from CurrencyContext, fallback to flowState
+    const amountVal = (typeof sendAmount !== 'undefined' && sendAmount) ? sendAmount : flowState.sendAmount;
+    form.append('amount', amountVal);
+    form.append('currency', fromCurrency?.code || flowState.fromCurrency || 'NGN');
+    form.append('description', description);
+    form.append('file', attachedFile);
+
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      const res = await apiFetch('/transactions', { method: 'POST', body: form });
+      if (res.ok && (res.status === 201 || res.status === 200)) {
+        // Save description and response transaction to flow and continue
+        updateFlowState({ paymentDescription: description, currentStep: 'review', transaction: res.data });
+        navigate('/review');
+      } else {
+        setErrors({ form: res.data?.error || 'Failed to create transaction' });
+      }
+    } catch (err) {
+      setErrors({ form: err.message || 'Network error' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleLogout = () => {
