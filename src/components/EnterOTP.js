@@ -145,6 +145,7 @@ const EnterOTP = () => {
       <div className={`w-full max-w-md ${hasAnimated ? 'animate-scale-in animate-once' : 'opacity-0'}`}>
         <div className={`absolute top-8 left-0 right-0 px-6 md:px-20 flex items-center justify-between ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
           <div className="flex items-center space-x-4">
+            <BackButton />
             <Logo className="w-13 h-9" />
             <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold">FLOWWAVE</div>
           </div>
