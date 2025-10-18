@@ -103,6 +103,12 @@ const ResetPassword = () => {
               Reset Password
             </h1>
           </div>
+          <div className="flex justify-center w-full">
+            <p className="text-neutral-gray dark:text-dark-textSecondary text-center text-sm">Resetting password for {email}</p>
+          </div>
+          <div className="flex justify-center w-full mt-2">
+            <button type="button" onClick={() => navigate('/forgot-password')} className="text-primary-blue text-sm hover:underline">Change email</button>
+          </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col items-start gap-6 w-full">
             {errors.general && (
