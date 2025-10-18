@@ -216,8 +216,8 @@ const PaymentReview = () => {
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Bank</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">{recipient.bank}</span>
+                  <span className="text-xs font-medium">Bank</span>
+                  <span className="text-xs">{recipient.bank}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
