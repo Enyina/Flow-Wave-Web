@@ -183,30 +183,36 @@ const Recipients = () => {
 
             {/* Recipients List */}
             <div className="space-y-4">
-              {filteredRecipients.map((recipient, index) => (
-                <button
-                  key={recipient.id}
-                  onClick={() => handleSelectRecipient(recipient)}
-                  className={`w-full p-4 bg-secondary-light rounded-lg hover:shadow-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
-                  style={{ animationDelay: `${0.8 + index * 0.1}s` }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full overflow-hidden">
-                        <img 
-                          src={recipient.avatar} 
-                          alt={recipient.name}
-                          className="w-full h-full object-cover"
-                        />
+              {loadingRecipients ? (
+                <div className="text-center py-8">Loading...</div>
+              ) : listError ? (
+                <div className="text-error text-center py-8">{listError}</div>
+              ) : (
+                filteredRecipients.map((recipient, index) => (
+                  <button
+                    key={recipient.id}
+                    onClick={() => handleSelectRecipient(recipient)}
+                    className={`w-full p-4 bg-secondary-light rounded-lg hover:shadow-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
+                    style={{ animationDelay: `${0.8 + index * 0.1}s` }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full overflow-hidden">
+                          <img
+                            src={recipient.avatar || 'https://api.builder.io/api/v1/image/assets/TEMP/04273d01ddb83b37c8d4e064d32b645782f153e4?width=62'}
+                            alt={recipient.fullName || recipient.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="text-neutral-dark dark:text-dark-text font-medium">{recipient.fullName || recipient.name}</span>
                       </div>
-                      <span className="text-neutral-dark dark:text-dark-text font-medium">{recipient.name}</span>
+                      <div className="text-right">
+                        <p className="text-neutral-gray text-xs">{(recipient.bankName || recipient.bank) || ''} - {(recipient.accountNumber && recipient.accountNumber.length > 6) ? `***${recipient.accountNumber.slice(-4)}` : recipient.accountNumber}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-neutral-gray text-xs">{recipient.bank} - {recipient.accountNumber}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                ))
+              )}
             </div>
 
             {/* Empty State */}
