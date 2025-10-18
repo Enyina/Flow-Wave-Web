@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
+import { apiFetch } from '../utils/api';
 
 const Recipients = () => {
   const navigate = useNavigate();
