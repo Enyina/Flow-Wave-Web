@@ -233,9 +233,14 @@ const AddRecipient = () => {
           </button>
 
           {/* Add Recipient Title */}
-          <h1 className="text-center text-2xl lg:text-3xl font-bold text-primary-pink mb-8 lg:mb-10">
-            Add Recipient
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-center text-2xl lg:text-3xl font-bold text-primary-pink mb-0">
+              {location?.state?.mode === 'view' ? 'View Recipient' : (location?.state?.mode === 'edit' ? 'Edit Recipient' : 'Add Recipient')}
+            </h1>
+            {location?.state?.mode === 'view' && (
+              <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-primary-blue text-white rounded">Edit</button>
+            )}
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
