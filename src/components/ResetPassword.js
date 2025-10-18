@@ -8,8 +8,9 @@ import { apiFetch } from '../utils/api';
 const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const token = location.state?.token || '';
-  const email = location.state?.email || '';
+  const params = new URLSearchParams(location.search);
+  const token = location.state?.token || params.get('token') || '';
+  const email = location.state?.email || params.get('email') || '';
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
