@@ -36,7 +36,22 @@ const Recipients = () => {
       try {
         const res = await apiFetch(`/recipients?page=1&limit=100&search=${encodeURIComponent(searchTerm)}`);
         if (res.ok) {
-          if (mounted) setRecipients(res.data || []);
+          // Normalize response to an array. API may return { data: [...] } or [...] directly or { recipients: [...] }
+          const ensureArray = (val) => {
+            if (Array.isArray(val)) return val;
+            if (val && typeof val === 'object') {
+              if (Array.isArray(val.data)) return val.data;
+              if (Array.isArray(val.results)) return val.results;
+              if (Array.isArray(val.recipients)) return val.recipients;
+              // return first array property if present
+              for (const k of Object.keys(val)) {
+                if (Array.isArray(val[k])) return val[k];
+              }
+            }
+            return [];
+          };
+
+          if (mounted) setRecipients(ensureArray(res.data));
         } else {
           setListError(res.data?.error || 'Failed to load recipients');
         }
