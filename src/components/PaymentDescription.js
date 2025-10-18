@@ -167,6 +167,17 @@ const PaymentDescription = () => {
           </h1>
 
           <div className="flex flex-col gap-6">
+            {/* Form-level errors */}
+            {(errors && Object.keys(errors).length > 0) && (
+              <div className="w-full p-3 bg-error/10 border border-error text-error rounded">
+                <ul className="list-disc pl-5 text-sm">
+                  {Object.values(errors).map((err, idx) => (
+                    <li key={idx}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Description Input */}
             <div className="flex flex-col gap-2">
               <label className="text-neutral-dark dark:text-dark-text text-base font-normal">
