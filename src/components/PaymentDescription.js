@@ -83,9 +83,10 @@ const PaymentDescription = () => {
       const toRate = exchangeRates[toCode] || 1;
       const exchangeRate = fromRate / toRate;
 
-      const convertedAmount = exchangeRate && exchangeRate > 0 ? parseFloat((amountVal / exchangeRate).toFixed(2)) : 0;
       const transferFee = parseFloat((amountVal * 0.02).toFixed(2)); // 2% fee
-      const total = parseFloat((amountVal + transferFee).toFixed(2));
+      // Sender pays only the amountVal (user input). The fee is deducted from recipient (recipient pays fee).
+      const total = parseFloat((amountVal).toFixed(2));
+      const convertedAmount = exchangeRate && exchangeRate > 0 ? parseFloat(((amountVal - transferFee) / exchangeRate).toFixed(2)) : 0;
 
       // Build reference and optional metadata expected by API
       const referenceId = flowState?.transaction?.reference || flowState?.transaction?.referenceId || `FLOW-${Date.now().toString().slice(-6)}`;
