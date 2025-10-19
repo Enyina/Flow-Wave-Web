@@ -87,6 +87,11 @@ const PaymentDescription = () => {
       const transferFee = parseFloat((amountVal * 0.02).toFixed(2)); // 2% fee
       const total = parseFloat((amountVal + transferFee).toFixed(2));
 
+      // Build reference and optional metadata expected by API
+      const referenceId = flowState?.transaction?.reference || flowState?.transaction?.referenceId || `FLOW-${Date.now().toString().slice(-6)}`;
+      const recipientCurrency = flowState?.transaction?.recipientCurrency || toCode;
+      const idempotencyKey = `tx-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+
       let res;
       if (attachedFile) {
         // Build form data for multipart upload as per OpenAPI
@@ -103,6 +108,11 @@ const PaymentDescription = () => {
         form.append('transferFee', transferFee);
         form.append('total', total);
 
+        // Add new fields per updated DTO
+        form.append('referenceId', referenceId);
+        form.append('recipientCurrency', recipientCurrency);
+        form.append('idempotencyKey', idempotencyKey);
+
         res = await apiFetch('/transactions', { method: 'POST', body: form });
       } else {
         // JSON-only flow (no file)
@@ -114,7 +124,10 @@ const PaymentDescription = () => {
           exchangeRate,
           convertedAmount,
           transferFee,
-          total
+          total,
+          referenceId,
+          recipientCurrency,
+          idempotencyKey
         };
         res = await apiFetch('/transactions', { method: 'POST', body: payload });
       }
