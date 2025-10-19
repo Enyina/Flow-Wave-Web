@@ -34,7 +34,8 @@ const MobileNumber = () => {
       }
     }
 
-    if (!authUser) load();
+    // Always attempt to refresh profile from server so we have latest data
+    load();
     return () => { mounted = false; };
   }, [authUser]);
 
