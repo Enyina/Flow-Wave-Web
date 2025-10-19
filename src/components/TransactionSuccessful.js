@@ -9,6 +9,7 @@ const TransactionSuccessful = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const { flowState, updateFlowState } = useFlow();
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
