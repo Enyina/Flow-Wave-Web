@@ -34,8 +34,8 @@ const EmailAddress = () => {
       }
     }
 
-    // Only fetch if we don't already have authUser
-    if (!authUser) load();
+    // Always attempt to refresh profile from server so we have latest data
+    load();
     return () => { mounted = false; };
   }, [authUser]);
 
