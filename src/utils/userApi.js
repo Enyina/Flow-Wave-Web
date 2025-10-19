@@ -20,6 +20,16 @@ export async function confirmEmailChange(token) {
   return apiFetch(`${API_PREFIX}/confirm-email-change`, { method: 'POST', body: { token } });
 }
 
+// 6️⃣ Change Phone (sends SMS)
+export async function changePhone(newPhone) {
+  return apiFetch(`${API_PREFIX}/change-phone`, { method: 'POST', body: { newPhone } });
+}
+
+// 7️⃣ Confirm Phone Change
+export async function confirmPhoneChange(token) {
+  return apiFetch(`${API_PREFIX}/confirm-phone-change`, { method: 'POST', body: { token } });
+}
+
 // 3️⃣ Change Password
 export async function changePassword(currentPassword, newPassword) {
   return apiFetch(`${API_PREFIX}/change-password`, { method: 'POST', body: { currentPassword, newPassword } });

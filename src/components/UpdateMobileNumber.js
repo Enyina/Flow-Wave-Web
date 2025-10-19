@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
+import userApi from '../utils/userApi';
 
 const UpdateMobileNumber = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const UpdateMobileNumber = () => {
   const location = useLocation();
   const [mobileNumber, setMobileNumber] = useState(location?.state?.currentPhone || '');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -42,9 +44,22 @@ const UpdateMobileNumber = () => {
     return true;
   };
 
-  const handleContinue = () => {
-    if (validateMobileNumber()) {
-      navigate('/verify-number', { state: { newMobileNumber: mobileNumber } });
+  const handleContinue = async () => {
+    if (!validateMobileNumber()) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await userApi.changePhone(mobileNumber);
+      setIsLoading(false);
+      if (res && res.ok) {
+        navigate('/verify-number', { state: { newMobileNumber: mobileNumber } });
+      } else {
+        const message = res?.message || res?.data?.message || res?.data?.error || 'Failed to start phone change. Please try again.';
+        setError(message);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      setError(err?.message || 'An unexpected error occurred. Please try again.');
     }
   };
 
@@ -135,10 +150,12 @@ const UpdateMobileNumber = () => {
           {/* Continue Button */}
           <button
             onClick={handleContinue}
-            className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+            disabled={isLoading}
+            className={`w-full py-3 text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300 ${isLoading ? 'bg-primary-blue/60 cursor-not-allowed' : 'bg-primary-blue'}`}
           >
-            Continue
+            {isLoading ? 'Sending...' : 'Continue'}
           </button>
+          {error && <p className="text-error text-sm mt-2">{error}</p>}
         </div>
       </main>
 
