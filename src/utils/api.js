@@ -27,6 +27,27 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Response interceptor: if auth fails (401/403), clear auth and notify app
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    try {
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        try { localStorage.removeItem('authToken'); } catch (e) {}
+        try { localStorage.removeItem('userData'); } catch (e) {}
+        // Emit a global event so React can react if needed
+        try { window.dispatchEvent(new CustomEvent('auth:logout')); } catch (e) {}
+        // Redirect to login page
+        try { window.location.href = '/login'; } catch (e) {}
+      }
+    } catch (e) {
+      // ignore
+    }
+    return Promise.reject(error);
+  }
+);
+
 export async function apiFetch(path, options = {}) {
   // Ensure URL starts with a slash so axios concatenates baseURL correctly
   const url = path && path.startsWith('/') ? path : `/${(path || '').replace(/^\//, '')}`;
