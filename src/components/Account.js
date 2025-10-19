@@ -25,6 +25,10 @@ const Account = () => {
   }, []);
 
   useEffect(() => {
+    if (authUser) setProfile(authUser);
+  }, [authUser]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
