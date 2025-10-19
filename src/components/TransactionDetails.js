@@ -74,23 +74,66 @@ const TransactionDetails = () => {
     return `${symbol}${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric)}`;
   };
 
+  // helper to pick first available key from candidates
+  const pick = (obj, ...keys) => {
+    for (const k of keys) {
+      const parts = k.split('.');
+      let cur = obj;
+      let found = true;
+      for (const p of parts) {
+        if (cur == null) { found = false; break; }
+        cur = cur[p];
+      }
+      if (found && typeof cur !== 'undefined' && cur !== null && String(cur) !== '') return cur;
+    }
+    return '';
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return String(iso);
+      return d.toLocaleString();
+    } catch (e) {
+      return String(iso);
+    }
+  };
+
+  const recipientFromFlow = tx?.recipient || {};
+  const fallbackRecipient = (flowState?.selectedRecipient) || {};
+
+  const recipientName = pick(tx, 'recipient.fullName', 'recipient.name', 'recipientName', 'recipient.firstName', 'recipient.full_name') || pick(fallbackRecipient, 'fullName', 'name');
+  const accountNumber = pick(tx, 'recipient.accountNumber', 'accountNumber', 'virtualAccount.accountNumber', 'recipient.account', 'beneficiary.accountNumber');
+  const bankName = pick(tx, 'recipient.bankName', 'recipient.bank', 'bankName', 'bank', 'virtualAccount.bankName');
+  const routingNumber = pick(tx, 'recipient.routingNumber', 'routingNumber', 'recipient.swiftCode', 'recipient.swift', 'routing_number');
+  const paymentDescription = pick(tx, 'description', 'paymentDescription', 'payment_description', 'notes') || '';
+
+  const amountRaw = pick(tx, 'total', 'amount');
+  const currencyCode = pick(tx, 'currency') || fromCurrency.code;
+  const convertedRaw = pick(tx, 'convertedAmount', 'receivedAmount');
+  const transferFeeRaw = pick(tx, 'transferFee');
+  const referenceIdRaw = pick(tx, 'reference', 'referenceId', 'id', '_id');
+  const exchangeRateRaw = pick(tx, 'exchangeRate', 'rate');
+  const dateRaw = pick(tx, 'createdAt', 'date', 'timestamp');
+
   const transactionData = {
-    amount: formatCurrency(tx?.amount ?? tx?.total ?? 0, tx?.currency || fromCurrency.code),
-    date: tx?.date || tx?.createdAt || tx?.timestamp || '',
-    status: tx?.status || tx?.state || '',
+    amount: formatCurrency(amountRaw || 0, currencyCode),
+    date: formatDate(dateRaw),
+    status: (pick(tx, 'status', 'state') || '').toString(),
     recipient: {
-      name: tx?.recipient?.fullName || tx?.recipient?.name || tx?.recipientName || tx?.recipient?.firstName || '',
-      accountNumber: tx?.recipient?.accountNumber || tx?.accountNumber || tx?.virtualAccount?.accountNumber || '',
-      bank: tx?.recipient?.bankName || tx?.recipient?.bank || tx?.bankName || tx?.bank || '',
-      routingNumber: tx?.recipient?.routingNumber || tx?.routingNumber || tx?.recipient?.swiftCode || '',
-      description: tx?.description || tx?.paymentDescription || ''
+      name: recipientName,
+      accountNumber: accountNumber,
+      bank: bankName,
+      routingNumber: routingNumber,
+      description: paymentDescription
     },
     details: {
-      referenceId: tx?.reference || tx?.referenceId || tx?.id || tx?._id || '',
-      exchangeRate: tx?.exchangeRate || tx?.rate || '',
-      receivedAmount: formatCurrency(tx?.convertedAmount || tx?.receivedAmount || 0, tx?.recipientCurrency || tx?.convertedCurrency || 'USD'),
-      transferFee: formatCurrency(tx?.transferFee || 0, tx?.currency || fromCurrency.code),
-      total: formatCurrency(tx?.total || (tx?.amount ? parseFloat(tx.amount) + (tx.transferFee || 0) : 0), tx?.currency || fromCurrency.code)
+      referenceId: referenceIdRaw,
+      exchangeRate: exchangeRateRaw,
+      receivedAmount: formatCurrency(convertedRaw || 0, tx?.recipientCurrency || tx?.convertedCurrency || 'USD'),
+      transferFee: formatCurrency(transferFeeRaw || 0, currencyCode),
+      total: formatCurrency(amountRaw || 0, currencyCode)
     }
   };
 
