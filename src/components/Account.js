@@ -9,6 +9,21 @@ const Account = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const res = await userApi.getProfile();
+        if (res.ok && mounted) setProfile(res.data);
+      } catch (e) {
+        // ignore
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
