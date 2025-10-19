@@ -12,7 +12,7 @@ const AccountVerifyEmail = () => {
   const [verificationCode, setVerificationCode] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
 
-  const email = location.state?.email || 'aostglc@gmail.com';
+  const email = location.state?.email || location.state?.newEmail || 'aostglc@gmail.com';
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
