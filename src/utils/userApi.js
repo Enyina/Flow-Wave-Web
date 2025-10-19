@@ -51,6 +51,8 @@ export default {
   getProfile,
   changeEmail,
   confirmEmailChange,
+  changePhone,
+  confirmPhoneChange,
   changePassword,
   updateAddress,
   uploadProfilePicture,
