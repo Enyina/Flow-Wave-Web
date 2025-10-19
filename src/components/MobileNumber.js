@@ -8,21 +8,55 @@ import { useState, useEffect } from 'react';
 
 const MobileNumber = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [profile, setProfile] = useState(authUser || null);
+  const [loadingProfile, setLoadingProfile] = useState(!authUser);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoadingProfile(true);
+      setError('');
+      try {
+        const res = await userApi.getProfile();
+        if (res.ok && mounted) setProfile(res.data);
+        else if (mounted) setError(res.data?.error || 'Failed to load profile');
+      } catch (e) {
+        if (mounted) setError('Network error');
+      } finally {
+        if (mounted) setLoadingProfile(false);
+      }
+    }
+
+    if (!authUser) load();
+    return () => { mounted = false; };
+  }, [authUser]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleChangeNumber = () => {
-    navigate('/mobile-pin-entry');
+  const handleChangeNumber = async () => {
+    setError('');
+    if (!profile?.phoneNumber) {
+      setLoadingProfile(true);
+      const res = await userApi.getProfile();
+      setLoadingProfile(false);
+      if (res.ok) setProfile(res.data);
+      else return setError('Unable to verify current phone number. Please try again.');
+    }
+
+    if (!profile?.phoneNumber) return setError('No phone number available to change');
+
+    navigate('/mobile-pin-entry', { state: { currentPhone: profile.phoneNumber } });
   };
 
   return (
