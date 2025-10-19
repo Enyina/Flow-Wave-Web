@@ -50,21 +50,32 @@ const EnterPin = () => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const pinString = pin.join('');
-    
+
     if (pinString.length !== 4) {
       setError('Please enter your 4-digit PIN');
       return;
     }
 
-    // Simulate PIN validation (use 1234 as valid PIN for demo)
-    if (pinString === '1234') {
-      navigate('/payment-instructions');
-    } else {
-      setError('Invalid PIN. Please try again. (Hint: use 1234 for demo)');
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await apiFetch('/auth/verify-pin', { method: 'POST', body: { pin: pinString } });
+      if (res.ok) {
+        navigate('/payment-instructions');
+      } else {
+        const msg = res.data?.message || res.data?.error || 'Invalid PIN';
+        setError(msg);
+        setPin(['', '', '', '']);
+        inputRefs.current[0]?.focus();
+      }
+    } catch (err) {
+      setError('Network error');
       setPin(['', '', '', '']);
       inputRefs.current[0]?.focus();
+    } finally {
+      setIsLoading(false);
     }
   };
 
