@@ -15,6 +15,8 @@ const AccountPin = () => {
 
   // Get the action from navigation state (change-email, change-mobile, etc.)
   const action = location.state?.action || 'change-email';
+  const currentEmail = location.state?.currentEmail;
+  const currentPhone = location.state?.currentPhone;
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
