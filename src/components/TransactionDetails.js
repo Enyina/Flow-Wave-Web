@@ -100,22 +100,24 @@ const TransactionDetails = () => {
     }
   };
 
-  const recipientFromFlow = tx?.recipient || {};
-  const fallbackRecipient = (flowState?.selectedRecipient) || {};
+  // Map fields exactly as returned by your API
+  const recipientFromTx = tx?.recipient || {};
+  const recipientName = recipientFromTx?.fullName || `${recipientFromTx?.firstName || ''} ${recipientFromTx?.lastName || ''}`.trim() || tx?.recipientName || flowState?.selectedRecipient?.fullName || '';
+  const accountNumber = recipientFromTx?.accountNumber || tx?.accountNumber || recipientFromTx?.account_number || '';
+  const bankName = recipientFromTx?.bankName || recipientFromTx?.bank || tx?.bankName || tx?.bank || '';
+  const routingNumber = recipientFromTx?.swiftOrSortCode || recipientFromTx?.swiftCode || recipientFromTx?.routingNumber || tx?.routingNumber || '';
+  const paymentDescription = tx?.description || tx?.paymentDescription || '';
 
-  const recipientName = pick(tx, 'recipient.fullName', 'recipient.name', 'recipientName', 'recipient.firstName', 'recipient.full_name') || pick(fallbackRecipient, 'fullName', 'name');
-  const accountNumber = pick(tx, 'recipient.accountNumber', 'accountNumber', 'virtualAccount.accountNumber', 'recipient.account', 'beneficiary.accountNumber');
-  const bankName = pick(tx, 'recipient.bankName', 'recipient.bank', 'bankName', 'bank', 'virtualAccount.bankName');
-  const routingNumber = pick(tx, 'recipient.routingNumber', 'routingNumber', 'recipient.swiftCode', 'recipient.swift', 'routing_number');
-  const paymentDescription = pick(tx, 'description', 'paymentDescription', 'payment_description', 'notes') || '';
+  const amountRaw = typeof tx?.total !== 'undefined' ? tx.total : tx?.amount;
+  const currencyCode = tx?.currency || fromCurrency.code;
+  const convertedRaw = tx?.convertedAmount || tx?.receivedAmount;
+  const transferFeeRaw = tx?.transferFee;
+  const referenceIdRaw = tx?.referenceId || tx?.reference || tx?.id || tx?._id || '';
+  const exchangeRateRaw = tx?.exchangeRate || tx?.rate || '';
+  const dateRaw = tx?.createdAt || tx?.date || tx?.timestamp || '';
 
-  const amountRaw = pick(tx, 'total', 'amount');
-  const currencyCode = pick(tx, 'currency') || fromCurrency.code;
-  const convertedRaw = pick(tx, 'convertedAmount', 'receivedAmount');
-  const transferFeeRaw = pick(tx, 'transferFee');
-  const referenceIdRaw = pick(tx, 'reference', 'referenceId', 'id', '_id');
-  const exchangeRateRaw = pick(tx, 'exchangeRate', 'rate');
-  const dateRaw = pick(tx, 'createdAt', 'date', 'timestamp');
+  // ensure recipient name is shown where amount is displayed
+  const displayName = recipientName || flowState?.selectedRecipient?.fullName || '';
 
   const transactionData = {
     amount: formatCurrency(amountRaw || 0, currencyCode),
