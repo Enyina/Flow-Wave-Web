@@ -97,8 +97,17 @@ const PaymentInstructions = () => {
   };
 
   // Prefer values from flowState.transaction when available
-  const transaction = flowState?.transaction || null;
-  const amountValue = transaction?.total ?? transaction?.amount ?? calculateTotalPay();
+  // Prefer transaction in flow state, else restore lastTransaction
+  let transaction = flowState?.transaction || null;
+  if (!transaction) {
+    try {
+      const raw = localStorage.getItem('lastTransaction');
+      if (raw) transaction = JSON.parse(raw);
+    } catch (e) { /* ignore */ }
+  }
+
+  // Amount payable should be what the sender entered (transaction.amount). Fallback to total if absent.
+  const amountValue = (typeof transaction?.amount !== 'undefined' && transaction !== null) ? transaction.amount : transaction?.total ?? calculateTotalPay();
   const currencyCode = transaction?.currency || fromCurrency.code;
   const amountPayableFormatted = formatCurrency(amountValue, currencyCode);
 
