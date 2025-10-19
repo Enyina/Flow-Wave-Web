@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
+import { useEffect } from 'react';
 
 const NewEmailAddress = () => {
   const navigate = useNavigate();
