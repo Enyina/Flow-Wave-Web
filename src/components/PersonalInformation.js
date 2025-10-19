@@ -10,6 +10,32 @@ const PersonalInformation = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadProfile() {
+      setLoadingProfile(true);
+      setError('');
+      try {
+        const res = await userApi.getProfile();
+        if (res.ok) {
+          if (mounted) setProfile(res.data);
+        } else {
+          setError(res.data?.error || 'Failed to load profile');
+        }
+      } catch (e) {
+        setError('Network error');
+      } finally {
+        if (mounted) setLoadingProfile(false);
+      }
+    }
+    loadProfile();
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
