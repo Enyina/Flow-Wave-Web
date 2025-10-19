@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 
 const NewEmailAddress = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [formData, setFormData] = useState({
@@ -14,6 +15,11 @@ const NewEmailAddress = () => {
     confirmEmail: ''
   });
   const [errors, setErrors] = useState({});
+  const currentEmail = location?.state?.currentEmail;
+
+  useEffect(() => {
+    // If currentEmail is provided, we don't autofill new email, but could display it
+  }, [currentEmail]);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
