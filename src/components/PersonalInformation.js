@@ -47,42 +47,68 @@ const PersonalInformation = () => {
     navigate('/login');
   };
 
+  const handleEditAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const [uploading, setUploading] = useState(false);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await userApi.uploadProfilePicture(file);
+      if (res.ok) {
+        // refresh profile
+        const prof = await userApi.getProfile();
+        if (prof.ok) setProfile(prof.data);
+      } else {
+        setError(res.data?.error || 'Failed to upload image');
+      }
+    } catch (err) {
+      setError('Network error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const personalDetails = [
     {
       label: 'Full Name',
-      value: 'Olumide Abayomi',
+      value: profile ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.fullName || '' : '',
       hasArrow: false
     },
     {
       label: 'Email',
-      value: 'olumide@gmail.com',
+      value: profile?.email || '',
       hasArrow: true,
       onClick: () => navigate('/email-address')
     },
     {
       label: 'Mobile Number',
-      value: '+234 123 456 789',
+      value: profile?.phoneNumber || '',
       hasArrow: true,
       onClick: () => navigate('/mobile-number')
     },
     {
       label: 'Gender',
-      value: 'Male',
+      value: profile?.gender || '',
       hasArrow: false
     },
     {
       label: 'Date of Birth',
-      value: '**-**-14',
+      value: profile?.dateOfBirth || '',
       hasArrow: false
     },
     {
       label: 'Occupation',
-      value: 'Product Designer',
+      value: profile?.occupation || '',
       hasArrow: false
     },
     {
       label: 'Address',
-      value: '',
+      value: profile?.address || '',
       hasArrow: true,
       onClick: () => navigate('/edit-address')
     }
