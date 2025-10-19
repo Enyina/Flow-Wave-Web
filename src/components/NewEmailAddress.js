@@ -15,6 +15,8 @@ const NewEmailAddress = () => {
     confirmEmail: ''
   });
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const currentEmail = location?.state?.currentEmail;
 
   useEffect(() => {
