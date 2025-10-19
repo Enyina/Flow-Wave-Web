@@ -93,7 +93,7 @@ const MobileNumberUpdated = () => {
                 Your mobile number has been updated
               </h1>
               <p className="text-center text-black text-base">
-                Olumide, you have successfully updated your mobile number
+                {displayName}, you have successfully updated your mobile number
               </p>
             </div>
           </div>
