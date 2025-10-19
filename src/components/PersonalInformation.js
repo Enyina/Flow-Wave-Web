@@ -17,6 +17,7 @@ const PersonalInformation = () => {
   useEffect(() => {
     let mounted = true;
     async function loadProfile() {
+      // If we already have authUser, keep it and still attempt to refresh
       setLoadingProfile(true);
       setError('');
       try {
@@ -32,9 +33,15 @@ const PersonalInformation = () => {
         if (mounted) setLoadingProfile(false);
       }
     }
+
     loadProfile();
     return () => { mounted = false; };
   }, []);
+
+  // Update profile when auth context user changes
+  useEffect(() => {
+    if (authUser) setProfile(authUser);
+  }, [authUser]);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
