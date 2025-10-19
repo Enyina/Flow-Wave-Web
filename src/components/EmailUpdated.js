@@ -104,7 +104,7 @@ const EmailUpdated = () => {
                 Your email address has been updated
               </h2>
               <p className="text-black text-base text-center">
-                Olumide, you have successfully updated your email address
+                {displayName}, you have successfully updated your email address
               </p>
             </div>
 
