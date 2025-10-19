@@ -8,21 +8,59 @@ import { useState, useEffect } from 'react';
 
 const EmailAddress = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [profile, setProfile] = useState(authUser || null);
+  const [loadingProfile, setLoadingProfile] = useState(!authUser);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoadingProfile(true);
+      setError('');
+      try {
+        const res = await userApi.getProfile();
+        if (res.ok && mounted) setProfile(res.data);
+        else if (mounted) setError(res.data?.error || 'Failed to load profile');
+      } catch (e) {
+        if (mounted) setError('Network error');
+      } finally {
+        if (mounted) setLoadingProfile(false);
+      }
+    }
+
+    // Only fetch if we don't already have authUser
+    if (!authUser) load();
+    return () => { mounted = false; };
+  }, [authUser]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleChangeEmail = () => {
-    navigate('/account-pin', { state: { action: 'change-email' } });
+  const handleChangeEmail = async () => {
+    setError('');
+    // ensure we have latest email
+    if (!profile?.email) {
+      setLoadingProfile(true);
+      const res = await userApi.getProfile();
+      setLoadingProfile(false);
+      if (res.ok) setProfile(res.data);
+      else return setError('Unable to verify current email. Please try again.');
+    }
+
+    if (!profile?.email) {
+      return setError('No email available to change');
+    }
+
+    navigate('/account-pin', { state: { action: 'change-email', currentEmail: profile.email } });
   };
 
   return (
