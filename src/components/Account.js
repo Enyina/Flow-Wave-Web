@@ -6,9 +6,9 @@ import userApi from '../utils/userApi';
 
 const Account = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(authUser || null);
 
   useEffect(() => {
     let mounted = true;
