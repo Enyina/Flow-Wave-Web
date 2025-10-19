@@ -63,9 +63,15 @@ const TransactionDetails = () => {
   const formatCurrency = (amount, currencyCode) => {
     const symbols = { NGN: '₦', USD: '$', GBP: '£', EUR: '€', CAD: 'C$', AUD: 'A$', JPY: '¥', CHF: 'CHF ', ZAR: 'R' };
     if (amount === undefined || amount === null || amount === '') return '';
-    if (typeof amount === 'string') return amount;
+    // accept strings that contain numbers
+    const numeric = typeof amount === 'number' ? amount : (typeof amount === 'string' && !isNaN(Number(amount)) ? Number(amount) : null);
     const symbol = symbols[currencyCode] || '';
-    return `${symbol}${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (numeric === null) {
+      // fallback: return original string trimmed
+      return `${symbol}${String(amount)}`;
+    }
+    // Avoid displaying absurdly large integers without grouping — use Intl.NumberFormat
+    return `${symbol}${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric)}`;
   };
 
   const transactionData = {
