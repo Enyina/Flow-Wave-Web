@@ -3,7 +3,11 @@ import apiFetch from './api';
 const API_PREFIX = '/users';
 
 export async function getProfile() {
-  return apiFetch(`${API_PREFIX}/me`);
+  const res = await apiFetch(`${API_PREFIX}/me`);
+  if (!res.ok) return res;
+  // Normalize common response shapes: { data: user }, { user: { ... } }, or raw user
+  const user = res.data?.data || res.data?.user || res.data;
+  return { ok: true, status: res.status, data: user };
 }
 
 // 1️⃣ Change Email (sends confirmation link)
