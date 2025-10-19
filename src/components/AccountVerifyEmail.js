@@ -167,6 +167,10 @@ const AccountVerifyEmail = () => {
             {isLoading ? 'Verifying...' : 'Verify'}
           </button>
 
+          {error ? (
+            <p className="text-center text-sm text-red-600 mb-4">{error}</p>
+          ) : null}
+
           {/* Resend Link */}
           <div className="text-center">
             <button
