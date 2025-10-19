@@ -125,8 +125,10 @@ const PaymentDescription = () => {
           currency: fromCode,
           description,
           exchangeRate,
+          // convertedAmount reflects recipient received amount after fee
           convertedAmount,
           transferFee,
+          // total represents what sender pays (amountVal)
           total,
           referenceId,
           recipientCurrency,
