@@ -137,10 +137,10 @@ const Account = () => {
               </p>
             </div>
 
-            {/* Tier Button */}
-            <button className="px-6 py-3 border border-neutral-gray rounded-lg text-neutral-gray font-bold hover:bg-neutral-light transition-colors">
-              Tier 1
-            </button>
+            {/* Status */}
+            <div className="px-6 py-2 border border-neutral-gray rounded-lg text-neutral-gray font-bold">
+              {profile?.status || 'Status Unknown'}
+            </div>
           </div>
 
           {/* Menu Items */}

@@ -86,28 +86,28 @@ const PersonalInformation = () => {
     },
     {
       label: 'Mobile Number',
-      value: profile?.phoneNumber || '',
+      value: profile?.phoneNumber || 'Not set',
       hasArrow: true,
       onClick: () => navigate('/mobile-number')
     },
     {
       label: 'Gender',
-      value: profile?.gender || '',
+      value: profile?.gender || 'Not set',
       hasArrow: false
     },
     {
       label: 'Date of Birth',
-      value: profile?.dateOfBirth || '',
+      value: profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : 'Not set',
       hasArrow: false
     },
     {
       label: 'Occupation',
-      value: profile?.occupation || '',
+      value: profile?.occupation || 'Not set',
       hasArrow: false
     },
     {
       label: 'Address',
-      value: profile?.address || '',
+      value: [profile?.address, profile?.city, profile?.state, profile?.zip, profile?.country].filter(Boolean).join(', ') || 'Not set',
       hasArrow: true,
       onClick: () => navigate('/edit-address')
     }
