@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
 import userApi from '../utils/userApi';
-import { useState, useEffect } from 'react';
 
 const MobileNumber = () => {
   const navigate = useNavigate();
