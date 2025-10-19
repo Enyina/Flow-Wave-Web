@@ -60,9 +60,23 @@ const NewEmailAddress = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
-    if (validateForm()) {
-      navigate('/account-verify-email', { state: { newEmail: formData.email } });
+  const handleContinue = async () => {
+    if (!validateForm()) return;
+
+    setApiError('');
+    setIsLoading(true);
+    try {
+      const res = await userApi.changeEmail(formData.email);
+      if (res.ok) {
+        // Navigate to verification page with the new email
+        navigate('/account-verify-email', { state: { email: formData.email } });
+      } else {
+        setApiError(res.data?.error || res.data?.message || 'Failed to initiate email change');
+      }
+    } catch (e) {
+      setApiError('Network error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
