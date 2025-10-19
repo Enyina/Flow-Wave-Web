@@ -136,8 +136,8 @@ const AddRecipient = () => {
         const saved = res.data || payload;
         // update selectedRecipient in flow so review uses real recipient
         updateFlowState({ selectedRecipient: saved, startedFromRecipient: true });
-        // Navigate to review step
-        navigate('/review');
+        // Navigate to recipients list
+        navigate('/recipients');
       } else {
         setErrors({ general: res.data?.error || 'Failed to save recipient' });
       }
@@ -244,6 +244,14 @@ const AddRecipient = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {errors && errors.general && (
+              <div className="w-full p-3 bg-error/10 border border-error text-error rounded">
+                <ul className="list-disc pl-5 text-sm m-0">
+                  <li>{errors.general}</li>
+                </ul>
+              </div>
+            )}
+
             {/* Personal Information */}
             <div className={`space-y-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
               {renderInputField('Full Name', 'fullName', 'text', 'First Name')}
