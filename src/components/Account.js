@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
+import userApi from '../utils/userApi';
 
 const Account = () => {
   const navigate = useNavigate();
