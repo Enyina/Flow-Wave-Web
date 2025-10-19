@@ -3,7 +3,7 @@ import apiFetch from './api';
 const API_PREFIX = '/users';
 
 export async function getProfile() {
-  return apiFetch('/user/me');
+  return apiFetch(`${API_PREFIX}/me`);
 }
 
 // 1️⃣ Change Email (sends confirmation link)
