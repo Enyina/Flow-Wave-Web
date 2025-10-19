@@ -10,6 +10,7 @@ const EnterPin = () => {
   const [pin, setPin] = useState(['', '', '', '']);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {
