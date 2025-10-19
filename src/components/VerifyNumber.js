@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
+import userApi from '../utils/userApi';
 
 const VerifyNumber = () => {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ const VerifyNumber = () => {
   const [countdown, setCountdown] = useState(256);
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const newMobileNumber = location.state?.newMobileNumber || '+234 567 890 1235';
 
@@ -67,19 +70,41 @@ const VerifyNumber = () => {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const codeString = code.join('');
-    if (codeString.length === 4) {
-      // Navigate to mobile number updated success page
-      navigate('/mobile-number-updated');
+    if (codeString.length !== 4) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await userApi.confirmPhoneChange(codeString);
+      setIsLoading(false);
+      if (res && res.ok) {
+        navigate('/mobile-number-updated');
+      } else {
+        const message = res?.message || res?.data?.message || res?.data?.error || 'Verification failed. Please try again.';
+        setError(message);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      setError(err?.message || 'An unexpected error occurred. Please try again.');
     }
   };
 
-  const handleResend = () => {
-    setCountdown(256);
-    setCanResend(false);
-    setCode(['', '', '', '']);
-    inputRefs.current[0]?.focus();
+  const handleResend = async () => {
+    if (!canResend) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      await userApi.changePhone(newMobileNumber);
+      setCountdown(256);
+      setCanResend(false);
+      setCode(['', '', '', '']);
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      setError(err?.message || 'Failed to resend code. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -169,11 +194,12 @@ const VerifyNumber = () => {
             {/* Verify Button */}
             <button
               onClick={handleVerify}
-              disabled={code.join('').length !== 4}
+              disabled={code.join('').length !== 4 || isLoading}
               className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
-              Verify
+              {isLoading ? 'Verifying...' : 'Verify'}
             </button>
+            {error && <p className="text-center text-sm text-red-600">{error}</p>}
 
             {/* Resend */}
             <div className="text-center text-xs">
