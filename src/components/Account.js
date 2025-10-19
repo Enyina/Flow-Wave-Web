@@ -135,6 +135,12 @@ const Account = () => {
               <p className="text-xs text-neutral-gray dark:text-dark-textSecondary">
                 {profile?.email || ''}
               </p>
+              {profile?.phoneNumber && (
+                <p className="text-xs text-neutral-gray dark:text-dark-textSecondary">{profile.phoneNumber}</p>
+              )}
+              {profile?.occupation && (
+                <p className="text-xs text-neutral-gray dark:text-dark-textSecondary">{profile.occupation}</p>
+              )}
             </div>
 
             {/* Status */}
