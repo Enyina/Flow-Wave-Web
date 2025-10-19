@@ -147,7 +147,7 @@ const MobileNumber = () => {
                 Your mobile number
               </p>
               <h2 className="text-black text-2xl font-bold text-center">
-                {loadingProfile ? 'Loading...' : (profile?.phoneNumber || 'Not set')}
+                {loadingProfile ? 'Loading...' : (profile?.phoneNumber || authUser?.phoneNumber || 'Not set')}
               </h2>
               {error && <p className="text-error text-sm mt-2">{error} <button onClick={handleReloadProfile} className="underline ml-2">Retry</button></p>}
             </div>
