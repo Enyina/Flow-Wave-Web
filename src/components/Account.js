@@ -121,7 +121,7 @@ const Account = () => {
             {/* Profile Image */}
             <div className="w-25 h-25 rounded-full overflow-hidden bg-neutral-light">
               <img
-                src={profile?.avatar || profile?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'}
+                src={profile?.profilePicture || profile?.avatar || profile?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
