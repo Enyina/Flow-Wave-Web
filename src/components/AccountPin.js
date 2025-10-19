@@ -68,13 +68,13 @@ const AccountPin = () => {
       // Navigate based on action
       switch (action) {
         case 'change-email':
-          navigate('/new-email-address');
+          navigate('/new-email-address', { state: { currentEmail } });
           break;
         case 'change-mobile':
-          navigate('/update-mobile-number');
+          navigate('/update-mobile-number', { state: { currentPhone } });
           break;
         default:
-          navigate('/new-email-address');
+          navigate('/new-email-address', { state: { currentEmail } });
       }
     } else {
       setError('Invalid PIN. Please try again. (Hint: use 1234 for demo)');
