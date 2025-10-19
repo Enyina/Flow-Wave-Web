@@ -62,6 +62,20 @@ const EmailAddress = () => {
     navigate('/account-pin', { state: { action: 'change-email', currentEmail: profile.email } });
   };
 
+  const handleReloadProfile = async () => {
+    setError('');
+    setLoadingProfile(true);
+    try {
+      const res = await userApi.getProfile();
+      if (res.ok) setProfile(res.data);
+      else setError(res.data?.error || 'Failed to reload profile');
+    } catch (e) {
+      setError('Network error');
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
       {/* Header */}
