@@ -25,6 +25,17 @@ export const AuthProvider = ({ children }) => {
     }
 
     setLoading(false);
+
+    // Listen for global logout events (emitted by api client on 401/403)
+    const onAuthLogout = () => {
+      try { localStorage.removeItem('authToken'); } catch (e) {}
+      try { localStorage.removeItem('userData'); } catch (e) {}
+      setIsAuthenticated(false);
+      setUser(null);
+    };
+
+    window.addEventListener('auth:logout', onAuthLogout);
+    return () => window.removeEventListener('auth:logout', onAuthLogout);
   }, []);
 
   const login = async (email, password) => {
