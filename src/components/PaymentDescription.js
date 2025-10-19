@@ -105,8 +105,10 @@ const PaymentDescription = () => {
 
         // Add calculated fields to FormData
         form.append('exchangeRate', exchangeRate);
+        // convertedAmount should reflect what recipient receives after fee deduction
         form.append('convertedAmount', convertedAmount);
         form.append('transferFee', transferFee);
+        // total is the amount the sender pays (user input)
         form.append('total', total);
 
         // Add new fields per updated DTO
