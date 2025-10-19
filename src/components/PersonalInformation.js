@@ -7,10 +7,10 @@ import userApi from '../utils/userApi';
 
 const PersonalInformation = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [profile, setProfile] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [profile, setProfile] = useState(authUser || null);
+  const [loadingProfile, setLoadingProfile] = useState(!authUser);
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
