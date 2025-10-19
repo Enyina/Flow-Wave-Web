@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
 
@@ -9,6 +10,7 @@ const PaymentInstructions = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { fromCurrency, sendAmount } = useCurrency();
+  const { flowState } = useFlow();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
   const [copyFeedback, setCopyFeedback] = useState('');
@@ -86,13 +88,18 @@ const PaymentInstructions = () => {
     }
   };
 
-  // Mock payment details
+  // Prefer values from flowState.transaction when available
+  const transaction = flowState?.transaction || null;
+  const amountValue = transaction?.total ?? transaction?.amount ?? calculateTotalPay();
+  const currencyCode = transaction?.currency || fromCurrency.code;
+  const amountPayableFormatted = formatCurrency(amountValue, currencyCode);
+
   const paymentDetails = {
-    accountNumber: '12345678901',
-    accountName: 'Flowwave',
-    bankName: 'Mastercard',
-    amountPayable: formatCurrency(calculateTotalPay(), fromCurrency.code),
-    referenceId: 'FLOW-12345'
+    accountNumber: transaction?.virtualAccount?.accountNumber || transaction?.accountNumber || '12345678901',
+    accountName: transaction?.virtualAccount?.accountName || transaction?.accountName || 'Flowwave',
+    bankName: transaction?.virtualAccount?.bankName || transaction?.bankName || transaction?.bank || 'Mastercard',
+    amountPayable: amountPayableFormatted,
+    referenceId: transaction?.reference || transaction?.referenceId || transaction?.id || transaction?._id || 'FLOW-12345'
   };
 
   return (
