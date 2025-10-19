@@ -185,9 +185,10 @@ const EnterPin = () => {
           {/* Continue Button */}
           <button
             onClick={handleContinue}
-            className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+            disabled={isLoading}
+            className={`w-full py-3 text-white text-lg font-bold rounded-lg transition-all duration-300 ${isLoading ? 'bg-primary-blue/60 cursor-not-allowed' : 'bg-primary-blue hover:bg-primary-blue/90'}`}
           >
-            Continue
+            {isLoading ? 'Verifying...' : 'Continue'}
           </button>
         </div>
       </main>
