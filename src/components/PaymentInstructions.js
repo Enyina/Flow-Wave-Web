@@ -103,11 +103,11 @@ const PaymentInstructions = () => {
   const amountPayableFormatted = formatCurrency(amountValue, currencyCode);
 
   const paymentDetails = {
-    accountNumber: transaction?.virtualAccount?.accountNumber || transaction?.accountNumber || '12345678901',
-    accountName: transaction?.virtualAccount?.accountName || transaction?.accountName || 'Flowwave',
-    bankName: transaction?.virtualAccount?.bankName || transaction?.bankName || transaction?.bank || 'Mastercard',
+    accountNumber: transaction?.virtualAccount?.accountNumber || transaction?.recipient?.accountNumber || transaction?.accountNumber || '12345678901',
+    accountName: transaction?.virtualAccount?.accountName || transaction?.recipient?.fullName || transaction?.accountName || 'Flowwave',
+    bankName: transaction?.virtualAccount?.bankName || transaction?.recipient?.bankName || transaction?.bankName || transaction?.bank || 'Mastercard',
     amountPayable: amountPayableFormatted,
-    referenceId: transaction?.reference || transaction?.referenceId || transaction?.id || transaction?._id || 'FLOW-12345'
+    referenceId: transaction?.referenceId || transaction?.reference || transaction?.id || transaction?._id || 'FLOW-12345'
   };
 
   return (
