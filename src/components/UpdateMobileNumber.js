@@ -8,7 +8,8 @@ const UpdateMobileNumber = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [mobileNumber, setMobileNumber] = useState('');
+  const location = useLocation();
+  const [mobileNumber, setMobileNumber] = useState(location?.state?.currentPhone || '');
   const [error, setError] = useState('');
 
   useEffect(() => {
