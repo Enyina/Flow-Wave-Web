@@ -46,20 +46,25 @@ const EmailAddress = () => {
 
   const handleChangeEmail = async () => {
     setError('');
-    // ensure we have latest email
-    if (!profile?.email) {
+    // ensure we have latest email or fallback to auth context
+    let currentEmail = profile?.email || authUser?.email;
+    if (!currentEmail) {
       setLoadingProfile(true);
       const res = await userApi.getProfile();
       setLoadingProfile(false);
-      if (res.ok) setProfile(res.data);
-      else return setError('Unable to verify current email. Please try again.');
+      if (res.ok) {
+        setProfile(res.data);
+        currentEmail = res.data?.email || authUser?.email;
+      } else {
+        return setError('Unable to verify current email. Please try again.');
+      }
     }
 
-    if (!profile?.email) {
+    if (!currentEmail) {
       return setError('No email available to change');
     }
 
-    navigate('/account-pin', { state: { action: 'change-email', currentEmail: profile.email } });
+    navigate('/account-pin', { state: { action: 'change-email', currentEmail } });
   };
 
   const handleReloadProfile = async () => {
