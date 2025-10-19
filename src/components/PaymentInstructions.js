@@ -65,7 +65,15 @@ const PaymentInstructions = () => {
       'CHF': 'CHF ',
       'ZAR': 'R'
     };
-    return `${symbols[currencyCode] || ''}${amount}`;
+    if (amount === undefined || amount === null || amount === '') return '';
+    // If it's already a formatted string, return it with symbol
+    if (typeof amount === 'string' && isNaN(Number(amount))) {
+      return `${symbols[currencyCode] || ''}${amount}`;
+    }
+    const numeric = Number(amount);
+    if (!isFinite(numeric)) return `${symbols[currencyCode] || ''}${String(amount)}`;
+    const formatted = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric);
+    return `${symbols[currencyCode] || ''}${formatted}`;
   };
 
   const handleSentMoney = () => {
