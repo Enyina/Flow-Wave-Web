@@ -6,8 +6,9 @@ import BackButton from './BackButton';
 
 const MobileNumberUpdated = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const displayName = user ? `${user.firstName || ''}${user.lastName ? ` ${user.lastName}` : ''}`.trim() : 'User';
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
