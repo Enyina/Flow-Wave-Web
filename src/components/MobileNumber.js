@@ -46,17 +46,22 @@ const MobileNumber = () => {
 
   const handleChangeNumber = async () => {
     setError('');
-    if (!profile?.phoneNumber) {
+    let currentPhone = profile?.phoneNumber || authUser?.phoneNumber;
+    if (!currentPhone) {
       setLoadingProfile(true);
       const res = await userApi.getProfile();
       setLoadingProfile(false);
-      if (res.ok) setProfile(res.data);
-      else return setError('Unable to verify current phone number. Please try again.');
+      if (res.ok) {
+        setProfile(res.data);
+        currentPhone = res.data?.phoneNumber || authUser?.phoneNumber;
+      } else {
+        return setError('Unable to verify current phone number. Please try again.');
+      }
     }
 
-    if (!profile?.phoneNumber) return setError('No phone number available to change');
+    if (!currentPhone) return setError('No phone number available to change');
 
-    navigate('/mobile-pin-entry', { state: { currentPhone: profile.phoneNumber } });
+    navigate('/mobile-pin-entry', { state: { currentPhone } });
   };
 
   const handleReloadProfile = async () => {
