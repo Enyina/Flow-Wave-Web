@@ -136,6 +136,11 @@ const PaymentDescription = () => {
       if (res.ok && (res.status === 201 || res.status === 200)) {
         // Save description and response transaction to flow and continue
         updateFlowState({ paymentDescription: description, currentStep: 'review', transaction: res.data });
+        try {
+          localStorage.setItem('lastTransaction', JSON.stringify(res.data));
+        } catch (e) {
+          // ignore localStorage errors
+        }
         navigate('/review');
       } else {
         setErrors({ form: res.data?.error || 'Failed to create transaction' });
