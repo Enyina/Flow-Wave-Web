@@ -16,6 +16,21 @@ const TransactionSuccessful = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Restore last transaction from localStorage if flowState missing it
+  useEffect(() => {
+    if (!flowState?.transaction) {
+      try {
+        const raw = localStorage.getItem('lastTransaction');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          updateFlowState({ transaction: parsed });
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, []);
+
   const handleDone = () => {
     navigate('/dashboard');
   };
