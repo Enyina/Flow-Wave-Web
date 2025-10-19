@@ -84,12 +84,13 @@ const PaymentReview = () => {
     navigate('/login');
   };
 
-  // Mock recipient data
+  // Prefer selected recipient from flow state or transaction; fall back to empty values
+  const rawRecipient = flowState?.selectedRecipient || transaction?.recipient || {};
   const recipient = {
-    name: 'Enyina Matthew',
-    accountNumber: '12345678901',
-    bank: 'Lead Bank',
-    routingNumber: 'ILBZAXAJH'
+    name: rawRecipient?.fullName || rawRecipient?.name || '',
+    accountNumber: rawRecipient?.accountNumber || rawRecipient?.account || '',
+    bank: rawRecipient?.bankName || rawRecipient?.bank || '',
+    routingNumber: rawRecipient?.routingNumber || rawRecipient?.swiftOrSortCode || rawRecipient?.swiftCode || ''
   };
 
   return (
