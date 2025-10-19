@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
 
@@ -9,7 +11,11 @@ const TransactionDetails = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { fromCurrency, toCurrency, sendAmount } = useCurrency();
+  const { flowState } = useFlow();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [copyFeedback, setCopyFeedback] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -22,33 +28,64 @@ const TransactionDetails = () => {
   };
 
   const handleShare = () => {
-    // Share functionality
-    if (navigator.share) {
-      navigator.share({
-        title: 'FlowWave Transaction Details',
-        text: 'Transaction completed successfully',
-      });
+    // Build share link from transaction identifier
+    const tx = flowState?.transaction;
+    const identifier = tx?.reference || tx?.referenceId || tx?.id || tx?._id || '';
+    const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+    const link = identifier ? `${origin}/public/transaction/${identifier}` : `${origin}/transactions`;
+    setShareLink(link);
+    setShowShareModal(true);
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyFeedback('Copied!');
+      setTimeout(() => setCopyFeedback(''), 2000);
+    } catch (err) {
+      setCopyFeedback('Failed to copy');
+      setTimeout(() => setCopyFeedback(''), 2000);
     }
   };
 
-  // Mock transaction data
+  const handleOSShare = () => {
+    if (navigator.share && shareLink) {
+      navigator.share({ title: 'FlowWave Transaction', url: shareLink }).catch(() => {});
+    }
+  };
+
+  const closeModal = () => {
+    setShowShareModal(false);
+  };
+
+  // Prefer transaction from flow state
+  const tx = flowState?.transaction || {};
+
+  const formatCurrency = (amount, currencyCode) => {
+    const symbols = { NGN: '₦', USD: '$', GBP: '£', EUR: '€', CAD: 'C$', AUD: 'A$', JPY: '¥', CHF: 'CHF ', ZAR: 'R' };
+    if (amount === undefined || amount === null || amount === '') return '';
+    if (typeof amount === 'string') return amount;
+    const symbol = symbols[currencyCode] || '';
+    return `${symbol}${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   const transactionData = {
-    amount: '₦10,000.00',
-    date: 'Jul 10th, 12:40:09',
-    status: 'Successful',
+    amount: formatCurrency(tx?.amount ?? tx?.total ?? 0, tx?.currency || fromCurrency.code),
+    date: tx?.date || tx?.createdAt || tx?.timestamp || '',
+    status: tx?.status || tx?.state || '',
     recipient: {
-      name: 'Enyina Matthew',
-      accountNumber: '12345678901',
-      bank: 'Lead Bank',
-      routingNumber: 'ILBZAXAJH',
-      description: 'Business Transaction'
+      name: tx?.recipient?.fullName || tx?.recipient?.name || tx?.recipientName || tx?.recipient?.firstName || '',
+      accountNumber: tx?.recipient?.accountNumber || tx?.accountNumber || tx?.virtualAccount?.accountNumber || '',
+      bank: tx?.recipient?.bankName || tx?.recipient?.bank || tx?.bankName || tx?.bank || '',
+      routingNumber: tx?.recipient?.routingNumber || tx?.routingNumber || tx?.recipient?.swiftCode || '',
+      description: tx?.description || tx?.paymentDescription || ''
     },
     details: {
-      referenceId: 'FLOW-12345',
-      exchangeRate: '₦1500.00 = $1.00',
-      receivedAmount: '$66.66',
-      transferFee: '₦1500.00',
-      total: '₦101,500.00'
+      referenceId: tx?.reference || tx?.referenceId || tx?.id || tx?._id || '',
+      exchangeRate: tx?.exchangeRate || tx?.rate || '',
+      receivedAmount: formatCurrency(tx?.convertedAmount || tx?.receivedAmount || 0, tx?.recipientCurrency || tx?.convertedCurrency || 'USD'),
+      transferFee: formatCurrency(tx?.transferFee || 0, tx?.currency || fromCurrency.code),
+      total: formatCurrency(tx?.total || (tx?.amount ? parseFloat(tx.amount) + (tx.transferFee || 0) : 0), tx?.currency || fromCurrency.code)
     }
   };
 
@@ -139,7 +176,7 @@ const TransactionDetails = () => {
                 <p className="text-neutral-dark text-xs mb-1">
                   {transactionData.date}
                 </p>
-                <p className="text-green-600 text-xs font-medium">
+                <p className={`${transactionData.status && transactionData.status.toLowerCase().includes('success') ? 'text-green-600' : 'text-neutral-dark'} text-xs font-medium`}>
                   {transactionData.status}
                 </p>
               </div>
@@ -205,6 +242,27 @@ const TransactionDetails = () => {
           >
             Share
           </button>
+
+          {/* Share Modal */}
+          {showShareModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-white dark:bg-dark-surface rounded-lg w-11/12 max-w-md p-6">
+                <h3 className="text-lg font-bold mb-3">Share Transaction</h3>
+                <p className="text-sm text-neutral-gray mb-3">Copy the link below and share it with anyone to view this transaction.</p>
+                <div className="flex gap-2 mb-3">
+                  <input type="text" readOnly value={shareLink} className="flex-1 px-3 py-2 border rounded" />
+                  <button onClick={() => copyToClipboard(shareLink)} className="px-3 py-2 bg-primary-blue text-white rounded">Copy</button>
+                </div>
+                {copyFeedback && <p className="text-sm text-green-600 mb-3">{copyFeedback}</p>}
+                <div className="flex justify-end gap-2">
+                  {navigator.share && (
+                    <button onClick={handleOSShare} className="px-4 py-2 bg-neutral-100 rounded">Share via device</button>
+                  )}
+                  <button onClick={closeModal} className="px-4 py-2 bg-primary-blue text-white rounded">Close</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
