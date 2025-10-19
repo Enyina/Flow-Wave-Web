@@ -122,6 +122,9 @@ const NewEmailAddress = () => {
             <p className="text-center text-neutral-gray text-base">
               Let's set up your new email address
             </p>
+            {currentEmail && (
+              <p className="text-center text-neutral-gray text-sm">Current: <span className="font-medium">{currentEmail}</span></p>
+            )}
           </div>
 
           {/* Form */}
