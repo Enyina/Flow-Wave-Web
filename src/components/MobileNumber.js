@@ -133,14 +133,16 @@ const MobileNumber = () => {
                 Your mobile number
               </p>
               <h2 className="text-black text-2xl font-bold text-center">
-                +234 567 890 1234
+                {loadingProfile ? 'Loading...' : (profile?.phoneNumber || 'Not set')}
               </h2>
+              {error && <p className="text-error text-sm mt-2">{error}</p>}
             </div>
 
             {/* Change Number Button */}
             <button
               onClick={handleChangeNumber}
-              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+              disabled={loadingProfile}
+              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300 disabled:opacity-60"
             >
               Change Number
             </button>
