@@ -148,14 +148,16 @@ const EmailAddress = () => {
                 Your current email
               </p>
               <h2 className="text-black text-2xl font-bold text-center">
-                olumide@gmail.com
+                {loadingProfile ? 'Loading...' : (profile?.email || 'Not set')}
               </h2>
+              {error && <p className="text-error text-sm mt-2">{error}</p>}
             </div>
 
             {/* Change Email Button */}
             <button
               onClick={handleChangeEmail}
-              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+              disabled={loadingProfile}
+              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300 disabled:opacity-60"
             >
               Change Email
             </button>
