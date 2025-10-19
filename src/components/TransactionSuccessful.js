@@ -36,6 +36,16 @@ const TransactionSuccessful = () => {
   };
 
   const handleViewTransactionDetails = () => {
+    // ensure flowState has transaction (restore from lastTransaction if necessary)
+    if (!flowState?.transaction) {
+      try {
+        const raw = localStorage.getItem('lastTransaction');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          updateFlowState({ transaction: parsed });
+        }
+      } catch (e) {}
+    }
     navigate('/transaction-details');
   };
 
