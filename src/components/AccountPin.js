@@ -57,31 +57,42 @@ const AccountPin = () => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const pinString = pin.join('');
-    
+
     if (pinString.length !== 4) {
       setError('Please enter your 4-digit PIN');
       return;
     }
 
-    // Simulate PIN validation (use 1234 as valid PIN for demo)
-    if (pinString === '1234') {
-      // Navigate based on action
-      switch (action) {
-        case 'change-email':
-          navigate('/new-email-address', { state: { currentEmail } });
-          break;
-        case 'change-mobile':
-          navigate('/update-mobile-number', { state: { currentPhone } });
-          break;
-        default:
-          navigate('/new-email-address', { state: { currentEmail } });
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await apiFetch('/auth/verify-pin', { method: 'POST', body: { pin: pinString } });
+      if (res.ok) {
+        // Navigate based on action
+        switch (action) {
+          case 'change-email':
+            navigate('/new-email-address', { state: { currentEmail } });
+            break;
+          case 'change-mobile':
+            navigate('/update-mobile-number', { state: { currentPhone } });
+            break;
+          default:
+            navigate('/new-email-address', { state: { currentEmail } });
+        }
+      } else {
+        const msg = res.data?.message || res.data?.error || 'Invalid PIN';
+        setError(msg);
+        setPin(['', '', '', '']);
+        inputRefs.current[0]?.focus();
       }
-    } else {
-      setError('Invalid PIN. Please try again. (Hint: use 1234 for demo)');
+    } catch (err) {
+      setError('Network error');
       setPin(['', '', '', '']);
       inputRefs.current[0]?.focus();
+    } finally {
+      setIsLoading(false);
     }
   };
 
