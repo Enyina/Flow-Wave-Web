@@ -170,6 +170,7 @@ const EnterPin = () => {
                 onChange={(e) => handlePinChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="w-12 h-16 text-center text-xl font-bold bg-primary-light border-2 border-transparent rounded-lg focus:border-primary-blue focus:outline-none transition-all duration-200"
+                disabled={isLoading}
               />
             ))}
           </div>
