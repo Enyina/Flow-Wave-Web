@@ -3,24 +3,79 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
+import userApi from '../utils/userApi';
 
 const MobileNumber = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [profile, setProfile] = useState(authUser || null);
+  const [loadingProfile, setLoadingProfile] = useState(!authUser);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoadingProfile(true);
+      setError('');
+      try {
+        const res = await userApi.getProfile();
+        if (res.ok && mounted) setProfile(res.data);
+        else if (mounted) setError(res.data?.error || 'Failed to load profile');
+      } catch (e) {
+        if (mounted) setError('Network error');
+      } finally {
+        if (mounted) setLoadingProfile(false);
+      }
+    }
+
+    // Always attempt to refresh profile from server so we have latest data
+    load();
+    return () => { mounted = false; };
+  }, [authUser]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleChangeNumber = () => {
-    navigate('/mobile-pin-entry');
+  const handleChangeNumber = async () => {
+    setError('');
+    let currentPhone = profile?.phoneNumber || authUser?.phoneNumber;
+    if (!currentPhone) {
+      setLoadingProfile(true);
+      const res = await userApi.getProfile();
+      setLoadingProfile(false);
+      if (res.ok) {
+        setProfile(res.data);
+        currentPhone = res.data?.phoneNumber || authUser?.phoneNumber;
+      } else {
+        return setError('Unable to verify current phone number. Please try again.');
+      }
+    }
+
+    if (!currentPhone) return setError('No phone number available to change');
+
+    navigate('/mobile-pin-entry', { state: { currentPhone } });
+  };
+
+  const handleReloadProfile = async () => {
+    setError('');
+    setLoadingProfile(true);
+    try {
+      const res = await userApi.getProfile();
+      if (res.ok) setProfile(res.data);
+      else setError(res.data?.error || 'Failed to reload profile');
+    } catch (e) {
+      setError('Network error');
+    } finally {
+      setLoadingProfile(false);
+    }
   };
 
   return (
@@ -97,14 +152,16 @@ const MobileNumber = () => {
                 Your mobile number
               </p>
               <h2 className="text-black text-2xl font-bold text-center">
-                +234 567 890 1234
+                {loadingProfile ? 'Loading...' : (profile?.phoneNumber || authUser?.phoneNumber || 'Not set')}
               </h2>
+              {error && <p className="text-error text-sm mt-2">{error} <button onClick={handleReloadProfile} className="underline ml-2">Retry</button></p>}
             </div>
 
             {/* Change Number Button */}
             <button
               onClick={handleChangeNumber}
-              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+              disabled={loadingProfile}
+              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300 disabled:opacity-60"
             >
               Change Number
             </button>

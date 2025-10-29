@@ -2,11 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
+import userApi from '../utils/userApi';
 
 const Account = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [profile, setProfile] = useState(authUser || null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const res = await userApi.getProfile();
+        if (res.ok && mounted) setProfile(res.data);
+      } catch (e) {
+        // ignore
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    if (authUser) setProfile(authUser);
+  }, [authUser]);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -104,9 +124,9 @@ const Account = () => {
           <div className="flex flex-col items-center gap-6 mb-10">
             {/* Profile Image */}
             <div className="w-25 h-25 rounded-full overflow-hidden bg-neutral-light">
-              <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face" 
-                alt="Profile" 
+              <img
+                src={profile?.profilePicture || profile?.avatar || profile?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face'}
+                alt="Profile"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -114,17 +134,23 @@ const Account = () => {
             {/* User Info */}
             <div className="flex flex-col items-center gap-2">
               <h2 className="text-lg font-bold text-neutral-dark dark:text-dark-text">
-                Olumide Abayomi
+                {profile ? (profile.firstName || profile.fullName || '') + (profile.lastName ? ` ${profile.lastName}` : '') : 'Account'}
               </h2>
               <p className="text-xs text-neutral-gray dark:text-dark-textSecondary">
-                olumide@gmail.com
+                {profile?.email || ''}
               </p>
+              {profile?.phoneNumber && (
+                <p className="text-xs text-neutral-gray dark:text-dark-textSecondary">{profile.phoneNumber}</p>
+              )}
+              {profile?.occupation && (
+                <p className="text-xs text-neutral-gray dark:text-dark-textSecondary">{profile.occupation}</p>
+              )}
             </div>
 
-            {/* Tier Button */}
-            <button className="px-6 py-3 border border-neutral-gray rounded-lg text-neutral-gray font-bold hover:bg-neutral-light transition-colors">
-              Tier 1
-            </button>
+            {/* Status */}
+            <div className="px-6 py-2 border border-neutral-gray rounded-lg text-neutral-gray font-bold">
+              {profile?.status || 'Status Unknown'}
+            </div>
           </div>
 
           {/* Menu Items */}

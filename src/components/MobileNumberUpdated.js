@@ -6,8 +6,9 @@ import BackButton from './BackButton';
 
 const MobileNumberUpdated = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const displayName = user ? `${user.firstName || ''}${user.lastName ? ` ${user.lastName}` : ''}`.trim() : 'User';
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -92,7 +93,7 @@ const MobileNumberUpdated = () => {
                 Your mobile number has been updated
               </h1>
               <p className="text-center text-black text-base">
-                Olumide, you have successfully updated your mobile number
+                {displayName}, you have successfully updated your mobile number
               </p>
             </div>
           </div>

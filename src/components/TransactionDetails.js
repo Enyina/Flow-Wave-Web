@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
 
@@ -9,7 +10,11 @@ const TransactionDetails = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { fromCurrency, toCurrency, sendAmount } = useCurrency();
+  const { flowState } = useFlow();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [copyFeedback, setCopyFeedback] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -22,33 +27,115 @@ const TransactionDetails = () => {
   };
 
   const handleShare = () => {
-    // Share functionality
-    if (navigator.share) {
-      navigator.share({
-        title: 'FlowWave Transaction Details',
-        text: 'Transaction completed successfully',
-      });
+    // Build share link from transaction identifier
+    const tx = flowState?.transaction;
+    const identifier = tx?.reference || tx?.referenceId || tx?.id || tx?._id || '';
+    const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+    const link = identifier ? `${origin}/public/transaction/${identifier}` : `${origin}/transactions`;
+    setShareLink(link);
+    setShowShareModal(true);
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyFeedback('Copied!');
+      setTimeout(() => setCopyFeedback(''), 2000);
+    } catch (err) {
+      setCopyFeedback('Failed to copy');
+      setTimeout(() => setCopyFeedback(''), 2000);
     }
   };
 
-  // Mock transaction data
+  const handleOSShare = () => {
+    if (navigator.share && shareLink) {
+      navigator.share({ title: 'FlowWave Transaction', url: shareLink }).catch(() => {});
+    }
+  };
+
+  const closeModal = () => {
+    setShowShareModal(false);
+  };
+
+  // Prefer transaction from flow state
+  const tx = flowState?.transaction || {};
+
+  const formatCurrency = (amount, currencyCode) => {
+    const symbols = { NGN: '₦', USD: '$', GBP: '£', EUR: '€', CAD: 'C$', AUD: 'A$', JPY: '¥', CHF: 'CHF ', ZAR: 'R' };
+    if (amount === undefined || amount === null || amount === '') return '';
+    // accept strings that contain numbers
+    const numeric = typeof amount === 'number' ? amount : (typeof amount === 'string' && !isNaN(Number(amount)) ? Number(amount) : null);
+    const symbol = symbols[currencyCode] || '';
+    if (numeric === null) {
+      // fallback: return original string trimmed
+      return `${symbol}${String(amount)}`;
+    }
+    // Avoid displaying absurdly large integers without grouping — use Intl.NumberFormat
+    return `${symbol}${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric)}`;
+  };
+
+  // helper to pick first available key from candidates
+  const pick = (obj, ...keys) => {
+    for (const k of keys) {
+      const parts = k.split('.');
+      let cur = obj;
+      let found = true;
+      for (const p of parts) {
+        if (cur == null) { found = false; break; }
+        cur = cur[p];
+      }
+      if (found && typeof cur !== 'undefined' && cur !== null && String(cur) !== '') return cur;
+    }
+    return '';
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return '';
+    try {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return String(iso);
+      return d.toLocaleString();
+    } catch (e) {
+      return String(iso);
+    }
+  };
+
+  // Map fields exactly as returned by your API
+  const recipientFromTx = tx?.recipient || {};
+  const recipientName = recipientFromTx?.fullName || `${recipientFromTx?.firstName || ''} ${recipientFromTx?.lastName || ''}`.trim() || tx?.recipientName || flowState?.selectedRecipient?.fullName || '';
+  const accountNumber = recipientFromTx?.accountNumber || tx?.accountNumber || recipientFromTx?.account_number || '';
+  const bankName = recipientFromTx?.bankName || recipientFromTx?.bank || tx?.bankName || tx?.bank || '';
+  const routingNumber = recipientFromTx?.swiftOrSortCode || recipientFromTx?.swiftCode || recipientFromTx?.routingNumber || tx?.routingNumber || '';
+  const paymentDescription = tx?.description || tx?.paymentDescription || '';
+
+  const amountRaw = typeof tx?.total !== 'undefined' ? tx.total : tx?.amount;
+  const currencyCode = tx?.currency || fromCurrency.code;
+  const convertedRaw = tx?.convertedAmount || tx?.receivedAmount;
+  const transferFeeRaw = tx?.transferFee;
+  const referenceIdRaw = tx?.referenceId || tx?.reference || tx?.id || tx?._id || '';
+  const exchangeRateRaw = tx?.exchangeRate || tx?.rate || '';
+  const dateRaw = tx?.createdAt || tx?.date || tx?.timestamp || '';
+
+  // ensure recipient name is shown where amount is displayed
+  const displayName = recipientName || flowState?.selectedRecipient?.fullName || '';
+
   const transactionData = {
-    amount: '₦10,000.00',
-    date: 'Jul 10th, 12:40:09',
-    status: 'Successful',
+    amount: formatCurrency(amountRaw || 0, currencyCode),
+    date: formatDate(dateRaw),
+    status: (pick(tx, 'status', 'state') || '').toString(),
     recipient: {
-      name: 'Enyina Matthew',
-      accountNumber: '12345678901',
-      bank: 'Lead Bank',
-      routingNumber: 'ILBZAXAJH',
-      description: 'Business Transaction'
+      name: recipientName,
+      accountNumber: accountNumber,
+      bank: bankName,
+      routingNumber: routingNumber,
+      description: paymentDescription
     },
     details: {
-      referenceId: 'FLOW-12345',
-      exchangeRate: '₦1500.00 = $1.00',
-      receivedAmount: '$66.66',
-      transferFee: '₦1500.00',
-      total: '₦101,500.00'
+      referenceId: referenceIdRaw,
+      exchangeRate: exchangeRateRaw,
+      receivedAmount: formatCurrency(convertedRaw || 0, tx?.recipientCurrency || tx?.convertedCurrency || 'USD'),
+      transferFee: formatCurrency(transferFeeRaw || 0, currencyCode),
+      total: formatCurrency(amountRaw || 0, currencyCode)
     }
   };
 
@@ -139,7 +226,7 @@ const TransactionDetails = () => {
                 <p className="text-neutral-dark text-xs mb-1">
                   {transactionData.date}
                 </p>
-                <p className="text-green-600 text-xs font-medium">
+                <p className={`${transactionData.status && transactionData.status.toLowerCase().includes('success') ? 'text-green-600' : 'text-neutral-dark'} text-xs font-medium`}>
                   {transactionData.status}
                 </p>
               </div>
@@ -205,6 +292,27 @@ const TransactionDetails = () => {
           >
             Share
           </button>
+
+          {/* Share Modal */}
+          {showShareModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-white dark:bg-dark-surface rounded-lg w-11/12 max-w-md p-6">
+                <h3 className="text-lg font-bold mb-3">Share Transaction</h3>
+                <p className="text-sm text-neutral-gray mb-3">Copy the link below and share it with anyone to view this transaction.</p>
+                <div className="flex gap-2 mb-3">
+                  <input type="text" readOnly value={shareLink} className="flex-1 px-3 py-2 border rounded" />
+                  <button onClick={() => copyToClipboard(shareLink)} className="px-3 py-2 bg-primary-blue text-white rounded">Copy</button>
+                </div>
+                {copyFeedback && <p className="text-sm text-green-600 mb-3">{copyFeedback}</p>}
+                <div className="flex justify-end gap-2">
+                  {navigator.share && (
+                    <button onClick={handleOSShare} className="px-4 py-2 bg-neutral-100 rounded">Share via device</button>
+                  )}
+                  <button onClick={closeModal} className="px-4 py-2 bg-primary-blue text-white rounded">Close</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useFlow } from '../contexts/FlowContext';
+import apiFetch from '../utils/api';
 import Logo from './Logo';
 import DarkModeToggle from './DarkModeToggle';
 
@@ -10,47 +12,53 @@ const Transactions = () => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [transactions, setTransactions] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [listError, setListError] = useState('');
+  const { updateFlowState } = useFlow();
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // Mock transaction data - replace with real data later
-  const mockTransactions = [
-    {
-      id: 1,
-      recipient: 'Enyina Matthew',
-      amount: '₦100,000.00',
-      date: 'Jul 10th, 12:40:09',
-      status: 'successful',
-      type: 'sent'
-    },
-    {
-      id: 2,
-      recipient: 'Enyina Matthew',
-      amount: '₦100,000.00',
-      date: 'Jul 10th, 12:40:09',
-      status: 'pending',
-      type: 'sent'
-    },
-    {
-      id: 3,
-      recipient: 'Enyina Matthew',
-      amount: '₦100,000.00',
-      date: 'Jul 10th, 12:40:09',
-      status: 'failed',
-      type: 'sent'
-    }
-  ];
-
   useEffect(() => {
-    // Simulate loading transactions
-    const timer = setTimeout(() => {
-      setTransactions(mockTransactions);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
+    let mounted = true;
+    const load = async () => {
+      setLoading(true);
+      setListError('');
+      try {
+        const params = new URLSearchParams();
+        params.set('page', String(page));
+        params.set('limit', String(limit));
+        if (statusFilter) params.set('status', statusFilter);
+        const res = await apiFetch(`/transactions?${params.toString()}`);
+        if (res.ok) {
+          // Normalize possible response shapes
+          const data = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.transactions || []);
+          if (mounted) setTransactions(data.map(t => ({
+            id: t.id || t._id || t.referenceId || t.reference,
+            raw: t,
+            recipient: (t.recipient?.fullName || t.recipient?.name || t.recipientName || t.recipient || '').toString(),
+            amount: typeof t.amount === 'number' ? new Intl.NumberFormat(undefined, { style: 'currency', currency: t.currency || 'NGN' }).format(t.amount) : (t.amount || ''),
+            date: t.createdAt || t.date || '',
+            status: t.status || ''
+          })));
+        } else {
+          setListError(res.data?.error || 'Failed to load transactions');
+        }
+      } catch (err) {
+        setListError('Network error');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => { mounted = false; };
+  }, [page, limit, statusFilter]);
+
 
   const handleLogout = () => {
     logout();
@@ -61,10 +69,14 @@ const Transactions = () => {
     setSearchQuery(e.target.value);
   };
 
-  const filteredTransactions = transactions.filter(transaction =>
-    transaction.recipient.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    transaction.amount.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTransactions = transactions.filter(transaction => {
+    const q = searchQuery.toLowerCase();
+    return (
+      (transaction.recipient || '').toLowerCase().includes(q) ||
+      (transaction.amount || '').toString().toLowerCase().includes(q) ||
+      (transaction.raw?.referenceId || transaction.raw?.reference || '').toLowerCase().includes(q)
+    );
+  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -93,7 +105,9 @@ const Transactions = () => {
   };
 
   const handleTransactionClick = (transaction) => {
-    navigate('/transaction-details', { state: { transaction } });
+    // store full transaction in flow state for details page
+    updateFlowState({ transaction: transaction.raw || transaction });
+    navigate('/transaction-details');
   };
 
   return (
@@ -170,7 +184,11 @@ const Transactions = () => {
           </div>
 
           {/* Transactions List */}
-          {filteredTransactions.length === 0 && !searchQuery ? (
+          {loading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : listError ? (
+            <div className="text-error text-center py-8">{listError}</div>
+          ) : filteredTransactions.length === 0 && !searchQuery ? (
             /* Empty State */
             <div className="text-center py-16">
               <p className="text-neutral-dark dark:text-dark-text text-base">

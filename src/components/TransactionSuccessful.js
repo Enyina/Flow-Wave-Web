@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
 
@@ -8,10 +9,26 @@ const TransactionSuccessful = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
+  const { flowState, updateFlowState } = useFlow();
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Restore last transaction from localStorage if flowState missing it
+  useEffect(() => {
+    if (!flowState?.transaction) {
+      try {
+        const raw = localStorage.getItem('lastTransaction');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          updateFlowState({ transaction: parsed });
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
   }, []);
 
   const handleDone = () => {
@@ -19,6 +36,16 @@ const TransactionSuccessful = () => {
   };
 
   const handleViewTransactionDetails = () => {
+    // ensure flowState has transaction (restore from lastTransaction if necessary)
+    if (!flowState?.transaction) {
+      try {
+        const raw = localStorage.getItem('lastTransaction');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          updateFlowState({ transaction: parsed });
+        }
+      } catch (e) {}
+    }
     navigate('/transaction-details');
   };
 

@@ -50,7 +50,7 @@ const MobilePinEntry = () => {
   const handleContinue = () => {
     const pinString = pin.join('');
     if (pinString.length === 4) {
-      navigate('/update-mobile-number');
+      navigate('/update-mobile-number', { state: { currentPhone: location?.state?.currentPhone } });
     }
   };
 

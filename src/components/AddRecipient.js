@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
+import { apiFetch } from '../utils/api';
+import { useFlow } from '../contexts/FlowContext';
 
 const AddRecipient = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const location = useLocation();
+  const { flowState, updateFlowState } = useFlow();
+
   const [formData, setFormData] = useState({
     fullName: '',
     bank: '',
@@ -21,6 +26,7 @@ const AddRecipient = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
 
   const banks = [
     'Access Bank',
@@ -36,6 +42,28 @@ const AddRecipient = () => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    // Pre-fill when navigating with state (view/edit)
+    const state = location?.state || {};
+    if (state.recipient) {
+      const r = state.recipient;
+      setFormData({
+        fullName: r.fullName || r.name || '',
+        bank: r.bankName || r.bank || '',
+        accountNumber: r.accountNumber || r.account || '',
+        swiftCode: r.swiftOrSortCode || r.swiftCode || '',
+        address: r.address || '',
+        state: r.state || '',
+        city: r.city || '',
+        zipCode: r.zipCode || r.postalCode || '',
+        phoneNumber: r.phoneNumber || r.phone || '',
+        email: r.email || ''
+      });
+      if (state.mode === 'view') setIsEditing(false);
+      if (state.mode === 'edit') setIsEditing(true);
+    }
+  }, [location]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -78,13 +106,46 @@ const AddRecipient = () => {
 
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const payload = {
+        fullName: formData.fullName,
+        firstName: '',
+        lastName: '',
+        bankName: formData.bank,
+        bankCode: '',
+        accountNumber: formData.accountNumber,
+        swiftOrSortCode: formData.swiftCode,
+        address: formData.address,
+        state: formData.state,
+        city: formData.city,
+        zipCode: formData.zipCode,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+      };
+
+      let res;
+      if (location?.state?.recipient && (location.state.mode === 'edit' || location.state.recipient.id || location.state.recipient._id)) {
+        // Update existing recipient
+        const id = location.state.recipient.id || location.state.recipient._id;
+        res = await apiFetch(`/recipients/${id}`, { method: 'PUT', body: payload });
+      } else {
+        res = await apiFetch('/recipients', { method: 'POST', body: payload });
+      }
+
+      if (res.ok) {
+        const saved = res.data || payload;
+        // update selectedRecipient in flow so review uses real recipient
+        updateFlowState({ selectedRecipient: saved, startedFromRecipient: true });
+        // Navigate to recipients list
+        navigate('/recipients');
+      } else {
+        setErrors({ general: res.data?.error || 'Failed to save recipient' });
+      }
+    } catch (err) {
+      setErrors({ general: 'Network error. Please try again.' });
+    } finally {
       setIsLoading(false);
-      // In a real app, you'd save the recipient data to state/context
-      console.log('Saved recipient:', formData);
-      navigate('/recipients');
-    }, 1500);
+    }
   };
 
   const renderInputField = (label, field, type = 'text', placeholder = '') => (
@@ -100,7 +161,7 @@ const AddRecipient = () => {
         className={`w-full px-4 py-3 rounded-lg border ${
           errors[field] ? 'border-error' : 'border-neutral-lightgray dark:border-dark-border'
         } bg-white dark:bg-dark-card text-neutral-dark dark:text-dark-text placeholder:text-neutral-placeholder focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/10 transition-all duration-200`}
-        disabled={isLoading}
+        disabled={!isEditing || isLoading}
       />
       {errors[field] && (
         <p className="text-error text-xs animate-slide-in-down animate-once">{errors[field]}</p>
@@ -172,12 +233,25 @@ const AddRecipient = () => {
           </button>
 
           {/* Add Recipient Title */}
-          <h1 className="text-center text-2xl lg:text-3xl font-bold text-primary-pink mb-8 lg:mb-10">
-            Add Recipient
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-center text-2xl lg:text-3xl font-bold text-primary-pink mb-0">
+              {location?.state?.mode === 'view' ? 'View Recipient' : (location?.state?.mode === 'edit' ? 'Edit Recipient' : 'Add Recipient')}
+            </h1>
+            {location?.state?.mode === 'view' && (
+              <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-primary-blue text-white rounded">Edit</button>
+            )}
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {errors && errors.general && (
+              <div className="w-full p-3 bg-error/10 border border-error text-error rounded">
+                <ul className="list-disc pl-5 text-sm m-0">
+                  <li>{errors.general}</li>
+                </ul>
+              </div>
+            )}
+
             {/* Personal Information */}
             <div className={`space-y-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
               {renderInputField('Full Name', 'fullName', 'text', 'First Name')}
@@ -241,21 +315,27 @@ const AddRecipient = () => {
             </div>
 
             {/* Save Button */}
-            <button
-              type="submit"
-              className={`w-full py-4 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
-              style={{ animationDelay: '1.2s' }}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Saving...
-                </div>
-              ) : (
-                'Save & Continue'
-              )}
-            </button>
+            {isEditing ? (
+              <button
+                type="submit"
+                className={`w-full py-4 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
+                style={{ animationDelay: '1.2s' }}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  'Save & Continue'
+                )}
+              </button>
+            ) : (
+              <button onClick={() => navigate('/recipients')} className={`w-full py-4 bg-neutral-gray text-white text-lg font-bold rounded-lg transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '1.2s' }}>
+                Back
+              </button>
+            )}
           </form>
         </div>
       </main>

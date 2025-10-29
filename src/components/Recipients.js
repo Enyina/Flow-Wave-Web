@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
+import { apiFetch } from '../utils/api';
 
 const Recipients = () => {
   const navigate = useNavigate();
@@ -12,26 +13,57 @@ const Recipients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [hasAnimated, setHasAnimated] = useState(false);
 
-  const recipients = [
-    {
-      id: 1,
-      name: 'Enyina Matthew',
-      bank: 'Lead Bank',
-      accountNumber: '0845037683',
-      avatar: 'https://api.builder.io/api/v1/image/assets/TEMP/04273d01ddb83b37c8d4e064d32b645782f153e4?width=62'
-    }
-  ];
+  const [recipients, setRecipients] = useState([]);
+  const [loadingRecipients, setLoadingRecipients] = useState(false);
+  const [listError, setListError] = useState('');
 
   const filteredRecipients = recipients.filter(recipient =>
-    recipient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipient.bank.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipient.accountNumber.includes(searchTerm)
+    (recipient.fullName || recipient.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (recipient.bankName || recipient.bank || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (recipient.accountNumber || '').includes(searchTerm)
   );
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoadingRecipients(true);
+      setListError('');
+      try {
+        const res = await apiFetch(`/recipients?page=1&limit=100&search=${encodeURIComponent(searchTerm)}`);
+        if (res.ok) {
+          // Normalize response to an array. API may return { data: [...] } or [...] directly or { recipients: [...] }
+          const ensureArray = (val) => {
+            if (Array.isArray(val)) return val;
+            if (val && typeof val === 'object') {
+              if (Array.isArray(val.data)) return val.data;
+              if (Array.isArray(val.results)) return val.results;
+              if (Array.isArray(val.recipients)) return val.recipients;
+              // return first array property if present
+              for (const k of Object.keys(val)) {
+                if (Array.isArray(val[k])) return val[k];
+              }
+            }
+            return [];
+          };
+
+          if (mounted) setRecipients(ensureArray(res.data));
+        } else {
+          setListError(res.data?.error || 'Failed to load recipients');
+        }
+      } catch (err) {
+        setListError('Network error');
+      } finally {
+        if (mounted) setLoadingRecipients(false);
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, [searchTerm]);
 
   const handleLogout = () => {
     logout();
@@ -166,30 +198,42 @@ const Recipients = () => {
 
             {/* Recipients List */}
             <div className="space-y-4">
-              {filteredRecipients.map((recipient, index) => (
-                <button
-                  key={recipient.id}
-                  onClick={() => handleSelectRecipient(recipient)}
-                  className={`w-full p-4 bg-secondary-light rounded-lg hover:shadow-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
-                  style={{ animationDelay: `${0.8 + index * 0.1}s` }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full overflow-hidden">
-                        <img 
-                          src={recipient.avatar} 
-                          alt={recipient.name}
-                          className="w-full h-full object-cover"
-                        />
+              {loadingRecipients ? (
+                <div className="text-center py-8">Loading...</div>
+              ) : listError ? (
+                <div className="text-error text-center py-8">{listError}</div>
+              ) : (
+                filteredRecipients.map((recipient, index) => (
+                  <div
+                    key={recipient.id || recipient._id}
+                    className={`w-full p-4 bg-secondary-light rounded-lg hover:shadow-large hover:-translate-y-1 transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
+                    style={{ animationDelay: `${0.8 + index * 0.1}s` }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full overflow-hidden">
+                          <img
+                            src={recipient.avatar || 'https://api.builder.io/api/v1/image/assets/TEMP/04273d01ddb83b37c8d4e064d32b645782f153e4?width=62'}
+                            alt={recipient.fullName || recipient.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="text-neutral-dark dark:text-dark-text font-medium">{recipient.fullName || recipient.name}</span>
                       </div>
-                      <span className="text-neutral-dark dark:text-dark-text font-medium">{recipient.name}</span>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-neutral-gray text-xs">{recipient.bank} - {recipient.accountNumber}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right mr-4">
+                          <p className="text-neutral-gray text-xs">{(recipient.bankName || recipient.bank) || ''} - {(recipient.accountNumber && recipient.accountNumber.length > 6) ? `***${recipient.accountNumber.slice(-4)}` : recipient.accountNumber}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => navigate('/add-recipient', { state: { recipient, mode: 'view' } })} className="px-3 py-1 text-sm rounded bg-white border">View</button>
+                          <button onClick={() => navigate('/add-recipient', { state: { recipient, mode: 'edit' } })} className="px-3 py-1 text-sm rounded bg-primary-blue text-white">Edit</button>
+                          <button onClick={() => handleSelectRecipient(recipient)} className="px-3 py-1 text-sm rounded bg-primary-green text-white">Use</button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </button>
-              ))}
+                ))
+              )}
             </div>
 
             {/* Empty State */}

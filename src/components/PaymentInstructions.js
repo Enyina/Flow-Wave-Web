@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
 
@@ -9,6 +10,7 @@ const PaymentInstructions = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { fromCurrency, sendAmount } = useCurrency();
+  const { flowState } = useFlow();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
   const [copyFeedback, setCopyFeedback] = useState('');
@@ -63,7 +65,15 @@ const PaymentInstructions = () => {
       'CHF': 'CHF ',
       'ZAR': 'R'
     };
-    return `${symbols[currencyCode] || ''}${amount}`;
+    if (amount === undefined || amount === null || amount === '') return '';
+    // If it's already a formatted string, return it with symbol
+    if (typeof amount === 'string' && isNaN(Number(amount))) {
+      return `${symbols[currencyCode] || ''}${amount}`;
+    }
+    const numeric = Number(amount);
+    if (!isFinite(numeric)) return `${symbols[currencyCode] || ''}${String(amount)}`;
+    const formatted = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric);
+    return `${symbols[currencyCode] || ''}${formatted}`;
   };
 
   const handleSentMoney = () => {
@@ -86,13 +96,27 @@ const PaymentInstructions = () => {
     }
   };
 
-  // Mock payment details
+  // Prefer values from flowState.transaction when available
+  // Prefer transaction in flow state, else restore lastTransaction
+  let transaction = flowState?.transaction || null;
+  if (!transaction) {
+    try {
+      const raw = localStorage.getItem('lastTransaction');
+      if (raw) transaction = JSON.parse(raw);
+    } catch (e) { /* ignore */ }
+  }
+
+  // Amount payable should be what the sender entered (transaction.amount). Fallback to total if absent.
+  const amountValue = (typeof transaction?.amount !== 'undefined' && transaction !== null) ? transaction.amount : transaction?.total ?? calculateTotalPay();
+  const currencyCode = transaction?.currency || fromCurrency.code;
+  const amountPayableFormatted = formatCurrency(amountValue, currencyCode);
+
   const paymentDetails = {
-    accountNumber: '12345678901',
-    accountName: 'Flowwave',
-    bankName: 'Mastercard',
-    amountPayable: formatCurrency(calculateTotalPay(), fromCurrency.code),
-    referenceId: 'FLOW-12345'
+    accountNumber: transaction?.virtualAccount?.accountNumber || transaction?.recipient?.accountNumber || transaction?.accountNumber || '12345678901',
+    accountName: transaction?.virtualAccount?.accountName || transaction?.recipient?.fullName || transaction?.accountName || 'Flowwave',
+    bankName: transaction?.virtualAccount?.bankName || transaction?.recipient?.bankName || transaction?.bankName || transaction?.bank || 'Mastercard',
+    amountPayable: amountPayableFormatted,
+    referenceId: transaction?.referenceId || transaction?.reference || transaction?.id || transaction?._id || 'FLOW-12345'
   };
 
   return (

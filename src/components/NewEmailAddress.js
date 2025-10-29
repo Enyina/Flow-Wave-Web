@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
+import userApi from '../utils/userApi';
 
 const NewEmailAddress = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [formData, setFormData] = useState({
@@ -13,6 +15,13 @@ const NewEmailAddress = () => {
     confirmEmail: ''
   });
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const currentEmail = location?.state?.currentEmail;
+
+  useEffect(() => {
+    // If currentEmail is provided, we don't autofill new email, but could display it
+  }, [currentEmail]);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -51,9 +60,23 @@ const NewEmailAddress = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
-    if (validateForm()) {
-      navigate('/account-verify-email', { state: { newEmail: formData.email } });
+  const handleContinue = async () => {
+    if (!validateForm()) return;
+
+    setApiError('');
+    setIsLoading(true);
+    try {
+      const res = await userApi.changeEmail(formData.email);
+      if (res.ok) {
+        // Navigate to verification page with the new email
+        navigate('/account-verify-email', { state: { email: formData.email } });
+      } else {
+        setApiError(res.data?.error || res.data?.message || 'Failed to initiate email change');
+      }
+    } catch (e) {
+      setApiError('Network error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -115,6 +138,9 @@ const NewEmailAddress = () => {
             <p className="text-center text-neutral-gray text-base">
               Let's set up your new email address
             </p>
+            {currentEmail && (
+              <p className="text-center text-neutral-gray text-sm">Current: <span className="font-medium">{currentEmail}</span></p>
+            )}
           </div>
 
           {/* Form */}
@@ -163,11 +189,13 @@ const NewEmailAddress = () => {
           </div>
 
           {/* Continue Button */}
+          {apiError && <div className="text-error text-sm mb-2">{apiError}</div>}
           <button
             onClick={handleContinue}
-            className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+            disabled={isLoading}
+            className={`w-full py-3 text-white text-lg font-bold rounded-lg transition-all duration-300 ${isLoading ? 'bg-primary-blue/60 cursor-not-allowed' : 'bg-primary-blue hover:bg-primary-blue/90'}`}
           >
-            Continue
+            {isLoading ? 'Sending...' : 'Continue'}
           </button>
         </div>
       </main>

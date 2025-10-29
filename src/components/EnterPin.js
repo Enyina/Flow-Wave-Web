@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
+import apiFetch from '../utils/api';
 
 const EnterPin = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const EnterPin = () => {
   const [pin, setPin] = useState(['', '', '', '']);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -48,21 +50,32 @@ const EnterPin = () => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const pinString = pin.join('');
-    
+
     if (pinString.length !== 4) {
       setError('Please enter your 4-digit PIN');
       return;
     }
 
-    // Simulate PIN validation (use 1234 as valid PIN for demo)
-    if (pinString === '1234') {
-      navigate('/payment-instructions');
-    } else {
-      setError('Invalid PIN. Please try again. (Hint: use 1234 for demo)');
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await apiFetch('/auth/verify-pin', { method: 'POST', body: { pin: pinString } });
+      if (res.ok) {
+        navigate('/payment-instructions');
+      } else {
+        const msg = res.data?.message || res.data?.error || 'Invalid PIN';
+        setError(msg);
+        setPin(['', '', '', '']);
+        inputRefs.current[0]?.focus();
+      }
+    } catch (err) {
+      setError('Network error');
       setPin(['', '', '', '']);
       inputRefs.current[0]?.focus();
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -157,6 +170,7 @@ const EnterPin = () => {
                 onChange={(e) => handlePinChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="w-12 h-16 text-center text-xl font-bold bg-primary-light border-2 border-transparent rounded-lg focus:border-primary-blue focus:outline-none transition-all duration-200"
+                disabled={isLoading}
               />
             ))}
           </div>
@@ -171,9 +185,10 @@ const EnterPin = () => {
           {/* Continue Button */}
           <button
             onClick={handleContinue}
-            className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+            disabled={isLoading}
+            className={`w-full py-3 text-white text-lg font-bold rounded-lg transition-all duration-300 ${isLoading ? 'bg-primary-blue/60 cursor-not-allowed' : 'bg-primary-blue hover:bg-primary-blue/90'}`}
           >
-            Continue
+            {isLoading ? 'Verifying...' : 'Continue'}
           </button>
         </div>
       </main>

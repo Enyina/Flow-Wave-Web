@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
+import userApi from '../utils/userApi';
 
 const AccountVerifyEmail = () => {
   const navigate = useNavigate();
@@ -11,8 +12,9 @@ const AccountVerifyEmail = () => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [verificationCode, setVerificationCode] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const email = location.state?.email || 'aostglc@gmail.com';
+  const email = location.state?.email || location.state?.newEmail || 'aostglc@gmail.com';
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -52,11 +54,20 @@ const AccountVerifyEmail = () => {
     }
 
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    setError('');
+    try {
+      const res = await userApi.confirmEmailChange(code);
       setIsLoading(false);
-      navigate('/email-updated');
-    }, 2000);
+      if (res && res.ok) {
+        navigate('/email-updated');
+      } else {
+        const message = res?.message || res?.data?.message || res?.data?.error || 'Verification failed. Please try again.';
+        setError(message);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      setError(err?.message || 'An unexpected error occurred. Please try again.');
+    }
   };
 
   const handleResend = () => {
@@ -155,6 +166,10 @@ const AccountVerifyEmail = () => {
           >
             {isLoading ? 'Verifying...' : 'Verify'}
           </button>
+
+          {error ? (
+            <p className="text-center text-sm text-red-600 mb-4">{error}</p>
+          ) : null}
 
           {/* Resend Link */}
           <div className="text-center">

@@ -106,7 +106,7 @@ const Signin = () => {
 
 
   const handleForgotPassword = () => {
-    alert('Forgot password functionality would be implemented here. A reset link would be sent to your email.');
+    navigate('/forgot-password');
   };
 
   const handleSocialLogin = (provider) => {

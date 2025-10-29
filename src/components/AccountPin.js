@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
+import apiFetch from '../utils/api';
 
 const AccountPin = () => {
   const navigate = useNavigate();
@@ -11,10 +12,13 @@ const AccountPin = () => {
   const [pin, setPin] = useState(['', '', '', '']);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const inputRefs = useRef([]);
 
   // Get the action from navigation state (change-email, change-mobile, etc.)
   const action = location.state?.action || 'change-email';
+  const currentEmail = location.state?.currentEmail;
+  const currentPhone = location.state?.currentPhone;
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -53,31 +57,42 @@ const AccountPin = () => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     const pinString = pin.join('');
-    
+
     if (pinString.length !== 4) {
       setError('Please enter your 4-digit PIN');
       return;
     }
 
-    // Simulate PIN validation (use 1234 as valid PIN for demo)
-    if (pinString === '1234') {
-      // Navigate based on action
-      switch (action) {
-        case 'change-email':
-          navigate('/new-email-address');
-          break;
-        case 'change-mobile':
-          navigate('/update-mobile-number');
-          break;
-        default:
-          navigate('/new-email-address');
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await apiFetch('/auth/verify-pin', { method: 'POST', body: { pin: pinString } });
+      if (res.ok) {
+        // Navigate based on action
+        switch (action) {
+          case 'change-email':
+            navigate('/new-email-address', { state: { currentEmail } });
+            break;
+          case 'change-mobile':
+            navigate('/update-mobile-number', { state: { currentPhone } });
+            break;
+          default:
+            navigate('/new-email-address', { state: { currentEmail } });
+        }
+      } else {
+        const msg = res.data?.message || res.data?.error || 'Invalid PIN';
+        setError(msg);
+        setPin(['', '', '', '']);
+        inputRefs.current[0]?.focus();
       }
-    } else {
-      setError('Invalid PIN. Please try again. (Hint: use 1234 for demo)');
+    } catch (err) {
+      setError('Network error');
       setPin(['', '', '', '']);
       inputRefs.current[0]?.focus();
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -170,6 +185,7 @@ const AccountPin = () => {
                 onChange={(e) => handlePinChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="w-12 h-16 text-center text-xl font-bold bg-primary-light border-2 border-transparent rounded-lg focus:border-primary-blue focus:outline-none transition-all duration-200"
+                disabled={isLoading}
               />
             ))}
           </div>
@@ -184,9 +200,10 @@ const AccountPin = () => {
           {/* Continue Button */}
           <button
             onClick={handleContinue}
-            className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+            disabled={isLoading}
+            className={`w-full py-3 text-white text-lg font-bold rounded-lg transition-all duration-300 ${isLoading ? 'bg-primary-blue/60 cursor-not-allowed' : 'bg-primary-blue hover:bg-primary-blue/90'}`}
           >
-            Continue
+            {isLoading ? 'Verifying...' : 'Continue'}
           </button>
         </div>
       </main>

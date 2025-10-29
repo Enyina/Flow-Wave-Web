@@ -17,6 +17,28 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('userData');
+
+    if (token && userData) {
+      setIsAuthenticated(true);
+      setUser(JSON.parse(userData));
+    }
+
+    setLoading(false);
+
+    // Listen for global logout events (emitted by api client on 401/403)
+    const onAuthLogout = () => {
+      try { localStorage.removeItem('authToken'); } catch (e) {}
+      try { localStorage.removeItem('userData'); } catch (e) {}
+      setIsAuthenticated(false);
+      setUser(null);
+    };
+
+    window.addEventListener('auth:logout', onAuthLogout);
+    return () => window.removeEventListener('auth:logout', onAuthLogout);
+  }, []);
 useEffect(() => {
   const token = localStorage.getItem('flowAuthToken');
   const userDataRaw = localStorage.getItem('userData');
@@ -47,6 +69,51 @@ useEffect(() => {
   /** LOGIN */
   const login = async (email, password) => {
     try {
+      const { apiFetch } = await import('../utils/api');
+      const res = await apiFetch('/auth/login', { method: 'POST', body: { email, password } });
+console.log({res})
+      if (!res.ok) {
+        return { success: false, error: res.data?.error || 'Login failed' };
+      }
+
+      // Extract access token from known response shapes (support nested `data` wrapper)
+      const accessToken =
+        res.data?.accessToken ||
+        res.data?.token ||
+        res.data?.data?.accessToken ||
+        res.data?.data?.token ||
+        null;
+
+      if (!accessToken) {
+        // If API returned no token but set cookie-based session, attempt to fetch user
+        const me = await apiFetch('/users/me', { method: 'GET' });
+        if (me.ok) {
+          try { localStorage.setItem('authToken', ''); } catch (e) {}
+          localStorage.setItem('userData', JSON.stringify(me.data));
+          setIsAuthenticated(true);
+          setUser(me.data);
+          return { success: true };
+        }
+        return { success: false, error: 'No access token returned' };
+      }
+
+      // Store token and fetch user
+      try { localStorage.setItem('authToken', accessToken); } catch (e) {}
+
+      const me = await apiFetch('/users/me', { method: 'GET', headers: { Authorization: `Bearer ${accessToken}` } });
+      if (me.ok) {
+        localStorage.setItem('userData', JSON.stringify(me.data));
+        setIsAuthenticated(true);
+        setUser(me.data);
+        return { success: true };
+      }
+
+      // If /users/me failed, still mark authenticated with email
+      const fallbackUser = { email, id: null };
+      localStorage.setItem('userData', JSON.stringify(fallbackUser));
+      setIsAuthenticated(true);
+      setUser(fallbackUser);
+      return { success: true };
       const res = await authApi.login({ email, password });
 
       localStorage.setItem('flowAuthToken', res.data.accessToken);
@@ -62,6 +129,21 @@ useEffect(() => {
   /** SIGNUP */
   const signup = async (dto) => {
     try {
+      const { apiFetch } = await import('../utils/api');
+      const res = await apiFetch('/auth/register', { method: 'POST', body: userData });
+
+      if (!res.ok) {
+        return { success: false, error: res.data?.error || 'Signup failed' };
+      }
+
+      // After signup, attempt to login automatically
+      const email = userData.email;
+      const password = userData.password;
+      if (email && password) {
+        return await login(email, password);
+      }
+
+      return { success: true };
       const res = await authApi.signup(dto);
       localStorage.setItem('userData', JSON.stringify({ email: dto.email }));
       setIsAuthenticated(false);

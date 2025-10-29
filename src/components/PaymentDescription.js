@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
+import { apiFetch } from '../utils/api';
 
 const PaymentDescription = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { sendAmount } = useCurrency();
   const [description, setDescription] = useState('');
   const [attachedFile, setAttachedFile] = useState(null);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -40,15 +41,21 @@ const PaymentDescription = () => {
     }
   };
 
-  const handleContinue = () => {
+  const { flowState, updateFlowState } = useFlow();
+  const { fromCurrency, toCurrency, sendAmount } = useCurrency();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleContinue = async () => {
+    console.log('handleContinue invoked', { description, attachedFile, flowState });
     const newErrors = {};
-    
+
     if (!description.trim()) {
       newErrors.description = 'Description is required';
     }
-    
-    if (!attachedFile) {
-      newErrors.file = 'Invoice attachment is required';
+
+    // file is optional now
+    if (!flowState?.selectedRecipient) {
+      newErrors.recipient = 'No recipient selected';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -56,7 +63,99 @@ const PaymentDescription = () => {
       return;
     }
 
-    navigate('/review');
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      const recipient = flowState.selectedRecipient;
+      const recipientId = recipient && (recipient.id || recipient._id || recipient.recipientId || recipient.id_str) || null;
+
+      // Prefer sendAmount from CurrencyContext, fallback to flowState
+      const amountValRaw = (typeof sendAmount !== 'undefined' && sendAmount) ? sendAmount : flowState.sendAmount;
+      const amountVal = amountValRaw ? parseFloat(amountValRaw) : 0;
+
+      // Compute exchange rate and converted amount using CurrencyContext conventions
+      const toCode = (toCurrency?.code) || flowState?.toCurrency || 'USD';
+      // Build a simple exchangeRate lookup (keep in sync with PaymentReview)
+      const exchangeRates = { NGN: 1500, USD: 1, GBP: 0.79, EUR: 0.85, CAD: 1.35, AUD: 1.52, JPY: 110, CHF: 0.92, ZAR: 18.5 };
+      const fromCode = fromCurrency?.code || flowState?.fromCurrency || 'NGN';
+      const fromRate = exchangeRates[fromCode] || 1;
+      const toRate = exchangeRates[toCode] || 1;
+      const exchangeRate = fromRate / toRate;
+
+      const transferFee = parseFloat((amountVal * 0.02).toFixed(2)); // 2% fee
+      // Sender pays only the amountVal (user input). The fee is deducted from recipient (recipient pays fee).
+      const total = parseFloat((amountVal).toFixed(2));
+      const convertedAmount = exchangeRate && exchangeRate > 0 ? parseFloat(((amountVal - transferFee) / exchangeRate).toFixed(2)) : 0;
+
+      // Build reference and optional metadata expected by API
+      const referenceId = flowState?.transaction?.reference || flowState?.transaction?.referenceId || `FLOW-${Date.now().toString().slice(-6)}`;
+      const recipientCurrency = flowState?.transaction?.recipientCurrency || toCode;
+      const idempotencyKey = `tx-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+
+      let res;
+      if (attachedFile) {
+        // Build form data for multipart upload as per OpenAPI
+        const form = new FormData();
+        form.append('recipientId', recipientId);
+        form.append('amount', amountVal);
+        form.append('currency', fromCode);
+        form.append('description', description);
+        form.append('file', attachedFile);
+
+        // Add calculated fields to FormData
+        form.append('exchangeRate', exchangeRate);
+        // convertedAmount should reflect what recipient receives after fee deduction
+        form.append('convertedAmount', convertedAmount);
+        form.append('transferFee', transferFee);
+        // total is the amount the sender pays (user input)
+        form.append('total', total);
+
+        // Add new fields per updated DTO
+        form.append('referenceId', referenceId);
+        form.append('recipientCurrency', recipientCurrency);
+        form.append('idempotencyKey', idempotencyKey);
+
+        res = await apiFetch('/transactions', { method: 'POST', body: form });
+      } else {
+        // JSON-only flow (no file)
+        const payload = {
+          recipientId,
+          amount: amountVal,
+          currency: fromCode,
+          description,
+          exchangeRate,
+          // convertedAmount reflects recipient received amount after fee
+          convertedAmount,
+          transferFee,
+          // total represents what sender pays (amountVal)
+          total,
+          referenceId,
+          recipientCurrency,
+          idempotencyKey
+        };
+        res = await apiFetch('/transactions', { method: 'POST', body: payload });
+      }
+
+      console.log('transaction response', res);
+      if (res.ok && (res.status === 201 || res.status === 200)) {
+        // Save description and response transaction to flow and continue
+        updateFlowState({ paymentDescription: description, currentStep: 'review', transaction: res.data });
+        try {
+          localStorage.setItem('lastTransaction', JSON.stringify(res.data));
+        } catch (e) {
+          // ignore localStorage errors
+        }
+        navigate('/review');
+      } else {
+        setErrors({ form: res.data?.error || 'Failed to create transaction' });
+      }
+    } catch (err) {
+      console.error(err);
+      setErrors({ form: err.message || 'Network error' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleLogout = () => {
@@ -129,6 +228,17 @@ const PaymentDescription = () => {
           </h1>
 
           <div className="flex flex-col gap-6">
+            {/* Form-level errors */}
+            {(errors && Object.keys(errors).length > 0) && (
+              <div className="w-full p-3 bg-error/10 border border-error text-error rounded">
+                <ul className="list-disc pl-5 text-sm">
+                  {Object.values(errors).map((err, idx) => (
+                    <li key={idx}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Description Input */}
             <div className="flex flex-col gap-2">
               <label className="text-neutral-dark dark:text-dark-text text-base font-normal">
@@ -149,7 +259,7 @@ const PaymentDescription = () => {
             {/* File Upload */}
             <div className="flex flex-col gap-2">
               <label className="text-neutral-dark dark:text-dark-text text-base font-normal">
-                Attach Invoice <span className="text-error">*</span>
+                Attach Invoice <span className="text-neutral-gray text-sm">(optional)</span>
               </label>
               
               <div className="relative">
@@ -188,9 +298,10 @@ const PaymentDescription = () => {
             {/* Continue Button */}
             <button
               onClick={handleContinue}
-              className="w-full py-3 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 transition-all duration-300"
+              disabled={isSubmitting}
+              className={`w-full py-3 text-white text-lg font-bold rounded-lg transition-all duration-300 ${isSubmitting ? 'bg-neutral-gray cursor-not-allowed' : 'bg-primary-blue hover:bg-primary-blue/90'}`}
             >
-              Continue
+              {isSubmitting ? 'Submitting...' : 'Continue'}
             </button>
           </div>
         </div>

@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 
 const PaymentReview = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { fromCurrency, toCurrency, sendAmount, receiveAmount } = useCurrency();
+  const { flowState } = useFlow();
+  const transaction = flowState?.transaction || null;
   const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
@@ -44,22 +47,33 @@ const PaymentReview = () => {
   };
 
   const getExchangeRate = () => {
+    // prefer transaction-provided rate when available
+    if (transaction?.exchangeRate) return transaction.exchangeRate;
     const fromRate = exchangeRates[fromCurrency.code] || 1;
     const toRate = exchangeRates[toCurrency.code] || 1;
     return fromRate / toRate;
   };
 
   const calculateFee = () => {
-    const amount = parseFloat(sendAmount) || 0;
+    const amount = parseFloat(transaction?.amount ?? sendAmount) || 0;
+    if (transaction?.transferFee) return parseFloat(transaction.transferFee).toFixed(2);
     const feePercentage = 0.02; // 2% fee
     return (amount * feePercentage).toFixed(2);
   };
 
   const calculateTotalPay = () => {
-    const amount = parseFloat(sendAmount) || 0;
+    if (transaction?.total) return parseFloat(transaction.total).toFixed(2);
+    const amount = parseFloat(transaction?.amount ?? sendAmount) || 0;
     const fee = parseFloat(calculateFee());
     return (amount + fee).toFixed(2);
   };
+
+  // values to display: prefer transaction fields
+  const displayAmount = transaction?.amount ?? sendAmount;
+  const displayConverted = transaction?.convertedAmount ?? receiveAmount;
+  const displayExchange = getExchangeRate();
+  const displayFee = transaction?.transferFee ?? calculateFee();
+  const displayTotal = transaction?.total ?? calculateTotalPay();
 
   const handleSend = () => {
     navigate('/enter-pin');
@@ -70,12 +84,13 @@ const PaymentReview = () => {
     navigate('/login');
   };
 
-  // Mock recipient data
+  // Prefer selected recipient from flow state or transaction; fall back to empty values
+  const rawRecipient = flowState?.selectedRecipient || transaction?.recipient || {};
   const recipient = {
-    name: 'Enyina Matthew',
-    accountNumber: '12345678901',
-    bank: 'Lead Bank',
-    routingNumber: 'ILBZAXAJH'
+    name: rawRecipient?.fullName || rawRecipient?.name || '',
+    accountNumber: rawRecipient?.accountNumber || rawRecipient?.account || '',
+    bank: rawRecipient?.bankName || rawRecipient?.bank || '',
+    routingNumber: rawRecipient?.routingNumber || rawRecipient?.swiftOrSortCode || rawRecipient?.swiftCode || ''
   };
 
   return (
@@ -148,66 +163,66 @@ const PaymentReview = () => {
 
           <div className="flex flex-col gap-4 mb-8">
             {/* Transaction Details */}
-            <div className="p-7 rounded-lg bg-secondary-light">
+            <div className="p-7 rounded-lg bg-secondary-light text-neutral-dark dark:text-dark-text">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Amount</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">
-                    {formatCurrency(sendAmount, fromCurrency.code)}
+                  <span className="text-xs font-medium">Amount</span>
+                  <span className="text-xs">
+                    {formatCurrency(displayAmount, fromCurrency.code)}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Received by recipient</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">
-                    {formatCurrency(receiveAmount, toCurrency.code)}
+                  <span className="text-xs font-medium">Received by recipient</span>
+                  <span className="text-xs">
+                    {formatCurrency(displayConverted, toCurrency.code)}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Exchange Rate:</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">
-                    {formatCurrency(getExchangeRate().toFixed(2), fromCurrency.code)} = {formatCurrency('1.00', toCurrency.code)}
+                  <span className="text-xs font-medium">Exchange Rate:</span>
+                  <span className="text-xs">
+                    {formatCurrency(displayExchange.toFixed(2), fromCurrency.code)} = {formatCurrency('1.00', toCurrency.code)}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Transfer Fee</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">
-                    {formatCurrency(calculateFee(), fromCurrency.code)}
+                  <span className="text-xs font-medium">Transfer Fee</span>
+                  <span className="text-xs">
+                    {formatCurrency(displayFee, fromCurrency.code)}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Total</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">
-                    {formatCurrency(calculateTotalPay(), fromCurrency.code)}
+                  <span className="text-xs font-medium">Total</span>
+                  <span className="text-xs">
+                    {formatCurrency(displayTotal, fromCurrency.code)}
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Recipient Details */}
-            <div className="p-7 rounded-lg bg-secondary-light">
+            <div className="p-7 rounded-lg bg-secondary-light text-neutral-dark dark:text-dark-text">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Recipient Name</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">{recipient.name}</span>
+                  <span className="text-xs font-medium">Recipient Name</span>
+                  <span className="text-xs">{recipient.name}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Account Number</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">{recipient.accountNumber}</span>
+                  <span className="text-xs font-medium">Account Number</span>
+                  <span className="text-xs">{recipient.accountNumber}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Bank</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">{recipient.bank}</span>
+                  <span className="text-xs font-medium">Bank</span>
+                  <span className="text-xs">{recipient.bank}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">Routing Number</span>
-                  <span className="text-neutral-dark dark:text-dark-text text-xs">{recipient.routingNumber}</span>
+                  <span className="text-xs font-medium">Routing Number</span>
+                  <span className="text-xs">{recipient.routingNumber}</span>
                 </div>
               </div>
             </div>
