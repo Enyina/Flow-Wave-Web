@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
+import { useAuth } from '../contexts/AuthContext';
 
 const CreatePin = ({ onNext }) => {
   const navigate = useNavigate();
   const [pin, setPin] = useState(['', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-
+  
+    const [errors, setErrors] = useState({});
+const { createPin } = useAuth();
   React.useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
@@ -33,25 +36,47 @@ const CreatePin = ({ onNext }) => {
     }
   };
 
-  const handleSubmit = () => {
-    if (pin.every(digit => digit !== '')) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        // Navigate directly to welcome page after creating PIN
+const handleSubmit = async () => {
+  if (pin.every(digit => digit !== '')) {
+    setIsLoading(true);
+    setErrors({}); // clear previous errors
+
+    try {
+      const pinCode = pin.join('');
+      const token = localStorage.getItem('flowAuthToken'); // use token from verifyEmail
+
+      const result = await createPin({ token, pin: pinCode });
+
+      if (result.success) {
+        // Navigate to welcome page
         navigate('/welcome');
-      }, 1000);
+      } else {
+        setErrors({ general: result.error || 'Failed to create PIN. Please try again.' });
+      }
+    } catch (err) {
+      setErrors({ general: 'Something went wrong. Please try again.' });
+    } finally {
+      setIsLoading(false);
     }
-  };
+  } else {
+    setErrors({ pin: 'Please enter the complete PIN.' });
+  }
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-dark-bg dark:to-dark-surface transition-colors duration-300">
       <div className={`flex items-center justify-between w-full max-w-md mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
         <div className="flex items-center">
           <div className="w-13 h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+            {/* <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
               <rect width="52" height="37" fill="#6C63FF" />
-            </svg>
+            </svg> */}
+                <img 
+        src={"/assets/logo.svg"} 
+        alt="Flow Wave Logo" 
+        className="w-full h-full object-contain" 
+      />
           </div>
           <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold transition-colors duration-300">FLOWWAVE</div>
         </div>
@@ -63,7 +88,12 @@ const CreatePin = ({ onNext }) => {
           <h2 className="gradient-text text-center text-3xl font-bold">Create Pin</h2>
           <p className="text-neutral-gray dark:text-dark-textSecondary text-center transition-colors duration-300">Enter a secure 4-digit pin to always access your app</p>
         </div>
-        
+                   {errors.general && (
+  <p className="text-red-500 text-sm mb-2">{errors.general}</p>
+)}
+{errors.otp && (
+  <p className="text-red-500 text-sm mb-2">{errors.otp}</p>
+)}
         <div className={`flex items-center gap-6 ${hasAnimated ? 'animate-bounce-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
           {pin.map((digit, index) => (
             <input

@@ -18,9 +18,14 @@ const WelcomeOnboard = () => {
       <div className={`flex items-center justify-between w-full max-w-md mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
         <div className="flex items-center">
           <div className="w-13 h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+            {/* <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
               <rect width="52" height="37" fill="#6C63FF" />
-            </svg>
+            </svg> */}
+                <img 
+        src={"/assets/logo.svg"} 
+        alt="Flow Wave Logo" 
+        className="w-full h-full object-contain" 
+      />
           </div>
           <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold transition-colors duration-300">FLOWWAVE</div>
         </div>

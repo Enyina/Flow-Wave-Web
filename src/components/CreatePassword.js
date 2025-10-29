@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
+import { useAuth } from '../contexts/AuthContext';
 
 const CreatePassword = () => {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ const CreatePassword = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-
+  const { createPassword } = useAuth();
   React.useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
@@ -24,27 +25,48 @@ const CreatePassword = () => {
     return hasMinLength && hasLetters && hasNumbers;
   };
 
-  const handleSubmit = () => {
-    const newErrors = {};
-    
-    if (!validatePassword(password)) {
-      newErrors.password = 'Minimum 8 characters with letters and numbers';
+ const handleSubmit = async () => {
+  const newErrors = {};
+console.log(password, confirmPassword);
+
+  if (!validatePassword(password)) {
+    newErrors.password = 'Minimum 8 characters with letters and numbers';
+  }
+
+  if (password !== confirmPassword) {
+    newErrors.confirmPassword = 'Passwords do not match';
+  }
+
+  setErrors(newErrors);
+
+  if (Object.keys(newErrors).length > 0) return;
+
+  setIsLoading(true);
+console.log(password, confirmPassword);
+
+  try {
+    // Get token stored after email verification
+    const token = localStorage.getItem('flowAuthToken');
+    if (!token) {
+      setErrors({ general: 'Verification token not found. Please verify your email again.' });
+      setIsLoading(false);
+      return;
     }
-    
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Password do not match';
+
+    const result = await createPassword({ token, password }); // call your API
+
+    if (result.success) {
+      navigate('/create-pin'); // move to next step
+    } else {
+      setErrors({ general: result.error || 'Failed to create password. Please try again.' });
     }
-    
-    setErrors(newErrors);
-    
-    if (Object.keys(newErrors).length === 0) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        navigate('/create-pin');
-      }, 1500);
-    }
-  };
+  } catch (err) {
+    setErrors({ general: 'Something went wrong. Please try again.' });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const isPasswordValid = validatePassword(password);
   const isConfirmPasswordValid = password === confirmPassword && confirmPassword !== '';
@@ -54,9 +76,14 @@ const CreatePassword = () => {
       <div className={`flex items-center justify-between w-full max-w-md mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
         <div className="flex items-center">
           <div className="w-13 h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+            {/* <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
               <rect width="52" height="37" fill="#6C63FF" />
-            </svg>
+            </svg> */}
+                <img 
+        src={"/assets/logo.svg"} 
+        alt="Flow Wave Logo" 
+        className="w-full h-full object-contain" 
+      />
           </div>
           <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
         </div>
@@ -71,6 +98,13 @@ const CreatePassword = () => {
         
         <div className={`flex flex-col gap-6 w-full ${hasAnimated ? 'animate-stagger-fade-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
           <div className="flex flex-col gap-2 w-full">
+            {errors.general && (
+  <p className="text-red-500 text-sm mb-2">{errors.general}</p>
+)}
+{errors.otp && (
+  <p className="text-red-500 text-sm mb-2">{errors.otp}</p>
+)}
+
             <label className="text-neutral-dark dark:text-dark-text text-base font-normal transition-colors duration-300">Password</label>
             <div className={`flex min-w-60 px-4 py-3 items-center rounded-lg border-2 transition-all duration-150 bg-white dark:bg-dark-card ${errors.password ? 'input-error' : isPasswordValid && password ? 'input-success' : 'border-neutral-gray/40 dark:border-dark-border'} focus-within:border-primary-blue focus-within:ring-4 focus-within:ring-primary-blue/10 focus-within:-translate-y-px`}>
               <input

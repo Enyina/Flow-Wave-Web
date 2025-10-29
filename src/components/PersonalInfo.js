@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
+import { userApi } from '../api/userApi';
 
 const PersonalInfo = ({ onNext }) => {
   const navigate = useNavigate();
@@ -43,31 +44,43 @@ const PersonalInfo = ({ onNext }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const token = localStorage.getItem('flowAuthToken');
+
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      console.log({formData, token});
+      
+      const result = await userApi.updateProfile(formData, token);
+      // update context
+        // console.log('API result', result);
+      // setUser(result.data);
+   
+        navigate('/dashboard');
+      
+    } catch (error) {
+      setErrors({ general: error.response?.data?.message || 'Failed to update profile' });
+    } finally {
       setIsLoading(false);
-      if (typeof onNext === 'function') {
-        onNext();
-      } else {
-        // Navigate to welcome and show profile created success modal
-        navigate('/welcome', { state: { profileCreated: true } });
-      }
-    }, 2000);
+    }
   };
+
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-dark-bg dark:to-dark-surface transition-colors duration-300">
       <div className={`flex items-center justify-between w-full max-w-lg mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
         <div className="flex items-center">
           <div className="w-13 h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
+            {/* <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
               <rect width="52" height="37" fill="#6C63FF" />
-            </svg>
+            </svg> */}
+                <img 
+        src={"/assets/logo.svg"} 
+        alt="Flow Wave Logo" 
+        className="w-full h-full object-contain" 
+      />
           </div>
           <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold transition-colors duration-300">FLOWWAVE</div>
         </div>

@@ -8,7 +8,7 @@ import Logo from './Logo';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, loading, isAuthenticated } = useAuth();
   const { fromCurrency, toCurrency, sendAmount, receiveAmount, updateSendAmount } = useCurrency();
   const { startFromAmount } = useFlow();
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -88,7 +88,14 @@ const Dashboard = () => {
     startFromAmount(sendAmount, fromCurrency, toCurrency);
     navigate('/recipients');
   };
-
+ const token = localStorage.getItem('flowAuthToken');
+ console.log({token});
+ console.log({isAuthenticated});
+ if (loading) return <div>Loading...</div>; // prevent early render
+if (!isAuthenticated) {
+  navigate('/login');
+  return null;
+}
   return (
     <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300">
       {/* Header */}

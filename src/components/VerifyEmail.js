@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
+import { useAuth } from '../contexts/AuthContext';
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
@@ -9,6 +10,9 @@ const VerifyEmail = () => {
   const [canResend, setCanResend] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
+const [errors, setErrors] = useState({}); 
+
+  const { verifyEmail, resendCode } = useAuth();
 
   useEffect(() => {
     // Trigger animation only once
@@ -77,30 +81,72 @@ const VerifyEmail = () => {
     if (inputToFocus) inputToFocus.focus();
   };
 
-  const handleSubmit = async () => {
-    if (otp.every(digit => digit !== '')) {
-      setIsLoading(true);
-      
-      // Simulate verification
-      setTimeout(() => {
-        setIsLoading(false);
-        navigate('/create-password');
-      }, 1500);
-    }
-  };
+const handleSubmit = async () => {
+  if (otp.every(digit => digit !== '')) {
+    setIsLoading(true);
+    setErrors({});
 
-  const handleResend = () => {
-    setCountdown(256);
-    setCanResend(false);
-    setOtp(['', '', '', '']);
+    try {
+      // Join OTP digits
+      const code = otp.join('');
+
+     const storedUser = JSON.parse(localStorage.getItem('userData')); // get email
+      if (!storedUser?.email) {
+        setErrors({ general: 'No email found. Please signup again.' });
+        setIsLoading(false);
+        return;
+      }
+
+      const result = await verifyEmail({ email: storedUser.email, code });
+
+      if (result.success) {
+        // store token for password creation
+        localStorage.setItem('createPasswordToken', result.token);
+        navigate('/create-password');
+      } else {
+        setErrors({ general: result.error || 'Verification failed. Please try again.' });
+      }
+    } catch (err) {
+      setErrors({ general: 'Something went wrong. Please try again.' });
+    } finally {
+      setIsLoading(false);
+    }
+  } else {
+    setErrors({ otp: 'Please enter the complete verification code.' });
+  }
+};
+
+const handleResend = async () => {
+  setCountdown(256);
+  setCanResend(false);
+  setOtp(['', '', '', '']);
+  setErrors({});
+
+  try {
+     const storedUser = JSON.parse(localStorage.getItem('userData')); // get email
+      if (!storedUser?.email) {
+        setErrors({ general: 'No email found. Please signup again.' });
+        setIsLoading(false);
+        return;
+      }
+      console.log(storedUser);
+      
+    const result = await resendCode({ email: storedUser.email }); // make sure `user.email` is available
+
+    if (result.success) {
+      alert('Verification code has been resent to your email!');
+      // Focus first input
+      const firstInput = document.querySelector(`input[data-index="0"]`);
+      if (firstInput) firstInput.focus();
+    } else {
+      setErrors({ general: result.error || 'Failed to resend code. Please try again.' });
+    }
+  } catch (err) {
+    console.log({err});
     
-    // Focus first input
-    const firstInput = document.querySelector(`input[data-index="0"]`);
-    if (firstInput) firstInput.focus();
-    
-    // Show confirmation
-    alert('Verification code has been resent to your email!');
-  };
+    setErrors({ general: 'Something went wrong. Please try again.' });
+  }
+};
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-screen p-8 xl:p-10 bg-gradient-to-br from-slate-50 to-slate-200 dark:from-dark-bg dark:to-dark-surface transition-colors duration-300">
@@ -108,9 +154,11 @@ const VerifyEmail = () => {
       <div className={`flex items-center justify-between w-full max-w-md mb-8 ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
         <div className="flex items-center">
           <div className="w-13 h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-              <rect width="52" height="37" fill="#6C63FF" />
-            </svg>
+             <img 
+        src={"/assets/logo.svg"} 
+        alt="Flow Wave Logo" 
+        className="w-full h-full object-contain" 
+      />
           </div>
           <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
         </div>
@@ -122,7 +170,12 @@ const VerifyEmail = () => {
           <h2 className="gradient-text text-center text-3xl font-bold">Verify your email address</h2>
           <p className="text-neutral-gray dark:text-dark-textSecondary text-center transition-colors duration-300">A verification code has been sent to your email</p>
         </div>
-        
+        {errors.general && (
+  <p className="text-red-500 text-sm mb-2">{errors.general}</p>
+)}
+{errors.otp && (
+  <p className="text-red-500 text-sm mb-2">{errors.otp}</p>
+)}
         <div className={`flex items-center gap-6 ${hasAnimated ? 'animate-bounce-in animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }} onPaste={handlePaste}>
           {otp.map((digit, index) => (
             <input
