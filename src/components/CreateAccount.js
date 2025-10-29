@@ -45,35 +45,38 @@ const CreateAccount = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!email || !validateEmail(email)) {
-      setErrors({ email: 'Please enter a valid email address' });
-      return;
+  if (!email || !validateEmail(email)) {
+    setErrors({ email: 'Please enter a valid email address' });
+    return;
+  }
+
+  if (!agreedToTerms) {
+    setErrors({ terms: 'Please agree to the Terms of Service and Privacy Policy' });
+    return;
+  }
+
+  setIsLoading(true);
+  setErrors({});
+
+  try {
+    const result = await signup({ email });
+
+    if (result.success) {
+      navigate('/verify-email');
+    } else {
+      // result.error will come directly from the backend standardized response
+      setErrors({ general: result.error || 'Account creation failed. Please try again.' });
     }
-
-    if (!agreedToTerms) {
-      setErrors({ terms: 'Please agree to the Terms of Service and Privacy Policy' });
-      return;
-    }
-
-    setIsLoading(true);
-    setErrors({});
-
-    try {
-      const result = await signup({ email });
-      if (result.success) {
-        navigate('/verify-email');
-      } else {
-        setErrors({ general: result.error || 'Account creation failed. Please try again.' });
-      }
-    } catch (error) {
-      setErrors({ general: 'Account creation failed. Please try again.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } catch (error) {
+    // in case something went wrong before reaching backend
+    setErrors({ general: 'Something went wrong. Please try again later.' });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleSocialLogin = (provider) => {
     setIsLoading(true);
@@ -138,9 +141,11 @@ const CreateAccount = () => {
         {/* Logo */}
         <div className={`absolute top-12 left-20 flex items-center ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
           <div className="w-13 h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-              <rect width="52" height="37" fill="#6C63FF" />
-            </svg>
+           <img 
+        src={"/assets/logo.svg"} 
+        alt="Flow Wave Logo" 
+        className="w-full h-full object-contain" 
+      />
           </div>
           <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold transition-colors duration-300">FLOWWAVE</div>
         </div>
@@ -195,7 +200,7 @@ const CreateAccount = () => {
                 </div>
                 
                 <div className="flex items-center gap-4 w-full cursor-pointer hover:translate-x-1 transition-transform duration-150" onClick={() => setAgreedToTerms(!agreedToTerms)}>
-                  <div className="w-4.5 h-4.5 rounded-sm bg-primary-pink flex items-center justify-center flex-shrink-0 relative overflow-hidden hover:ring-4 hover:ring-primary-pink/20 transition-all duration-150">
+                  <div className="w-4 h-4 rounded-sm bg-primary-pink flex items-center justify-center flex-shrink-0 relative overflow-hidden hover:ring-4 hover:ring-primary-pink/20 transition-all duration-150 ">
                     {agreedToTerms && (
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="animate-checkmark animate-once">
                         <path d="M10 16.4L6 12.4L7.4 11L10 13.6L16.6 7L18 8.4L10 16.4Z" fill="white"/>

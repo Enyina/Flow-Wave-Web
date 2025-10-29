@@ -61,40 +61,49 @@ const Signin = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    let newErrors = {};
+  let newErrors = {};
 
-    if (!email || !validateEmail(email)) {
-      newErrors.email = 'Please enter a valid email address';
+  if (!email || !validateEmail(email)) {
+    newErrors.email = 'Please enter a valid email address';
+  }
+
+  if (!password || !validatePassword(password)) {
+    newErrors.password = 'Password must be at least 6 characters';
+  }
+
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
+
+  setIsLoading(true);
+  setErrors({});
+
+  try {
+    const result = await login(email, password); // your login API call
+    if (result.success) {
+      // Save token for future API calls
+      localStorage.setItem('flowAuthToken', result.data.accessToken);
+
+      // Optionally save user data to context or localStorage
+      localStorage.setItem('userData', JSON.stringify({email:result.data.user.email}));
+  const token = localStorage.getItem('flowAuthToken');
+  console.log({token});
+  
+      navigate('/dashboard');
+    } else {
+      setErrors({ general: result.error || 'Login failed. Please try again.' });
     }
+  } catch (error) {
+    setErrors({ general: 'Login failed. Please try again.' });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    if (!password || !validatePassword(password)) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    setIsLoading(true);
-    setErrors({});
-
-    try {
-      const result = await login(email, password);
-      if (result.success) {
-        navigate('/dashboard');
-      } else {
-        setErrors({ general: result.error || 'Login failed. Please try again.' });
-      }
-    } catch (error) {
-      setErrors({ general: 'Login failed. Please try again.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleForgotPassword = () => {
     navigate('/forgot-password');
@@ -155,9 +164,11 @@ const Signin = () => {
       <div className="flex flex-col items-center justify-center w-full lg:w-1/2 p-8 xl:p-10 bg-white dark:bg-dark-bg relative transition-colors duration-300">
         <div className={`absolute top-12 left-20 flex items-center ${hasAnimated ? 'animate-slide-in-down animate-once' : 'opacity-0'}`}>
           <div className="w-13 h-9 mr-3">
-            <svg width="52" height="37" viewBox="0 0 52 37" fill="none">
-              <rect width="52" height="37" fill="#6C63FF" />
-            </svg>
+            <img 
+        src={"/assets/logo.svg"} 
+        alt="Flow Wave Logo" 
+        className="w-full h-full object-contain" 
+      />
           </div>
           <div className="text-black/80 dark:text-dark-text font-times text-2xl font-bold hover:text-primary-blue transition-colors duration-300">FLOWWAVE</div>
         </div>
