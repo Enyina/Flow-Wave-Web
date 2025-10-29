@@ -114,13 +114,13 @@ console.log({res})
       setIsAuthenticated(true);
       setUser(fallbackUser);
       return { success: true };
-      const res = await authApi.login({ email, password });
+      // const res = await authApi.login({ email, password });
 
-      localStorage.setItem('flowAuthToken', res.data.accessToken);
-      localStorage.setItem('userData', JSON.stringify({ email }));
-      setIsAuthenticated(true);
-      setUser({ email });
-      return { success: true, data: res.data };
+      // localStorage.setItem('flowAuthToken', res.data.accessToken);
+      // localStorage.setItem('userData', JSON.stringify({ email }));
+      // setIsAuthenticated(true);
+      // setUser({ email });
+      // return { success: true, data: res.data };
     } catch (error) {
       return { success: false, error: error.response?.data?.message || 'Login failed' };
     }
@@ -144,11 +144,11 @@ console.log({res})
       }
 
       return { success: true };
-      const res = await authApi.signup(dto);
-      localStorage.setItem('userData', JSON.stringify({ email: dto.email }));
-      setIsAuthenticated(false);
-      setUser({ email: dto.email });
-      return { success: true, data: res.data };
+      // const res = await authApi.signup(dto);
+      // localStorage.setItem('userData', JSON.stringify({ email: dto.email }));
+      // setIsAuthenticated(false);
+      // setUser({ email: dto.email });
+      // return { success: true, data: res.data };
     } catch (error) {
       return { success: false, error: error.response?.data?.message || 'Signup failed' };
     }
