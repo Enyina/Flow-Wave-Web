@@ -127,11 +127,13 @@ console.log({res})
   };
 
   /** SIGNUP */
-  const signup = async (dto) => {
+  const signup = async (userData) => {
     try {
       const { apiFetch } = await import('../utils/api');
-      const res = await apiFetch('/auth/register', { method: 'POST', body: userData });
-
+      console.log("here");
+      
+      const res = await apiFetch('/auth/signup', { method: 'POST', body: userData });
+console.log({res})
       if (!res.ok) {
         return { success: false, error: res.data?.error || 'Signup failed' };
       }
@@ -142,12 +144,12 @@ console.log({res})
       if (email && password) {
         return await login(email, password);
       }
+      localStorage.setItem('userData', JSON.stringify({ email }));
+      setIsAuthenticated(false);
+      setUser({ email });
 
       return { success: true };
       // const res = await authApi.signup(dto);
-      // localStorage.setItem('userData', JSON.stringify({ email: dto.email }));
-      // setIsAuthenticated(false);
-      // setUser({ email: dto.email });
       // return { success: true, data: res.data };
     } catch (error) {
       return { success: false, error: error.response?.data?.message || 'Signup failed' };
