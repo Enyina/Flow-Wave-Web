@@ -5,13 +5,12 @@ import { useCurrency } from '../contexts/CurrencyContext';
 import { useFlow } from '../contexts/FlowContext';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
-import { apiFetch } from '../utils/api';
+import { apiFetch } from '../api';
 
 const PaymentDescription = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [description, setDescription] = useState('');
-  const [attachedFile, setAttachedFile] = useState(null);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -20,42 +19,21 @@ const PaymentDescription = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
-      const maxSize = 5 * 1024 * 1024; // 5MB
-
-      if (!allowedTypes.includes(file.type)) {
-        setErrors({ file: 'Only PNG, JPEG, PDF files are supported' });
-        return;
-      }
-
-      if (file.size > maxSize) {
-        setErrors({ file: 'File size must be less than 5MB' });
-        return;
-      }
-
-      setAttachedFile(file);
-      setErrors({});
-    }
-  };
-
   const { flowState, updateFlowState } = useFlow();
   const { fromCurrency, toCurrency, sendAmount } = useCurrency();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleContinue = async () => {
-    console.log('handleContinue invoked', { description, attachedFile, flowState });
+    console.log('handleContinue invoked', { description, flowState });
     const newErrors = {};
 
     if (!description.trim()) {
       newErrors.description = 'Description is required';
     }
 
-    // file is optional now
-    if (!flowState?.selectedRecipient) {
-      newErrors.recipient = 'No recipient selected';
+    // Check if cross-border payment info is collected
+    if (!flowState?.beneficiaryName) {
+      newErrors.beneficiary = 'Beneficiary information is required';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -93,49 +71,35 @@ const PaymentDescription = () => {
       const recipientCurrency = flowState?.transaction?.recipientCurrency || toCode;
       const idempotencyKey = `tx-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
 
-      let res;
-      if (attachedFile) {
-        // Build form data for multipart upload as per OpenAPI
-        const form = new FormData();
-        form.append('recipientId', recipientId);
-        form.append('amount', amountVal);
-        form.append('currency', fromCode);
-        form.append('description', description);
-        form.append('file', attachedFile);
+      // JSON-only flow (no file - invoice upload moved to after payment confirmation)
+      const payload = {
+        recipientId,
+        amount: amountVal,
+        currency: fromCode,
+        description,
+        // Add cross-border payment information
+        beneficiaryName: flowState.beneficiaryName || '',
+        beneficiaryBank: flowState.beneficiaryBank || '',
+        beneficiaryAccountNumber: flowState.beneficiaryAccountNumber || '',
+        accountType: flowState.accountType || '',
+        routingNumber: flowState.routingNumber || '',
+        swiftCode: flowState.swiftCode || '',
+        beneficiaryAddress: flowState.beneficiaryAddress || '',
+        phoneNumber: flowState.phoneNumber || '',
+        email: flowState.email || '',
+        purposeOfPayment: flowState.purposeOfPayment || '',
+        exchangeRate,
+        // convertedAmount reflects recipient received amount after fee
+        convertedAmount,
+        transferFee,
+        // total represents what sender pays (amountVal)
+        total,
+        referenceId,
+        recipientCurrency,
+        idempotencyKey
+      };
 
-        // Add calculated fields to FormData
-        form.append('exchangeRate', exchangeRate);
-        // convertedAmount should reflect what recipient receives after fee deduction
-        form.append('convertedAmount', convertedAmount);
-        form.append('transferFee', transferFee);
-        // total is the amount the sender pays (user input)
-        form.append('total', total);
-
-        // Add new fields per updated DTO
-        form.append('referenceId', referenceId);
-        form.append('recipientCurrency', recipientCurrency);
-        form.append('idempotencyKey', idempotencyKey);
-
-        res = await apiFetch('/transactions', { method: 'POST', body: form });
-      } else {
-        // JSON-only flow (no file)
-        const payload = {
-          recipientId,
-          amount: amountVal,
-          currency: fromCode,
-          description,
-          exchangeRate,
-          // convertedAmount reflects recipient received amount after fee
-          convertedAmount,
-          transferFee,
-          // total represents what sender pays (amountVal)
-          total,
-          referenceId,
-          recipientCurrency,
-          idempotencyKey
-        };
-        res = await apiFetch('/transactions', { method: 'POST', body: payload });
-      }
+      const res = await apiFetch('/transactions', { method: 'POST', body: payload });
 
       console.log('transaction response', res);
       if (res.ok && (res.status === 201 || res.status === 200)) {
@@ -239,6 +203,94 @@ const PaymentDescription = () => {
               </div>
             )}
 
+            {/* Beneficiary Confirmation Section */}
+            <div className="bg-secondary-light p-4 rounded-lg mb-6">
+              <h2 className="text-lg font-semibold text-neutral-dark dark:text-dark-text mb-4">
+                Beneficiary Details
+              </h2>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Beneficiary Name:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.beneficiaryName || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Beneficiary Bank:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.beneficiaryBank || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Account Number:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.beneficiaryAccountNumber || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Account Type:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.accountType || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Routing Number/Sortcode:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.routingNumber || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">ABA/Swift Code:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.swiftCode || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Beneficiary Address:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.beneficiaryAddress || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Phone Number:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.phoneNumber || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Email:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.email || 'Not provided'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray text-sm">Purpose of Payment:</span>
+                  <span className="text-neutral-dark dark:text-dark-text font-medium">
+                    {flowState?.purposeOfPayment || 'Not provided'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Warning if beneficiary info is missing */}
+              {(!flowState?.beneficiaryName || !flowState?.beneficiaryBank || !flowState?.beneficiaryAccountNumber) && (
+                <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded">
+                  <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                    ⚠️ Some beneficiary information is missing. Please ensure all required fields are completed.
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Description Input */}
             <div className="flex flex-col gap-2">
               <label className="text-neutral-dark dark:text-dark-text text-base font-normal">
@@ -256,43 +308,9 @@ const PaymentDescription = () => {
               )}
             </div>
 
-            {/* File Upload */}
-            <div className="flex flex-col gap-2">
-              <label className="text-neutral-dark dark:text-dark-text text-base font-normal">
-                Attach Invoice <span className="text-neutral-gray text-sm">(optional)</span>
-              </label>
-              
-              <div className="relative">
-                <input
-                  type="file"
-                  accept=".png,.jpeg,.jpg,.pdf"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                <div className={`w-full p-4 border border-dashed ${errors.file ? 'border-error' : 'border-neutral-gray'} rounded-lg bg-white dark:bg-dark-surface flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-neutral-50 dark:hover:bg-dark-bg transition-colors`}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-neutral-gray">
-                    <path d="M20 20C20.5304 20 21.0391 19.7893 21.4142 19.4142C21.7893 19.0391 22 18.5304 22 18V8C22 7.46957 21.7893 6.96086 21.4142 6.58579C21.0391 6.21071 20.5304 6 20 6H12.1C11.7655 6.00328 11.4355 5.92261 11.1403 5.76538C10.8451 5.60815 10.594 5.37938 10.41 5.1L9.6 3.9C9.41789 3.62347 9.16997 3.39648 8.8785 3.2394C8.58702 3.08231 8.26111 3.00005 7.93 3H4C3.46957 3 2.96086 3.21071 2.58579 3.58579C2.21071 3.96086 2 4.46957 2 5V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H20Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 10V16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M9 13L12 10L15 13" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <div className="text-center">
-                    <p className="text-neutral-dark dark:text-dark-text text-xs font-medium">
-                      {attachedFile ? attachedFile.name : 'Click to upload file'}
-                    </p>
-                    <p className="text-neutral-gray text-xs">
-                      Only PNG, JPEG, PDF files format are supported
-                    </p>
-                  </div>
-                </div>
-              </div>
-              {errors.file && (
-                <p className="text-error text-sm">{errors.file}</p>
-              )}
-            </div>
-
             {/* Description Text */}
             <p className="text-neutral-gray text-xs leading-[18px]">
-              Please attach any related document that shows the purpose of this transaction. Data should match the beneficiary details to avoid delays.
+              Enter the purpose of this payment. You will be able to upload supporting documents after confirming the payment.
             </p>
 
             {/* Continue Button */}
