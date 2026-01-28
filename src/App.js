@@ -6,10 +6,14 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { FlowProvider } from './contexts/FlowContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 
 // Authentication components
 import CreateAccount from './components/CreateAccount';
 import Signin from './components/Signin';
+import MagicLinkSignup from './components/MagicLinkSignup';
+import CheckEmail from './components/CheckEmail';
+import MagicLinkVerifier from './components/MagicLinkVerifier';
 import VerifyEmail from './components/VerifyEmail';
 import CreatePassword from './components/CreatePassword';
 import CreatePin from './components/CreatePin';
@@ -20,12 +24,21 @@ import ForgotPassword from './components/ForgotPassword';
 import EnterOTP from './components/EnterOTP';
 import ResetPassword from './components/ResetPassword';
 
+// Flow components
+import ExchangeRate from './components/ExchangeRate';
+import BeneficiaryDetails from './components/BeneficiaryDetails';
+import VirtualAccount from './components/VirtualAccount';
+import Payment from './components/Payment';
+import ReceiptProcessing from './components/ReceiptProcessing';
+import ReceiptCompleted from './components/ReceiptCompleted';
+
 // Dashboard components
 import Dashboard from './components/Dashboard';
 import CountrySelector from './components/CountrySelector';
 import Recipients from './components/Recipients';
 import AddRecipient from './components/AddRecipient';
-import PaymentDescription from './components/PaymentDescription';
+import CrossBorderPaymentInfo from './components/CrossBorderPaymentInfo';
+import InvoiceUpload from './components/InvoiceUpload';
 import PaymentReview from './components/PaymentReview';
 import EnterPin from './components/EnterPin';
 import PaymentInstructions from './components/PaymentInstructions';
@@ -33,6 +46,13 @@ import TransactionSuccessful from './components/TransactionSuccessful';
 import TransactionDetails from './components/TransactionDetails';
 import Notification from './components/Notification';
 import Transactions from './components/Transactions';
+
+// Admin components
+import AdminDashboard from './components/AdminDashboard';
+import TransactionManagement from './components/TransactionManagement';
+import AdminManagement from './components/AdminManagement';
+import Unauthorized from './components/Unauthorized';
+import DebugAuth from './components/DebugAuth';
 
 // Account Management components
 import Account from './components/Account';
@@ -71,6 +91,8 @@ function App() {
               {/* Public Routes */}
               <Route path="/login" element={<Signin />} />
               <Route path="/signup" element={<CreateAccount />} />
+              <Route path="/check-email" element={<CheckEmail />} />
+              <Route path="/verify-magic-link" element={<MagicLinkVerifier />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/create-password" element={<CreatePassword />} />
               <Route path="/create-pin" element={<CreatePin />} />
@@ -80,6 +102,56 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/enter-otp" element={<EnterOTP />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+
+              {/* Flow Routes */}
+              <Route 
+                path="/exchange-rate" 
+                element={
+                  <ProtectedRoute>
+                    <ExchangeRate />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/beneficiary-details" 
+                element={
+                  <ProtectedRoute>
+                    <BeneficiaryDetails />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/virtual-account" 
+                element={
+                  <ProtectedRoute>
+                    <VirtualAccount />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/payment" 
+                element={
+                  <ProtectedRoute>
+                    <Payment />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/receipt-processing" 
+                element={
+                  <ProtectedRoute>
+                    <ReceiptProcessing />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/receipt-completed" 
+                element={
+                  <ProtectedRoute>
+                    <ReceiptCompleted />
+                  </ProtectedRoute>
+                } 
+              />
 
               {/* Protected Routes */}
               <Route 
@@ -115,10 +187,19 @@ function App() {
                 }
               />
               <Route
-                path="/payment-description"
+                path="/cross-border-payment-info"
                 element={
                   <ProtectedRoute>
-                    <PaymentDescription />
+                    <CrossBorderPaymentInfo />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/invoice-upload"
+                element={
+                  <ProtectedRoute>
+                    <InvoiceUpload />
                   </ProtectedRoute>
                 }
               />
@@ -177,6 +258,32 @@ function App() {
                     <Transactions />
                   </ProtectedRoute>
                 }
+              />
+
+              {/* Admin Routes */}
+              <Route 
+                path="/admin/dashboard" 
+                element={
+                  <AdminProtectedRoute>
+                    <AdminDashboard />
+                  </AdminProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/transactions" 
+                element={
+                  <AdminProtectedRoute>
+                    <TransactionManagement />
+                  </AdminProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/admins" 
+                element={
+                  <AdminProtectedRoute>
+                    <AdminManagement />
+                  </AdminProtectedRoute>
+                } 
               />
 
               {/* Account Management Routes */}
@@ -353,6 +460,12 @@ function App() {
 
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/login" replace />} />
+              
+              {/* Unauthorized page */}
+              <Route path="/unauthorized" element={<Unauthorized />} />
+              
+              {/* Debug route */}
+              <Route path="/debug-auth" element={<DebugAuth />} />
               
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/login" replace />} />
