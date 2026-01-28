@@ -65,6 +65,8 @@ const CreateAccount = () => {
     const result = await signup({ email });
 
     if (result.success) {
+      // Store email for verification step
+      localStorage.setItem('signupEmail', email);
       navigate('/verify-email');
     } else {
       // result.error will come directly from the backend standardized response

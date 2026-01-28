@@ -6,13 +6,13 @@ import { useAuth } from '../contexts/AuthContext';
 const VerifyEmail = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState(['', '', '', '']);
-  const [countdown, setCountdown] = useState(256); // 4:16 in seconds
+  const [countdown, setCountdown] = useState(2); // 4:16 in seconds
   const [canResend, setCanResend] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
 const [errors, setErrors] = useState({}); 
 
-  const { verifyEmail, resendCode } = useAuth();
+  const { user, verifyEmail, resendCode } = useAuth();
 
   useEffect(() => {
     // Trigger animation only once
@@ -90,18 +90,17 @@ const handleSubmit = async () => {
       // Join OTP digits
       const code = otp.join('');
 
-     const storedUser = JSON.parse(localStorage.getItem('userData')); // get email
-      if (!storedUser?.email) {
+      // Get email from auth store or use a fallback
+      const email = user?.email || localStorage.getItem('signupEmail');
+      if (!email) {
         setErrors({ general: 'No email found. Please signup again.' });
         setIsLoading(false);
         return;
       }
 
-      const result = await verifyEmail({ email: storedUser.email, code });
+      const result = await verifyEmail({ email, code });
 
       if (result.success) {
-        // store token for password creation
-        localStorage.setItem('createPasswordToken', result.token);
         navigate('/create-password');
       } else {
         setErrors({ general: result.error || 'Verification failed. Please try again.' });
@@ -123,18 +122,16 @@ const handleResend = async () => {
   setErrors({});
 
   try {
-     const storedUser = JSON.parse(localStorage.getItem('userData')); // get email
-      if (!storedUser?.email) {
-        setErrors({ general: 'No email found. Please signup again.' });
-        setIsLoading(false);
-        return;
-      }
-      console.log(storedUser);
-      
-    const result = await resendCode({ email: storedUser.email }); // make sure `user.email` is available
+    // Get email from auth store or use a fallback
+    const email = user?.email || localStorage.getItem('signupEmail');
+    if (!email) {
+      setErrors({ general: 'No email found. Please signup again.' });
+      return;
+    }
+    
+    const result = await resendCode({ email });
 
     if (result.success) {
-      alert('Verification code has been resent to your email!');
       // Focus first input
       const firstInput = document.querySelector(`input[data-index="0"]`);
       if (firstInput) firstInput.focus();
@@ -142,8 +139,6 @@ const handleResend = async () => {
       setErrors({ general: result.error || 'Failed to resend code. Please try again.' });
     }
   } catch (err) {
-    console.log({err});
-    
     setErrors({ general: 'Something went wrong. Please try again.' });
   }
 };

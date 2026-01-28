@@ -43,13 +43,13 @@ const handleSubmit = async () => {
 
     try {
       const pinCode = pin.join('');
-      const token = localStorage.getItem('flowAuthToken'); // use token from verifyEmail
+      console.log('🔍 Creating PIN with code:', pinCode);
 
-      const result = await createPin({ token, pin: pinCode });
+      const result = await createPin({ pin: pinCode });
 
       if (result.success) {
-        // Navigate to welcome page
-        navigate('/welcome');
+        // Navigate to personal info page
+        navigate('/personal-info');
       } else {
         setErrors({ general: result.error || 'Failed to create PIN. Please try again.' });
       }

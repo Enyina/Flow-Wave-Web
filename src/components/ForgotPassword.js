@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 import BackButton from './BackButton';
 import DarkModeToggle from './DarkModeToggle';
-import { apiFetch } from '../utils/api';
+import { apiFetch } from '../api';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();

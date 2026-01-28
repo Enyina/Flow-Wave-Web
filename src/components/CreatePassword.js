@@ -46,14 +46,19 @@ console.log(password, confirmPassword);
 
   try {
     // Get token stored after email verification
-    const token = localStorage.getItem('flowAuthToken');
+    const token = localStorage.getItem('createPasswordToken');
+    console.log('🔍 Retrieved token from localStorage:', token);
+    console.log('🔍 All localStorage items:', Object.keys(localStorage));
+    
     if (!token) {
       setErrors({ general: 'Verification token not found. Please verify your email again.' });
       setIsLoading(false);
       return;
     }
 
+    console.log('🔍 About to call createPassword with token:', token);
     const result = await createPassword({ token, password }); // call your API
+    console.log('🔍 CreatePassword result:', result);
 
     if (result.success) {
       navigate('/create-pin'); // move to next step
