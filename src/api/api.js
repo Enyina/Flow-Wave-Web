@@ -1,8 +1,7 @@
 import axios from 'axios';
 import TokenManager from '../utils/tokenManager';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api'
-
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5600/api';
 
 export const apiClient = axios.create({
   baseURL: API_BASE.replace(/\/$/, ''),
@@ -15,16 +14,15 @@ apiClient.interceptors.request.use(
   (config) => {
     try {
       const token = TokenManager.getAccessToken();
-      console.log('🔍 utils/api.js - token:', token);
       
       if (token) {
         config.headers = config.headers || {};
         if (!config.headers.Authorization && !config.headers.authorization) {
           config.headers.Authorization = `Bearer ${token}`;
-          console.log('🔍 utils/api.js - Authorization header set:', config.headers.Authorization);
+          console.log('🔑 Attaching token to request:', config.url);
         }
       } else {
-        console.warn('🔍 utils/api.js - No token found!');
+        console.log('❌ No token available for request:', config.url);
       }
     } catch (e) {
       console.error('Request interceptor error:', e);
@@ -42,15 +40,11 @@ apiClient.interceptors.response.use(
       const status = error?.response?.status;
       
       if (status === 401 || status === 403) {
-        try { localStorage.removeItem('accessToken'); } catch (e) {}
-        try { localStorage.removeItem('refreshToken'); } catch (e) {}
-        try { localStorage.removeItem('authToken'); } catch (e) {}
-        try { localStorage.removeItem('userData'); } catch (e) {}
-        try { localStorage.removeItem('user'); } catch (e) {}
+        // Clear tokens using TokenManager
+        TokenManager.clearTokens();
+        
         // Emit a global event so React can react if needed
         try { window.dispatchEvent(new CustomEvent('auth:logout')); } catch (e) {}
-        // Temporarily disable redirect for debugging
-        // try { window.location.href = '/login'; } catch (e) {}
       }
     } catch (e) {
       console.error('Interceptor error:', e);
