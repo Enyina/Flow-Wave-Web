@@ -18,7 +18,18 @@ export const FlowProvider = ({ children }) => {
     fromCurrency: null,
     toCurrency: null,
     paymentDescription: '',
-    currentStep: 'dashboard' // dashboard, recipients, amount, description, review, pin, instructions, success
+    currentStep: 'dashboard', // dashboard, recipients, amount, description, review, pin, instructions, success
+    // Cross-border payment information
+    beneficiaryName: '',
+    beneficiaryBank: '',
+    beneficiaryAccountNumber: '',
+    accountType: '', // 'Personal' or 'Business'
+    routingNumber: '',
+    swiftCode: '',
+    beneficiaryAddress: '',
+    phoneNumber: '',
+    email: '',
+    purposeOfPayment: ''
   });
 
   const updateFlowState = (updates) => {
@@ -33,7 +44,18 @@ export const FlowProvider = ({ children }) => {
       fromCurrency: null,
       toCurrency: null,
       paymentDescription: '',
-      currentStep: 'dashboard'
+      currentStep: 'dashboard',
+      // Cross-border payment information
+      beneficiaryName: '',
+      beneficiaryBank: '',
+      beneficiaryAccountNumber: '',
+      accountType: '',
+      routingNumber: '',
+      swiftCode: '',
+      beneficiaryAddress: '',
+      phoneNumber: '',
+      email: '',
+      purposeOfPayment: ''
     });
   };
 
@@ -45,7 +67,18 @@ export const FlowProvider = ({ children }) => {
       fromCurrency: null,
       toCurrency: null,
       paymentDescription: '',
-      currentStep: 'amount'
+      currentStep: 'amount',
+      // Cross-border payment information
+      beneficiaryName: '',
+      beneficiaryBank: '',
+      beneficiaryAccountNumber: '',
+      accountType: '',
+      routingNumber: '',
+      swiftCode: '',
+      beneficiaryAddress: '',
+      phoneNumber: '',
+      email: '',
+      purposeOfPayment: ''
     });
   };
 
@@ -57,7 +90,18 @@ export const FlowProvider = ({ children }) => {
       fromCurrency,
       toCurrency,
       paymentDescription: '',
-      currentStep: 'recipients'
+      currentStep: 'recipients',
+      // Cross-border payment information
+      beneficiaryName: '',
+      beneficiaryBank: '',
+      beneficiaryAccountNumber: '',
+      accountType: '',
+      routingNumber: '',
+      swiftCode: '',
+      beneficiaryAddress: '',
+      phoneNumber: '',
+      email: '',
+      purposeOfPayment: ''
     });
   };
 
