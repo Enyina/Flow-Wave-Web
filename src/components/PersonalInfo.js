@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 import { userApi } from '../api/userApi';
+import TokenManager from '../utils/tokenManager';
 
 const PersonalInfo = ({ onNext }) => {
   const navigate = useNavigate();
@@ -44,24 +45,38 @@ const PersonalInfo = ({ onNext }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const token = localStorage.getItem('flowAuthToken');
-
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
     try {
-      console.log({formData, token});
+      // Check current token
+      const currentToken = TokenManager.getAccessToken();
+      console.log('🔍 Current token for personal info:', currentToken);
       
-      const result = await userApi.updateProfile(formData, token);
-      // update context
-        // console.log('API result', result);
-      // setUser(result.data);
+      if (!currentToken) {
+        setErrors({ general: 'Authentication token missing. Please log in again.' });
+        return;
+      }
+
+      // Decode JWT to see contents (for debugging)
+      try {
+        const tokenPayload = JSON.parse(atob(currentToken.split('.')[1]));
+        console.log('🔍 JWT payload:', tokenPayload);
+      } catch (e) {
+        console.error('🔍 Failed to decode JWT:', e);
+      }
+
+      console.log('🔍 Submitting personal info:', formData);
+      
+      const result = await userApi.updateProfile(formData);
+      console.log('🔍 Personal info update result:', result);
    
-        navigate('/dashboard');
+      navigate('/welcome');
       
     } catch (error) {
-      setErrors({ general: error.response?.data?.message || 'Failed to update profile' });
+      console.error('🔍 Personal info update error:', error);
+      setErrors({ general: error.message || 'Failed to update profile' });
     } finally {
       setIsLoading(false);
     }

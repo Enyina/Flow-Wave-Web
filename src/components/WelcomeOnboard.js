@@ -62,7 +62,7 @@ const WelcomeOnboard = () => {
             </div>
             <button
               className="flex px-3 py-3 justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-primary-blue to-primary-pink border-none cursor-pointer w-full text-white text-lg font-bold hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
-              onClick={() => navigate('/personal-info')}
+              onClick={() => navigate('/dashboard')}
             >
               Let's Go
             </button>

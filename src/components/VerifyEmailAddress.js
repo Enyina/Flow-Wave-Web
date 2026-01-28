@@ -8,7 +8,7 @@ const VerifyEmailAddress = () => {
   const { logout } = useAuth();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [verificationCode, setVerificationCode] = useState(['', '', '', '']);
-  const [countdown, setCountdown] = useState(256);
+  const [countdown, setCountdown] = useState(2);
   const [showResend, setShowResend] = useState(false);
   const inputRefs = useRef([]);
 
