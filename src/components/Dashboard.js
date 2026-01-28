@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { useFlow } from '../contexts/FlowContext';
+import { useTransactionStore } from '../stores/transactionStore';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
 
@@ -11,13 +12,36 @@ const Dashboard = () => {
   const { logout, loading, isAuthenticated } = useAuth();
   const { fromCurrency, toCurrency, sendAmount, receiveAmount, updateSendAmount } = useCurrency();
   const { startFromAmount } = useFlow();
+  const { 
+    fetchExchangeRate, 
+    exchangeRate, 
+    loading: rateLoading,
+    calculateTransferFee,
+    calculateTotalAmount
+  } = useTransactionStore();
+  
   const [hasAnimated, setHasAnimated] = useState(false);
   const [errors, setErrors] = useState({});
+  const [localExchangeRateData, setLocalExchangeRateData] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  // Fetch exchange rates when currencies change
+  useEffect(() => {
+    const loadExchangeRate = async () => {
+      if (fromCurrency.code && toCurrency.code) {
+        try {
+          await fetchExchangeRate(fromCurrency.code, toCurrency.code);
+        } catch (error) {
+          console.error('Failed to fetch exchange rate:', error);
+        }
+      }
+    };
+    loadExchangeRate();
+  }, [fromCurrency.code, toCurrency.code, fetchExchangeRate]);
 
   // Exchange rates (in base currency units per 1 USD)
   const exchangeRates = {
@@ -32,7 +56,12 @@ const Dashboard = () => {
     'ZAR': 18.5
   };
 
-  const getExchangeRate = () => {
+  const getCurrentExchangeRate = () => {
+    // Use real API rate if available, fallback to hardcoded rate
+    if (exchangeRate && exchangeRate.rate) {
+      return exchangeRate.rate;
+    }
+    // Fallback to hardcoded rates
     const fromRate = exchangeRates[fromCurrency.code] || 1;
     const toRate = exchangeRates[toCurrency.code] || 1;
     return fromRate / toRate;
@@ -55,14 +84,12 @@ const Dashboard = () => {
 
   const calculateFee = () => {
     const amount = parseFloat(sendAmount) || 0;
-    const feePercentage = 0.02; // 2% fee
-    return (amount * feePercentage).toFixed(2);
+    return calculateTransferFee(amount);
   };
 
   const calculateTotalPay = () => {
     const amount = parseFloat(sendAmount) || 0;
-    const fee = parseFloat(calculateFee());
-    return (amount + fee).toFixed(2);
+    return calculateTotalAmount(amount);
   };
 
   const handleSendAmountChange = (e) => {
@@ -71,6 +98,39 @@ const Dashboard = () => {
     // Clear errors when user starts typing
     if (value && parseFloat(value) > 0) {
       setErrors({});
+    }
+    // Check exchange rate when amount changes
+    if (value && parseFloat(value) > 0) {
+      checkExchangeRate(value);
+    }
+  };
+
+  const checkExchangeRate = async (amount) => {
+    if (!amount || parseFloat(amount) <= 0) return;
+    
+    try {
+      const response = await transactionService.checkExchangeRate(
+        parseFloat(amount),
+        fromCurrency.code,
+        toCurrency.code
+      );
+      
+      if (response.success) {
+        setLocalExchangeRateData({
+          originalAmount: parseFloat(amount),
+          originalCurrency: fromCurrency.code,
+          convertedAmount: response.data.convertedAmount,
+          targetCurrency: toCurrency.code,
+          rate: response.data.rate,
+          timestamp: new Date().toISOString(),
+          transferFee: calculateFee(),
+          total: calculateTotalPay()
+        });
+      }
+    } catch (error) {
+      console.error('Exchange rate check failed:', error);
+      // Fallback to local calculation
+      setLocalExchangeRateData(null);
     }
   };
 
@@ -84,7 +144,24 @@ const Dashboard = () => {
       setErrors({ amount: 'This cannot be empty' });
       return;
     }
-    // Start amount-first flow
+    
+    // Store transaction data and navigate to existing recipients page
+    const transactionData = {
+      amount: parseFloat(sendAmount),
+      fromCurrency,
+      toCurrency,
+      exchangeRateData: localExchangeRateData || {
+        originalAmount: parseFloat(sendAmount),
+        originalCurrency: fromCurrency.code,
+        convertedAmount: receiveAmount,
+        targetCurrency: toCurrency.code,
+        rate: getCurrentExchangeRate(),
+        timestamp: new Date().toISOString(),
+        transferFee: calculateFee(),
+        total: calculateTotalPay()
+      }
+    };
+    
     startFromAmount(sendAmount, fromCurrency, toCurrency);
     navigate('/recipients');
   };
@@ -212,6 +289,11 @@ if (!isAuthenticated) {
                 <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">Fee:</p>
                 <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">Total Pay:</p>
                 <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">Rate:</p>
+                {rateLoading && (
+                  <p className="text-primary-blue text-xs leading-[18px] animate-pulse">
+                    Checking rate...
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-3 text-right">
                 <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">
@@ -221,8 +303,22 @@ if (!isAuthenticated) {
                   {formatCurrency(calculateTotalPay(), fromCurrency.code)}
                 </p>
                 <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">
-                  {formatCurrency(getExchangeRate().toFixed(2), fromCurrency.code)} = {formatCurrency('1.00', toCurrency.code)}
+                  {rateLoading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      Loading rate...
+                    </span>
+                  ) : localExchangeRateData ? (
+                    `1 ${localExchangeRateData.originalCurrency} = ${localExchangeRateData.rate} ${localExchangeRateData.targetCurrency}`
+                  ) : (
+                    `${formatCurrency(getCurrentExchangeRate().toFixed(2), fromCurrency.code)} = ${formatCurrency('1.00', toCurrency.code)}`
+                  )}
                 </p>
+                {localExchangeRateData && (
+                  <p className="text-xs text-neutral-gray">
+                    {new Date(localExchangeRateData.timestamp).toLocaleTimeString()}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -258,6 +354,7 @@ if (!isAuthenticated) {
           {/* Continue Button */}
           <button
             onClick={handleContinue}
+            disabled={!sendAmount || sendAmount === '' || parseFloat(sendAmount) <= 0}
             className={`w-full py-4 bg-primary-blue text-white text-lg font-bold rounded-lg hover:bg-primary-blue/90 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`}
             style={{ animationDelay: '1s' }}
           >

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
 import BackButton from './BackButton';
-import apiFetch from '../utils/api';
+import { apiFetch } from '../api';
 
 const AccountPin = () => {
   const navigate = useNavigate();

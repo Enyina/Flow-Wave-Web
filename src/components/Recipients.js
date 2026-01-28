@@ -2,26 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useFlow } from '../contexts/FlowContext';
+import { useTransactionStore } from '../stores/transactionStore';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
-import { apiFetch } from '../utils/api';
 
 const Recipients = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { flowState, startFromRecipient, updateFlowState } = useFlow();
+  const { 
+    recipients: storeRecipients, 
+    fetchRecipients, 
+    loading: storeLoading, 
+    error 
+  } = useTransactionStore();
+  
+  console.log('📊 Transaction store data:', { storeRecipients, storeLoading, error });
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [hasAnimated, setHasAnimated] = useState(false);
-
-  const [recipients, setRecipients] = useState([]);
-  const [loadingRecipients, setLoadingRecipients] = useState(false);
+  const [showBeneficiaryForm, setShowBeneficiaryForm] = useState(false);
+  const [selectedRecipientData, setSelectedRecipientData] = useState(null);
+  const [beneficiaryInfo, setBeneficiaryInfo] = useState({
+    beneficiaryName: '',
+    beneficiaryBank: '',
+    beneficiaryAccountNumber: '',
+    accountType: 'Personal',
+    routingNumber: '',
+    swiftCode: '',
+    beneficiaryAddress: '',
+    phoneNumber: '',
+    email: '',
+    purposeOfPayment: ''
+  });
   const [listError, setListError] = useState('');
 
-  const filteredRecipients = recipients.filter(recipient =>
+  const filteredRecipients = Array.isArray(storeRecipients) ? storeRecipients.filter(recipient =>
     (recipient.fullName || recipient.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (recipient.bankName || recipient.bank || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (recipient.accountNumber || '').includes(searchTerm)
-  );
+  ) : [];
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -29,61 +49,69 @@ const Recipients = () => {
   }, []);
 
   useEffect(() => {
-    let mounted = true;
-    async function load() {
-      setLoadingRecipients(true);
-      setListError('');
+    const load = async () => {
       try {
-        const res = await apiFetch(`/recipients?page=1&limit=100&search=${encodeURIComponent(searchTerm)}`);
-        if (res.ok) {
-          // Normalize response to an array. API may return { data: [...] } or [...] directly or { recipients: [...] }
-          const ensureArray = (val) => {
-            if (Array.isArray(val)) return val;
-            if (val && typeof val === 'object') {
-              if (Array.isArray(val.data)) return val.data;
-              if (Array.isArray(val.results)) return val.results;
-              if (Array.isArray(val.recipients)) return val.recipients;
-              // return first array property if present
-              for (const k of Object.keys(val)) {
-                if (Array.isArray(val[k])) return val[k];
-              }
-            }
-            return [];
-          };
-
-          if (mounted) setRecipients(ensureArray(res.data));
-        } else {
-          setListError(res.data?.error || 'Failed to load recipients');
-        }
+        await fetchRecipients();
       } catch (err) {
-        setListError('Network error');
-      } finally {
-        if (mounted) setLoadingRecipients(false);
+        console.error('Failed to load recipients:', err);
       }
-    }
+    };
     load();
-    return () => { mounted = false; };
-  }, [searchTerm]);
+  }, [fetchRecipients]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleRecipientSelect = (recipient) => {
+    setSelectedRecipientData(recipient);
+    // Pre-fill beneficiary info from recipient data
+    setBeneficiaryInfo({
+      beneficiaryName: recipient.fullName || recipient.name || '',
+      beneficiaryBank: recipient.bankName || recipient.bank || '',
+      beneficiaryAccountNumber: recipient.accountNumber || '',
+      accountType: recipient.accountType || 'Personal',
+      routingNumber: recipient.routingNumber || recipient.swiftOrSortCode || '',
+      swiftCode: recipient.swiftOrSortCode || '',
+      beneficiaryAddress: recipient.address || `${recipient.state || ''}, ${recipient.city || ''}` || '',
+      phoneNumber: recipient.phoneNumber || '',
+      email: recipient.email || '',
+      purposeOfPayment: ''
+    });
+    setShowBeneficiaryForm(true);
   };
 
   const handleAddRecipient = () => {
     navigate('/add-recipient');
   };
 
-  const handleSelectRecipient = (recipient) => {
-    if (flowState.startedFromRecipient || !flowState.sendAmount) {
-      // If we started from recipient or don't have amount yet, start recipient-first flow
-      startFromRecipient(recipient);
-      navigate('/dashboard'); // Go to dashboard to input amount
-    } else {
-      // If we have amount from dashboard, continue to payment description
-      updateFlowState({ selectedRecipient: recipient, currentStep: 'description' });
-      navigate('/payment-description');
+  const handleBeneficiarySubmit = () => {
+    // Validate required fields
+    if (!beneficiaryInfo.beneficiaryName || !beneficiaryInfo.beneficiaryBank || !beneficiaryInfo.beneficiaryAccountNumber) {
+      setListError('Please fill in all required beneficiary fields');
+      return;
     }
+
+    // Update flow state with beneficiary info and proceed
+    updateFlowState({ 
+      selectedRecipient: selectedRecipientData,
+      beneficiaryName: beneficiaryInfo.beneficiaryName,
+      beneficiaryBank: beneficiaryInfo.beneficiaryBank,
+      beneficiaryAccountNumber: beneficiaryInfo.beneficiaryAccountNumber,
+      accountType: beneficiaryInfo.accountType,
+      routingNumber: beneficiaryInfo.routingNumber,
+      swiftCode: beneficiaryInfo.swiftCode,
+      beneficiaryAddress: beneficiaryInfo.beneficiaryAddress,
+      phoneNumber: beneficiaryInfo.phoneNumber,
+      email: beneficiaryInfo.email,
+      purposeOfPayment: beneficiaryInfo.purposeOfPayment, // This is now the description
+      paymentDescription: beneficiaryInfo.purposeOfPayment // Same as purpose of payment
+    });
+    
+    setShowBeneficiaryForm(false);
+    // Navigate directly to virtual account instead of payment description
+    navigate('/virtual-account');
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -198,11 +226,11 @@ const Recipients = () => {
 
             {/* Recipients List */}
             <div className="space-y-4">
-              {loadingRecipients ? (
+              {storeLoading ? (
                 <div className="text-center py-8">Loading...</div>
               ) : listError ? (
                 <div className="text-error text-center py-8">{listError}</div>
-              ) : (
+              ) : Array.isArray(filteredRecipients) && filteredRecipients.length > 0 ? (
                 filteredRecipients.map((recipient, index) => (
                   <div
                     key={recipient.id || recipient._id}
@@ -215,24 +243,25 @@ const Recipients = () => {
                           <img
                             src={recipient.avatar || 'https://api.builder.io/api/v1/image/assets/TEMP/04273d01ddb83b37c8d4e064d32b645782f153e4?width=62'}
                             alt={recipient.fullName || recipient.name}
-                            className="w-full h-full object-cover"
                           />
                         </div>
-                        <span className="text-neutral-dark dark:text-dark-text font-medium">{recipient.fullName || recipient.name}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right mr-4">
+                        <div>
+                          <p className="font-medium text-neutral-dark dark:text-dark-text">{recipient.fullName || recipient.name}</p>
                           <p className="text-neutral-gray text-xs">{(recipient.bankName || recipient.bank) || ''} - {(recipient.accountNumber && recipient.accountNumber.length > 6) ? `***${recipient.accountNumber.slice(-4)}` : recipient.accountNumber}</p>
                         </div>
                         <div className="flex gap-2">
                           <button onClick={() => navigate('/add-recipient', { state: { recipient, mode: 'view' } })} className="px-3 py-1 text-sm rounded bg-white border">View</button>
                           <button onClick={() => navigate('/add-recipient', { state: { recipient, mode: 'edit' } })} className="px-3 py-1 text-sm rounded bg-primary-blue text-white">Edit</button>
-                          <button onClick={() => handleSelectRecipient(recipient)} className="px-3 py-1 text-sm rounded bg-primary-green text-white">Use</button>
+                          <button onClick={() => handleRecipientSelect(recipient)} className="px-3 py-1 text-sm rounded bg-primary-green text-white">Use</button>
                         </div>
                       </div>
                     </div>
                   </div>
                 ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-neutral-gray">No recipients found</p>
+                </div>
               )}
             </div>
 
@@ -245,6 +274,173 @@ const Recipients = () => {
           </div>
         </div>
       </main>
+
+      {/* Beneficiary Form Modal */}
+      {showBeneficiaryForm && selectedRecipientData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-surface rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-neutral-dark dark:text-dark-text mb-6">
+                Confirm Beneficiary Details
+              </h2>
+              
+              {listError && (
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                  <p className="text-red-600 dark:text-red-400 text-sm">{listError}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Beneficiary Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={beneficiaryInfo.beneficiaryName}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, beneficiaryName: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    placeholder="Enter beneficiary full name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Beneficiary Bank *
+                  </label>
+                  <input
+                    type="text"
+                    value={beneficiaryInfo.beneficiaryBank}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, beneficiaryBank: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    placeholder="Enter bank name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Account Number *
+                  </label>
+                  <input
+                    type="text"
+                    value={beneficiaryInfo.beneficiaryAccountNumber}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, beneficiaryAccountNumber: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    placeholder="Enter account number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Account Type
+                  </label>
+                  <select
+                    value={beneficiaryInfo.accountType}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, accountType: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                  >
+                    <option value="Personal">Personal</option>
+                    <option value="Business">Business</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Routing Number/Sortcode
+                  </label>
+                  <input
+                    type="text"
+                    value={beneficiaryInfo.routingNumber}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, routingNumber: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    placeholder="Enter routing number or sortcode"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    ABA/Swift Code
+                  </label>
+                  <input
+                    type="text"
+                    value={beneficiaryInfo.swiftCode}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, swiftCode: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    placeholder="Enter SWIFT or ABA code"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Beneficiary Address
+                  </label>
+                  <textarea
+                    value={beneficiaryInfo.beneficiaryAddress}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, beneficiaryAddress: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    rows="3"
+                    placeholder="Enter beneficiary address"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={beneficiaryInfo.phoneNumber}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, phoneNumber: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Email (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    value={beneficiaryInfo.email}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, email: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    placeholder="Enter email address"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-dark dark:text-dark-text mb-2">
+                    Purpose of Payment *
+                  </label>
+                  <textarea
+                    value={beneficiaryInfo.purposeOfPayment}
+                    onChange={(e) => setBeneficiaryInfo({...beneficiaryInfo, purposeOfPayment: e.target.value})}
+                    className="w-full px-4 py-3 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-dark-bg text-neutral-dark dark:text-white"
+                    rows="3"
+                    placeholder="Enter purpose of payment"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={() => setShowBeneficiaryForm(false)}
+                  className="flex-1 px-4 py-3 border border-neutral-300 dark:border-gray-600 text-neutral-dark dark:text-white rounded-lg hover:bg-neutral-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleBeneficiarySubmit}
+                  className="flex-1 px-4 py-3 bg-primary-blue text-white rounded-lg hover:bg-primary-blue/90"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Navigation */}
       <nav className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-surface shadow-soft dark:shadow-dark-soft px-6 py-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '1.2s' }}>

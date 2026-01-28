@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
-import { apiFetch } from '../utils/api';
+import { apiFetch } from '../api';
 import { useFlow } from '../contexts/FlowContext';
 
 const AddRecipient = () => {
@@ -15,6 +15,8 @@ const AddRecipient = () => {
     fullName: '',
     bank: '',
     accountNumber: '',
+    accountType: 'Personal',
+    routingNumber: '',
     swiftCode: '',
     address: '',
     state: '',
@@ -27,16 +29,6 @@ const AddRecipient = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isEditing, setIsEditing] = useState(true);
-
-  const banks = [
-    'Access Bank',
-    'First Bank',
-    'GTBank',
-    'Lead Bank',
-    'UBA',
-    'Zenith Bank',
-    'Choose Bank'
-  ];
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -52,6 +44,8 @@ const AddRecipient = () => {
         fullName: r.fullName || r.name || '',
         bank: r.bankName || r.bank || '',
         accountNumber: r.accountNumber || r.account || '',
+        accountType: r.accountType || 'Personal',
+        routingNumber: r.routingNumber || r.swiftOrSortCode || '',
         swiftCode: r.swiftOrSortCode || r.swiftCode || '',
         address: r.address || '',
         state: r.state || '',
@@ -80,10 +74,10 @@ const AddRecipient = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    const requiredFields = ['fullName', 'bank', 'accountNumber', 'swiftCode', 'address', 'state', 'city', 'zipCode', 'phoneNumber', 'email'];
+    const requiredFields = ['fullName', 'bank', 'accountNumber', 'accountType', 'routingNumber', 'swiftCode', 'address', 'state', 'city', 'zipCode', 'phoneNumber', 'email'];
 
     requiredFields.forEach(field => {
-      if (!formData[field] || formData[field] === 'Choose Bank') {
+      if (!formData[field] || formData[field].trim() === '') {
         newErrors[field] = 'This field is required';
       }
     });
@@ -256,35 +250,37 @@ const AddRecipient = () => {
             <div className={`space-y-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
               {renderInputField('Full Name', 'fullName', 'text', 'First Name')}
               
-              {/* Bank Dropdown */}
+              {renderInputField('Bank', 'bank', 'text', 'Enter bank name')}
+
+              {renderInputField('Account Number', 'accountNumber', 'text', 'Address')}
+              
+              {/* Account Type */}
               <div className="space-y-2">
                 <label className="text-neutral-dark dark:text-dark-text font-medium">
-                  Bank <span className="text-error">*</span>
+                  Account Type
                 </label>
                 <div className="relative">
                   <select
-                    value={formData.bank}
-                    onChange={(e) => handleInputChange('bank', e.target.value)}
+                    value={formData.accountType}
+                    onChange={(e) => handleInputChange('accountType', e.target.value)}
                     className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.bank ? 'border-error' : 'border-neutral-lightgray dark:border-dark-border'
+                      errors.accountType ? 'border-error' : 'border-neutral-lightgray dark:border-dark-border'
                     } bg-white dark:bg-dark-card text-neutral-dark dark:text-dark-text appearance-none focus:border-primary-blue focus:ring-4 focus:ring-primary-blue/10 transition-all duration-200`}
-                    disabled={isLoading}
+                    disabled={!isEditing || isLoading}
                   >
-                    <option value="">Choose Bank</option>
-                    {banks.filter(bank => bank !== 'Choose Bank').map(bank => (
-                      <option key={bank} value={bank}>{bank}</option>
-                    ))}
+                    <option value="Personal">Personal</option>
+                    <option value="Business">Business</option>
                   </select>
                   <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-dark dark:text-dark-text pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                {errors.bank && (
-                  <p className="text-error text-xs animate-slide-in-down animate-once">{errors.bank}</p>
+                {errors.accountType && (
+                  <p className="text-error text-xs animate-slide-in-down animate-once">{errors.accountType}</p>
                 )}
               </div>
-
-              {renderInputField('Account Number', 'accountNumber', 'text', 'Address')}
+              
+              {renderInputField('Routing Number/Sortcode', 'routingNumber', 'text', 'Enter Routing Number or Sortcode')}
               {renderInputField('Swift/Sort Code', 'swiftCode', 'text', 'Enter Swift/Sort Code')}
             </div>
 
