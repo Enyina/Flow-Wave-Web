@@ -2,112 +2,94 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useFlow } from '../contexts/FlowContext';
-import { apiFetch } from '../api';
-import Logo from './Logo';
+import { useTransactionStore } from '../stores/transactionStore';
 import DarkModeToggle from './DarkModeToggle';
+import Logo from './Logo';
 
-const Transactions = () => {
+const InvoiceUpload = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { flowState } = useFlow();
+  const [attachedFile, setAttachedFile] = useState(null);
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [transactions, setTransactions] = useState([]);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(20);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [listError, setListError] = useState('');
-  const { updateFlowState } = useFlow();
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      setLoading(true);
-      setListError('');
-      try {
-        const params = new URLSearchParams();
-        params.set('page', String(page));
-        params.set('limit', String(limit));
-        if (statusFilter) params.set('status', statusFilter);
-        const res = await apiFetch(`/transactions?${params.toString()}`);
-        if (res.ok) {
-          // Normalize possible response shapes
-          const data = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.transactions || []);
-          if (mounted) setTransactions(data.map(t => ({
-            id: t.id || t._id || t.referenceId || t.reference,
-            raw: t,
-            recipient: (t.recipient?.fullName || t.recipient?.name || t.recipientName || t.recipient || '').toString(),
-            amount: typeof t.amount === 'number' ? new Intl.NumberFormat(undefined, { style: 'currency', currency: t.currency || 'NGN' }).format(t.amount) : (t.amount || ''),
-            date: t.createdAt || t.date || '',
-            status: t.status || ''
-          })));
-        } else {
-          setListError(res.data?.error || 'Failed to load transactions');
-        }
-      } catch (err) {
-        setListError('Network error');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-    load();
-    return () => { mounted = false; };
-  }, [page, limit, statusFilter]);
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
 
+      if (!allowedTypes.includes(file.type)) {
+        setErrors({ file: 'Only PNG, JPEG, PDF files are supported' });
+        return;
+      }
+
+      if (file.size > maxSize) {
+        setErrors({ file: 'File size must be less than 5MB' });
+        return;
+      }
+
+      setAttachedFile(file);
+      setErrors({});
+    }
+  };
+
+  const handleSkip = () => {
+    // Navigate to transaction successful page
+    navigate('/transaction-successful');
+  };
+
+  const handleUpload = async () => {
+    if (!attachedFile) {
+      setErrors({ file: 'Please select a file to upload' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      const transaction = flowState?.transaction;
+      if (!transaction?.id) {
+        setErrors({ form: 'No transaction found' });
+        return;
+      }
+
+      // Create FormData for file upload
+      const form = new FormData();
+      form.append('file', attachedFile);
+      form.append('transactionId', transaction.id);
+
+      // Upload invoice to backend
+      const res = await apiFetch(`/transactions/${transaction.id}/upload-invoice`, { 
+        method: 'POST', 
+        body: form 
+      });
+
+      if (res.ok && (res.status === 200 || res.status === 201)) {
+        // Navigate to transaction successful page
+        navigate('/transaction-successful');
+      } else {
+        setErrors({ form: res.data?.error || 'Failed to upload invoice' });
+      }
+    } catch (err) {
+      console.error(err);
+      setErrors({ form: err.message || 'Network error' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/login');
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const filteredTransactions = transactions.filter(transaction => {
-    const q = searchQuery.toLowerCase();
-    return (
-      (transaction.recipient || '').toLowerCase().includes(q) ||
-      (transaction.amount || '').toString().toLowerCase().includes(q) ||
-      (transaction.raw?.referenceId || transaction.raw?.reference || '').toLowerCase().includes(q)
-    );
-  });
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'successful':
-        return 'bg-green-600';
-      case 'pending':
-        return 'bg-yellow-600';
-      case 'failed':
-        return 'bg-red-600';
-      default:
-        return 'bg-gray-600';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'successful':
-        return 'Successful';
-      case 'pending':
-        return 'Pending';
-      case 'failed':
-        return 'Failed';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const handleTransactionClick = (transaction) => {
-    // store full transaction in flow state for details page
-    updateFlowState({ transaction: transaction.raw || transaction });
-    navigate('/transaction-details');
   };
 
   return (
@@ -135,10 +117,7 @@ const Transactions = () => {
           </button>
 
           {/* Notifications */}
-          <button 
-            onClick={() => navigate('/notifications')}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface transition-all duration-200"
-          >
+          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-surface transition-all duration-200">
             <svg width="40" height="40" viewBox="0 0 50 50" fill="none" className="w-8 h-8 lg:w-10 lg:h-10">
               <path d="M32.2923 37.5C32.2923 41.5271 29.0277 44.7917 25.0007 44.7917C20.9736 44.7917 17.709 41.5271 17.709 37.5" stroke="#3A49A4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M40.0648 37.4997H9.93515C7.8999 37.4997 6.25 35.8497 6.25 33.8145C6.25 32.8372 6.63825 31.8999 7.32935 31.2086L8.58608 29.952C9.75819 28.7799 10.4167 27.1901 10.4167 25.5326V19.7913C10.4167 11.7372 16.9459 5.20801 25 5.20801C33.0542 5.20801 39.5833 11.7372 39.5833 19.7913V25.5326C39.5833 27.1901 40.2419 28.7799 41.414 29.952L42.6706 31.2086C43.3617 31.8999 43.75 32.8372 43.75 33.8145C43.75 35.8497 42.1 37.4997 40.0648 37.4997Z" stroke="#3A49A4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
@@ -162,90 +141,91 @@ const Transactions = () => {
       <main className="flex flex-col items-center px-4 lg:px-0 pb-24">
         <div className={`w-full max-w-lg ${hasAnimated ? 'animate-fade-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
           {/* Title */}
-          <h1 className="text-center text-2xl lg:text-3xl font-bold text-primary-pink mb-8">
-            Transactions
+          <h1 className="text-center text-2xl lg:text-3xl font-bold text-primary-pink mb-4 lg:mb-6">
+            Upload Invoice
           </h1>
 
-          {/* Search Bar */}
-          <div className="relative mb-6">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-neutral-gray">
-                <circle cx="7.33333" cy="7.33333" r="6" stroke="currentColor" strokeWidth="1.33333"/>
-                <path d="M12.6667 12.6667L16 16" stroke="currentColor" strokeWidth="1.33333" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="w-full pl-12 pr-4 py-2 bg-primary-light rounded-lg text-sm text-neutral-gray placeholder-neutral-gray border-none outline-none focus:ring-2 focus:ring-primary-blue"
-            />
-          </div>
+          <p className="text-center text-neutral-gray text-sm mb-8 lg:mb-10">
+            Your payment has been confirmed! You can optionally upload an invoice or supporting document for this transaction.
+          </p>
 
-          {/* Transactions List */}
-          {loading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : listError ? (
-            <div className="text-error text-center py-8">{listError}</div>
-          ) : filteredTransactions.length === 0 && !searchQuery ? (
-            /* Empty State */
-            <div className="text-center py-16">
-              <p className="text-neutral-dark dark:text-dark-text text-base">
-                You do not have any transactions yet.
-              </p>
-            </div>
-          ) : filteredTransactions.length === 0 && searchQuery ? (
-            /* No Search Results */
-            <div className="text-center py-16">
-              <p className="text-neutral-dark dark:text-dark-text text-base">
-                No transactions found matching "{searchQuery}"
-              </p>
-            </div>
-          ) : (
-            /* Transaction List */
-            <div className="space-y-4">
-              {filteredTransactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  onClick={() => handleTransactionClick(transaction)}
-                  className="bg-secondary-light rounded-lg p-4 cursor-pointer hover:bg-secondary-light/80 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {/* Transaction Icon */}
-                      <div className="w-8 h-8 rounded-full bg-secondary-200 flex items-center justify-center">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-black">
-                          <path d="M3.5 8.5L8.5 3.5M8.5 3.5H3.5M8.5 3.5V8.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-
-                      {/* Transaction Info */}
-                      <div>
-                        <p className="text-black text-base font-medium">{transaction.recipient}</p>
-                        <p className="text-neutral-dark text-xs">{transaction.date}</p>
-                      </div>
-                    </div>
-
-                    {/* Amount and Status */}
-                    <div className="text-right">
-                      <p className="text-neutral-dark text-xs mb-1">{transaction.amount}</p>
-                      <span className={`inline-block px-3 py-1 rounded-full text-white text-xs ${getStatusColor(transaction.status)}`}>
-                        {getStatusText(transaction.status)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* Form-level errors */}
+          {Object.keys(errors).length > 0 && (
+            <div className="w-full p-3 bg-error/10 border border-error text-error rounded mb-6">
+              <ul className="list-disc pl-5 text-sm">
+                {Object.values(errors).map((err, idx) => (
+                  <li key={idx}>{err}</li>
+                ))}
+              </ul>
             </div>
           )}
+
+          <div className="flex flex-col gap-6">
+            {/* File Upload */}
+            <div className="flex flex-col gap-2">
+              <label className="text-neutral-dark dark:text-dark-text text-base font-normal">
+                Attach Invoice <span className="text-neutral-gray text-sm">(optional)</span>
+              </label>
+              
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".png,.jpeg,.jpg,.pdf"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className={`w-full p-4 border border-dashed ${errors.file ? 'border-error' : 'border-neutral-gray'} rounded-lg bg-white dark:bg-dark-surface flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-neutral-50 dark:hover:bg-dark-bg transition-colors`}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-neutral-gray">
+                    <path d="M20 20C20.5304 20 21.0391 19.7893 21.4142 19.4142C21.7893 19.0391 22 18.5304 22 18V8C22 7.46957 21.7893 6.96086 21.4142 6.58579C21.0391 6.21071 20.5304 6 20 6H12.1C11.7655 6.00328 11.4355 5.92261 11.1403 5.76538C10.8451 5.60815 10.594 5.37938 10.41 5.1L9.6 3.9C9.41789 3.62347 9.16997 3.39648 8.8785 3.2394C8.58702 3.08231 8.26111 3.00005 7.93 3H4C3.46957 3 2.96086 3.21071 2.58579 3.58579C2.21071 3.96086 2 4.46957 2 5V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H20Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 10V16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 13L12 10L15 13" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <div className="text-center">
+                    <p className="text-neutral-dark dark:text-dark-text text-xs font-medium">
+                      {attachedFile ? attachedFile.name : 'Click to upload file'}
+                    </p>
+                    <p className="text-neutral-gray text-xs">
+                      Only PNG, JPEG, PDF files format are supported (Max 5MB)
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {errors.file && (
+                <p className="text-error text-sm">{errors.file}</p>
+              )}
+            </div>
+
+            {/* Description Text */}
+            <p className="text-neutral-gray text-xs leading-[18px]">
+              Please attach any related document that shows the purpose of this transaction. Data should match the beneficiary details to avoid delays.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleUpload}
+                disabled={isSubmitting || !attachedFile}
+                className={`w-full py-3 text-white text-lg font-bold rounded-lg transition-all duration-300 ${isSubmitting || !attachedFile ? 'bg-neutral-gray cursor-not-allowed' : 'bg-primary-blue hover:bg-primary-blue/90'}`}
+              >
+                {isSubmitting ? 'Uploading...' : 'Upload Invoice'}
+              </button>
+
+              <button
+                onClick={handleSkip}
+                disabled={isSubmitting}
+                className={`w-full py-3 text-primary-blue text-lg font-bold rounded-lg border-2 border-primary-blue transition-all duration-300 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-blue hover:text-white'}`}
+              >
+                Skip for Now
+              </button>
+            </div>
+          </div>
         </div>
       </main>
 
       {/* Bottom Navigation */}
       <nav className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-surface shadow-soft dark:shadow-dark-soft px-6 py-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '1.2s' }}>
         <div className="flex justify-between items-center max-w-2xl mx-auto">
-          <button onClick={() => navigate('/dashboard')} className="flex flex-col items-center gap-1 text-neutral-gray">
+          <button onClick={() => navigate('/dashboard')} className="flex flex-col items-center gap-1 text-primary-blue">
             <svg width="50" height="50" viewBox="0 0 50 50" fill="none" className="w-10 h-10">
               <path d="M6.25 24.978V30.208C6.25 37.0826 6.25 40.5199 8.38569 42.6557C10.5214 44.7913 13.9587 44.7913 20.8333 44.7913H29.1667C36.0412 44.7913 39.4785 44.7913 41.6144 42.6557C43.75 40.5199 43.75 37.0826 43.75 30.208V24.978C43.75 21.4753 43.75 19.7241 43.0085 18.2081C42.2671 16.6921 40.8848 15.6169 38.12 13.4666L33.9533 10.2258C29.6523 6.88061 27.5019 5.20801 25 5.20801C22.4981 5.20801 20.3477 6.88061 16.0467 10.2258L11.88 13.4666C9.11527 15.6169 7.7329 16.6921 6.99146 18.2081C6.25 19.7241 6.25 21.4753 6.25 24.978Z" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M31.25 35.417C29.5844 36.7137 27.3963 37.5003 25 37.5003C22.6036 37.5003 20.4157 36.7137 18.75 35.417" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -253,7 +233,7 @@ const Transactions = () => {
             <span className="text-xs font-medium">Home</span>
           </button>
 
-          <button className="flex flex-col items-center gap-1 text-primary-blue">
+          <button onClick={() => navigate('/transactions')} className="flex flex-col items-center gap-1 text-neutral-gray">
             <svg width="50" height="50" viewBox="0 0 50 50" fill="none" className="w-10 h-10">
               <path d="M34.1418 6.25L36.2312 8.28279C37.1646 9.19094 37.6312 9.64502 37.4668 10.0309C37.3027 10.4167 36.6427 10.4167 35.3227 10.4167H19.154C10.8763 10.4167 4.16602 16.9459 4.16602 25C4.16602 28.0983 5.1591 30.9713 6.85247 33.3333" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M15.8574 43.7503L13.7682 41.7176C12.8349 40.8093 12.3682 40.3553 12.5324 39.9695C12.6967 39.5837 13.3567 39.5837 14.6766 39.5837H30.8454C39.1229 39.5837 45.8333 33.0545 45.8333 25.0003C45.8333 21.902 44.8402 19.0291 43.1469 16.667" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
@@ -281,4 +261,4 @@ const Transactions = () => {
   );
 };
 
-export default Transactions;
+export default InvoiceUpload;

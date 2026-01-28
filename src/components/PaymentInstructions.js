@@ -77,7 +77,7 @@ const PaymentInstructions = () => {
   };
 
   const handleSentMoney = () => {
-    navigate('/transaction-successful');
+    navigate('/invoice-upload');
   };
 
   const handleLogout = () => {
