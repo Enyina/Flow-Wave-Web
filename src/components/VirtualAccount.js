@@ -13,7 +13,7 @@ const VirtualAccount = () => {
   const { logout } = useAuth();
   const { flowState, updateFlowState } = useFlow();
   const { sendAmount, fromCurrency } = useCurrency();
-  const { exchangeRate } = useTransactionStore();
+  const { exchangeRate, calculateTransferFee, calculateTotalAmount } = useTransactionStore();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [virtualAccount, setVirtualAccount] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +60,6 @@ const VirtualAccount = () => {
     
     try {
       // Calculate total amount including fee
-      const { calculateTransferFee, calculateTotalAmount } = useTransactionStore();
       const userAmount = parseFloat(flowState.sendAmount || sendAmount || 0);
       const transferFee = calculateTransferFee(userAmount);
       const totalAmount = calculateTotalAmount(userAmount);

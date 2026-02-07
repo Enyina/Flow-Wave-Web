@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { useFlow } from '../contexts/FlowContext';
 import { useTransactionStore } from '../stores/transactionStore';
+import transactionService from '../api/transactionService';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
 
@@ -305,7 +306,7 @@ if (!isAuthenticated) {
                 <p className="text-neutral-dark dark:text-dark-text text-xs leading-[18px]">
                   {rateLoading ? (
                     <span className="flex items-center gap-2">
-                      <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin inline-block"></span>
                       Loading rate...
                     </span>
                   ) : localExchangeRateData ? (
