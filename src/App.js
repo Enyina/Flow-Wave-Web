@@ -29,6 +29,8 @@ import ExchangeRate from './components/ExchangeRate';
 import BeneficiaryDetails from './components/BeneficiaryDetails';
 import VirtualAccount from './components/VirtualAccount';
 import Payment from './components/Payment';
+import PaymentCallback from './components/PaymentCallback';
+import PaymentError from './components/PaymentError';
 import ReceiptProcessing from './components/ReceiptProcessing';
 import ReceiptCompleted from './components/ReceiptCompleted';
 
@@ -133,6 +135,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Payment />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/payment/callback" 
+                element={
+                  <ProtectedRoute>
+                    <PaymentCallback />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/payment/error" 
+                element={
+                  <ProtectedRoute>
+                    <PaymentError />
                   </ProtectedRoute>
                 } 
               />

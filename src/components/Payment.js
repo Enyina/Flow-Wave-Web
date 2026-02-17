@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useFlow } from '../contexts/FlowContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { initiateTransaction } from '../api/transactionApi';
 import DarkModeToggle from './DarkModeToggle';
 import Logo from './Logo';
 
@@ -13,7 +14,6 @@ const Payment = () => {
   const { sendAmount, fromCurrency } = useCurrency();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('paystack');
 
   useEffect(() => {
     const timer = setTimeout(() => setHasAnimated(true), 100);
@@ -43,27 +43,49 @@ const Payment = () => {
     return amount + fee;
   };
 
-  const initializePaystackPayment = () => {
+  const initializePaystackPayment = async () => {
     setIsProcessing(true);
     
-    // Simulate Paystack initialization
-    setTimeout(() => {
-      // In a real implementation, you would initialize Paystack here
-      const paystackHandler = {
-        callback: (response) => {
-          // Payment successful
-          handlePaymentSuccess(response);
-        },
-        onClose: () => {
-          setIsProcessing(false);
-        }
+    try {
+      // Prepare transaction data
+      const transactionData = {
+        amount: parseFloat(flowState.sendAmount || sendAmount || 0),
+        fromCurrency: flowState.fromCurrency || fromCurrency || 'NGN',
+        toCurrency: flowState.toCurrency || 'USD',
+        userId: flowState.userId || flowState.recipient?.userId,
+        recipientId: flowState.recipient?.id,
+        description: flowState.description || 'Cross-border payment'
       };
 
-      // Simulate successful payment for demo
-      setTimeout(() => {
-        handlePaymentSuccess({ reference: 'demo_ref_' + Date.now() });
-      }, 3000);
-    }, 1000);
+      // Initiate transaction with new backend API
+      const response = await initiateTransaction(transactionData);
+      
+      if (response.paymentAuthorizationUrl) {
+        // Update flow state with transaction information
+        updateFlowState({
+          ...flowState,
+          transactionId: response.id,
+          paymentReference: response.referenceId,
+          paymentAuthorizationUrl: response.paymentAuthorizationUrl,
+          paymentAccessCode: response.paymentAccessCode,
+          paymentMethod: 'paystack',
+          status: 'payment_initiated',
+          totalAmount: response.total,
+          transferFee: response.transferFee,
+          exchangeRate: response.exchangeRate,
+          initiatedAt: new Date().toISOString()
+        });
+
+        // Redirect to Paystack payment page
+        window.location.href = response.paymentAuthorizationUrl;
+      } else {
+        throw new Error('No payment authorization URL received');
+      }
+    } catch (error) {
+      console.error('Payment initialization error:', error);
+      setIsProcessing(false);
+      alert(`Payment initialization failed: ${error.message}`);
+    }
   };
 
   const handlePaymentSuccess = (response) => {
@@ -71,17 +93,13 @@ const Payment = () => {
     updateFlowState({
       ...flowState,
       paymentReference: response.reference,
-      paymentMethod,
+      paymentMethod: 'paystack',
       status: 'payment_successful',
       paidAt: new Date().toISOString()
     });
 
     setIsProcessing(false);
     navigate('/receipt-processing');
-  };
-
-  const handlePaymentMethodChange = (method) => {
-    setPaymentMethod(method);
   };
 
   const handleLogout = () => {
@@ -160,46 +178,49 @@ const Payment = () => {
               <div className="flex justify-between">
                 <span className="text-neutral-gray">Amount:</span>
                 <span className="font-bold text-lg">
-                  {formatCurrency(calculateTotalPay(), fromCurrency?.code)}
+                  {formatCurrency(flowState.sendAmount || sendAmount, flowState.fromCurrency?.code || fromCurrency?.code)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-gray">Beneficiary:</span>
-                <span className="font-medium">{flowState.beneficiary?.beneficiaryName}</span>
+                <span className="text-neutral-gray">Transfer Fee:</span>
+                <span className="font-medium">
+                  {formatCurrency(flowState.transferFee || calculateTotalPay() - parseFloat(flowState.sendAmount || sendAmount || 0), flowState.fromCurrency?.code || fromCurrency?.code)}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-neutral-gray">Virtual Account:</span>
-                <span className="font-medium">{flowState.virtualAccount?.accountNumber}</span>
+                <span className="text-neutral-gray">Total Amount:</span>
+                <span className="font-bold text-lg text-primary-blue">
+                  {formatCurrency(flowState.totalAmount || calculateTotalPay(), flowState.fromCurrency?.code || fromCurrency?.code)}
+                </span>
               </div>
+              {flowState.recipient && (
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray">Recipient:</span>
+                  <span className="font-medium">{flowState.recipient.name || flowState.recipient.beneficiaryName}</span>
+                </div>
+              )}
+              {flowState.exchangeRate && (
+                <div className="flex justify-between">
+                  <span className="text-neutral-gray">Exchange Rate:</span>
+                  <span className="font-medium">1 {flowState.fromCurrency?.code} = {flowState.exchangeRate} {flowState.toCurrency?.code}</span>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Payment Methods */}
           <div className={`mb-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
-            <h3 className="text-lg font-bold text-neutral-dark dark:text-dark-text mb-4">Select Payment Method</h3>
+            <h3 className="text-lg font-bold text-neutral-dark dark:text-dark-text mb-4">Payment Method</h3>
             
             <div className="space-y-3">
               {/* Paystack Option */}
-              <button
-                onClick={() => handlePaymentMethodChange('paystack')}
-                className={`w-full p-4 rounded-lg border-2 transition-all duration-200 ${
-                  paymentMethod === 'paystack' 
-                    ? 'border-primary-blue bg-primary-blue/10' 
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
+              <div className="w-full p-4 rounded-lg border-2 border-primary-blue bg-primary-blue/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-5 h-5 rounded-full border-2 ${
-                      paymentMethod === 'paystack' 
-                        ? 'border-primary-blue bg-primary-blue' 
-                        : 'border-gray-400'
-                    }`}>
-                      {paymentMethod === 'paystack' && (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
+                    <div className="w-5 h-5 rounded-full border-2 border-primary-blue bg-primary-blue">
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      </div>
                     </div>
                     <div className="text-left">
                       <p className="font-medium text-neutral-dark dark:text-dark-text">Pay with Paystack</p>
@@ -210,84 +231,28 @@ const Payment = () => {
                     <span className="text-white text-xs font-bold">PS</span>
                   </div>
                 </div>
-              </button>
-
-              {/* Bank Transfer Option */}
-              <button
-                onClick={() => handlePaymentMethodChange('transfer')}
-                className={`w-full p-4 rounded-lg border-2 transition-all duration-200 ${
-                  paymentMethod === 'transfer' 
-                    ? 'border-primary-blue bg-primary-blue/10' 
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-5 h-5 rounded-full border-2 ${
-                      paymentMethod === 'transfer' 
-                        ? 'border-primary-blue bg-primary-blue' 
-                        : 'border-gray-400'
-                    }`}>
-                      {paymentMethod === 'transfer' && (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-neutral-dark dark:text-dark-text">Bank Transfer</p>
-                      <p className="text-sm text-neutral-gray">Direct bank deposit</p>
-                    </div>
-                  </div>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-600">
-                    <path d="M12 2L2 7V12C2 16.5 4.23 20.68 7.62 23.15L12 24L16.38 23.15C19.77 20.68 22 16.5 22 12V7L12 2Z" stroke="currentColor" strokeWidth="2"/>
-                  </svg>
-                </div>
-              </button>
+              </div>
             </div>
           </div>
 
           {/* Paystack Payment Info */}
-          {paymentMethod === 'paystack' && (
-            <div className={`bg-green-50 border border-green-200 rounded-lg p-4 mb-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
-              <div className="flex items-start gap-3">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-green-600 flex-shrink-0 mt-0.5">
-                  <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                <div>
-                  <p className="text-sm font-medium text-green-800 mb-1">Secure Payment</p>
-                  <p className="text-xs text-green-700">
-                    Your payment is secured by Paystack. You can pay with card, bank transfer, or USSD.
-                  </p>
-                </div>
+          <div className={`bg-green-50 border border-green-200 rounded-lg p-4 mb-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
+            <div className="flex items-start gap-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-green-600 flex-shrink-0 mt-0.5">
+                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <div>
+                <p className="text-sm font-medium text-green-800 mb-1">Secure Payment</p>
+                <p className="text-xs text-green-700">
+                  Your payment is secured by Paystack. You can pay with card, bank transfer, or USSD. You'll be redirected to Paystack's secure payment page.
+                </p>
               </div>
             </div>
-          )}
-
-          {/* Bank Transfer Info */}
-          {paymentMethod === 'transfer' && (
-            <div className={`bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 ${hasAnimated ? 'animate-slide-in-up animate-once' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
-              <h4 className="font-medium text-blue-800 mb-2">Bank Transfer Details</h4>
-              <div className="space-y-2 text-sm text-blue-700">
-                <div className="flex justify-between">
-                  <span>Account Number:</span>
-                  <span className="font-mono font-bold">{flowState.virtualAccount?.accountNumber}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Bank Name:</span>
-                  <span className="font-medium">{flowState.virtualAccount?.bankName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Account Name:</span>
-                  <span className="font-medium text-xs">{flowState.virtualAccount?.accountName}</span>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
 
           {/* Payment Button */}
           <button
-            onClick={paymentMethod === 'paystack' ? initializePaystackPayment : () => navigate('/receipt-processing')}
+            onClick={initializePaystackPayment}
             disabled={isProcessing}
             className={`w-full py-4 bg-primary-blue text-white text-lg font-bold rounded-lg transition-all duration-300 ${
               isProcessing 
@@ -302,7 +267,7 @@ const Payment = () => {
                 <span>Processing Payment...</span>
               </div>
             ) : (
-              paymentMethod === 'paystack' ? 'Pay with Paystack' : 'I Have Made Transfer'
+              'Pay with Paystack'
             )}
           </button>
 

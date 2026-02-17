@@ -67,65 +67,78 @@ const VirtualAccount = () => {
       // Prepare transaction data for initiation
       const transactionData = {
         amount: userAmount, // Original user amount
-        totalAmount: totalAmount, // Total amount including fee
-        transferFee: transferFee, // Fee amount
         fromCurrency: fromCurrency?.code || 'NGN',
         toCurrency: flowState.toCurrency?.code || 'NGN',
+        userId: flowState.userId || flowState.selectedRecipient?.userId,
         recipientId: flowState.selectedRecipient?.id,
-        beneficiary: flowState.beneficiary,
-        paymentDescription: flowState.purposeOfPayment || flowState.paymentDescription || '',
-        exchangeRateData: {
-          ...flowState.exchangeRateData,
-          rate: flowState.exchangeRateData?.rate || exchangeRate,
-          timestamp: new Date().toISOString(),
-          feeCalculation: {
-            percentage: 0.02,
-            feeAmount: transferFee,
-            totalAmount: totalAmount
-          }
-        }
+        description: flowState.purposeOfPayment || flowState.paymentDescription || 'Cross-border payment'
       };
 
       console.log('🚀 Initiating transaction with data:', transactionData);
 
-      // Initiate transaction (this automatically generates virtual account)
+      // Initiate transaction (this now returns Paystack payment URL)
       const response = await initiateTransaction(transactionData);
       
       console.log('✅ Transaction initiated successfully:', response);
       
-      // Update state with transaction data (includes virtual account in meta)
-      setVirtualAccount(response.data || response); // Use response.data if it exists, otherwise response
+      // Extract actual data from response (backend wraps in data property)
+      const responseData = response.data || response;
       
-      // Update flow state with transaction info
-      updateFlowState({
-        ...flowState,
-        transaction: response.data || response,
-        virtualAccount: (response.data || response).meta,
-        status: 'PENDING_PAYMENT',
-        createdAt: new Date().toISOString()
+      console.log('✅ Response structure:', {
+        hasPaymentUrl: !!responseData.paymentAuthorizationUrl,
+        hasMetaPaymentUrl: !!responseData.meta?.paymentAuthorizationUrl,
+        paymentUrl: responseData.paymentAuthorizationUrl,
+        metaPaymentUrl: responseData.meta?.paymentAuthorizationUrl,
+        fullResponse: JSON.stringify(responseData, null, 2)
       });
+      
+      // Check if response contains Paystack payment URL
+      if (responseData.paymentAuthorizationUrl || responseData.meta?.paymentAuthorizationUrl) {
+        const paymentUrl = responseData.paymentAuthorizationUrl || responseData.meta?.paymentAuthorizationUrl;
+        
+        console.log('🔗 Redirecting to Paystack URL:', paymentUrl);
+        
+        // Update flow state with transaction info
+        updateFlowState({
+          ...flowState,
+          transactionId: responseData.id,
+          paymentReference: responseData.referenceId,
+          paymentAuthorizationUrl: paymentUrl,
+          paymentAccessCode: responseData.paymentAccessCode || responseData.meta?.paymentAccessCode,
+          paymentMethod: 'paystack',
+          status: 'payment_initiated',
+          totalAmount: responseData.total,
+          transferFee: responseData.transferFee,
+          exchangeRate: responseData.exchangeRate,
+          initiatedAt: new Date().toISOString()
+        });
+
+        // Small delay to ensure state is updated before redirect
+        setTimeout(() => {
+          console.log('🚀 Executing redirect to Paystack...');
+          window.location.href = paymentUrl;
+        }, 100);
+      } else {
+        console.error('❌ No payment URL found in response');
+        throw new Error('No payment authorization URL received');
+      }
       
     } catch (error) {
       console.error('❌ Failed to initiate transaction:', error);
-      // Handle error - could show error message or redirect
-      // For now, we'll use fallback mock data
-      const fallbackAccount = {
-        accountNumber: '9988776655',
-        bankName: 'Flowwave Virtual Bank',
-        accountName: `${flowState.beneficiary?.beneficiaryName || 'Flowwave User'} - Temp Account`,
-        reference: `FW${Date.now().toString().slice(-8)}`,
-        expiryTime: new Date(Date.now() + 30 * 60 * 1000).toLocaleTimeString()
-      };
-      
-      setVirtualAccount(fallbackAccount);
-      updateFlowState({
-        ...flowState,
-        virtualAccount: fallbackAccount,
-        status: 'awaiting_payment',
-        createdAt: new Date().toISOString()
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data
       });
-    } finally {
       setIsLoading(false);
+      
+      // Don't redirect immediately, show error for debugging
+      alert(`Payment initiation failed: ${error.message}`);
+      
+      // Redirect to payment error page after a delay
+      setTimeout(() => {
+        navigate('/payment/error?error=payment_initiation_failed');
+      }, 1000);
     }
   };
 
@@ -290,7 +303,7 @@ const VirtualAccount = () => {
       <div className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mx-auto mb-4"></div>
-          <p className="text-neutral-dark dark:text-dark-text">Generating Virtual Account...</p>
+          <p className="text-neutral-dark dark:text-dark-text">Initiating Payment...</p>
         </div>
       </div>
     );

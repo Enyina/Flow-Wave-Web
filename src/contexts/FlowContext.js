@@ -29,7 +29,19 @@ export const FlowProvider = ({ children }) => {
     beneficiaryAddress: '',
     phoneNumber: '',
     email: '',
-    purposeOfPayment: ''
+    purposeOfPayment: '',
+    // New Paystack payment fields
+    transactionId: '',
+    paymentReference: '',
+    paymentAuthorizationUrl: '',
+    paymentAccessCode: '',
+    paymentMethod: 'paystack',
+    status: '',
+    totalAmount: 0,
+    transferFee: 0,
+    exchangeRate: 0,
+    initiatedAt: '',
+    paidAt: ''
   });
 
   const updateFlowState = (updates) => {
@@ -55,7 +67,19 @@ export const FlowProvider = ({ children }) => {
       beneficiaryAddress: '',
       phoneNumber: '',
       email: '',
-      purposeOfPayment: ''
+      purposeOfPayment: '',
+      // New Paystack payment fields
+      transactionId: '',
+      paymentReference: '',
+      paymentAuthorizationUrl: '',
+      paymentAccessCode: '',
+      paymentMethod: 'paystack',
+      status: '',
+      totalAmount: 0,
+      transferFee: 0,
+      exchangeRate: 0,
+      initiatedAt: '',
+      paidAt: ''
     });
   };
 
@@ -78,7 +102,19 @@ export const FlowProvider = ({ children }) => {
       beneficiaryAddress: '',
       phoneNumber: '',
       email: '',
-      purposeOfPayment: ''
+      purposeOfPayment: '',
+      // New Paystack payment fields
+      transactionId: '',
+      paymentReference: '',
+      paymentAuthorizationUrl: '',
+      paymentAccessCode: '',
+      paymentMethod: 'paystack',
+      status: '',
+      totalAmount: 0,
+      transferFee: 0,
+      exchangeRate: 0,
+      initiatedAt: '',
+      paidAt: ''
     });
   };
 
@@ -101,7 +137,19 @@ export const FlowProvider = ({ children }) => {
       beneficiaryAddress: '',
       phoneNumber: '',
       email: '',
-      purposeOfPayment: ''
+      purposeOfPayment: '',
+      // New Paystack payment fields
+      transactionId: '',
+      paymentReference: '',
+      paymentAuthorizationUrl: '',
+      paymentAccessCode: '',
+      paymentMethod: 'paystack',
+      status: '',
+      totalAmount: 0,
+      transferFee: 0,
+      exchangeRate: 0,
+      initiatedAt: '',
+      paidAt: ''
     });
   };
 
